@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MG Vaults - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="glass-panel p-8 rounded-xl shadow-2xl text-center max-w-md w-full">
+        <h1 class="text-3xl font-bold mb-6 accent-text">MG Vaults</h1>
+        <button id="googleLogin" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded transition-colors">
+            Sign in with Google
+        </button>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        document.getElementById('googleLogin').addEventListener('click', async () => {
+            await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: 'https://mgvaults.github.io/vaults/index.html' }
+            });
+        });
+    </script>
+</body>
+</html>
