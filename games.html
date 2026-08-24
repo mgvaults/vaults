@@ -582,7 +582,7 @@
 
         function downloadTemplate() { const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vault_template.csv'; a.click(); }
         document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const gToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], platform: cols[1]||'PC', series: cols[2]||null, genre: cols[3]||'Action', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; }).filter(x => x); await supabaseClient.from('games').insert(gToInsert); loadGames(); }; r.readAsText(e.target.files[0]); });
-        document.getElementById('pinInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPin(); });
+        ;
     </script>
 </body>
 </html>
