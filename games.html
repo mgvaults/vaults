@@ -117,17 +117,6 @@
         let supabaseClient, allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
 
         const PLAT_MAP = { steam: {n:'Steam', c:'#171a21'}, gog: {n:'GOG', c:'#86328a'}, epic: {n:'Epic Games', c:'#313131'}, battlenet: {n:'BattleNet', c:'#009eff'}, ps5: {n:'PS5', c:'#003087'}, xbox: {n:'Xbox', c:'#107c10'}, switch: {n:'Nintendo Switch', c:'#e60012'}, amazon: {n:'Amazon Luna', c:'#ff9900'} };
-
-        async function checkPin() { 
-            if (document.getElementById('pinInput').value.trim() === "007113") { 
-                document.getElementById('pinScreen').style.display = 'none'; 
-                document.getElementById('mainApp').style.display = 'block'; 
-                supabaseClient = supabase.createClient(SB_URL, SB_KEY); 
-                initSortable(); 
-                loadGames(); 
-            } 
-        }
-
         async function loadGames() { 
             let { data, error } = await supabaseClient.from('games').select('*').order('sort_order', { ascending: true }); 
             if (!error) { 
