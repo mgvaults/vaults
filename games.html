@@ -2,34 +2,49 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Games Vault</title>
-  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SortableJS for drag-and-drop -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Shared Centralized Auth Logic -->
+  <script src="auth.js" defer></script>
+
+  <style>
+    .plat-box {
+      width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+      background: #0f172a; border: 1px solid #334155; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .plat-box:hover, .plat-box.active { border-color: #6366f1; background: #1e1b4b; }
+    .plat-box img { width: 20px; height: 20px; object-fit: contain; }
+    .plat-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; color: white; text-transform: uppercase; }
+    .game-card { display: flex; background: #1e293b; border-radius: 1rem; overflow: hidden; height: 130px; }
+    .series-chained { border-left: 4px solid #6366f1 !important; }
+    .unreleased-card { opacity: 0.75; border-style: dashed !important; }
+    .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .column-height { min-height: 200px; }
+    .col-filter { background: #0f172a; border: 1px solid #334155; padding: 6px 12px; border-radius: 10px; color: white; font-size: 12px; outline: none; }
+    .genre-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+    .series-label { font-size: 11px; color: #818cf8; font-weight: 800; text-transform: uppercase; }
+    .icon-square button { width: 28px; height: 28px; font-size: 12px; }
+  </style>
 </head>
 
-<body>
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-
-  const supabase = createClient(
-    "https://zioiamijgblwxlfevcdr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o"
-  );
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    window.location.href = "login.html";
-  }
-</script><body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
-    <div id="mainApp" style="display: none;">
+<body class="bg-slate-900 min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
+    <div id="mainApp">
         <div class="max-w-7xl mx-auto">
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
-                   <button onclick="toggleView('queue')" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🏠</button>
-                   <button onclick="window.location.reload()" title="Lock Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
+                   <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center">🏠</a>
+                   <button onclick="handleLogout()" title="Lock Vault / Logout" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                    <button onclick="downloadTemplate()" title="CSV Template" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">💾</button>
                    <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📥</button>
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">The Vault</h1>
+                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Games Vault</h1>
                 <div class="flex gap-2">
                     <button id="repairBtn" onclick="repairSortOrder()" title="Repair All Sorting & Release Dates" class="p-2.5 px-4 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-xl text-2xl transition hover:bg-amber-600">🔧</button>
                     <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
@@ -46,18 +61,21 @@
                 </div>
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
                     <div class="flex flex-col gap-4 relative">
-                        <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between"><span id="formModeLabel">Database Search / Entry</span><button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button></div>
+                        <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between">
+                            <span id="formModeLabel">Database Search / Entry</span>
+                            <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button>
+                        </div>
                         <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
                         <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
                         <div class="flex flex-wrap justify-center gap-3 py-2 border-y border-slate-700/40">
                             <div onclick="toggleP('steam')" id="i-steam" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"></div>
                             <div onclick="toggleP('gog')" id="i-gog" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg"></div>
                             <div onclick="toggleP('epic')" id="i-epic" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg"></div>
-                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px;">BN</span></div>
+                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px; font-weight:bold;">BN</span></div>
                             <div onclick="toggleP('ps5')" id="i-ps5" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg"></div>
                             <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg"></div>
                             <div onclick="toggleP('switch')" id="i-switch" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg"></div>
-                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px;">A</span></div>
+                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px; font-weight:bold;">A</span></div>
                         </div>
                         <div class="flex gap-3 text-white relative">
                             <div class="flex-1 relative">
@@ -72,8 +90,20 @@
 
             <div id="queueView">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <div><div class="flex justify-between items-center mb-6"><h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Next Focus</h2><input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter"></div><div id="col-next" class="column-height space-y-5"></div></div>
-                    <div><div class="flex justify-between items-center mb-6"><h2 class="text-slate-500 font-black text-sm uppercase tracking-[0.4em]">Backlog & Collection</h2><input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter"></div><div id="col-backlog" class="column-height space-y-5 text-left"></div></div>
+                    <div>
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Next Focus</h2>
+                            <input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                        </div>
+                        <div id="col-next" class="column-height space-y-5"></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-slate-500 font-black text-sm uppercase tracking-[0.4em]">Backlog & Collection</h2>
+                            <input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                        </div>
+                        <div id="col-backlog" class="column-height space-y-5 text-left"></div>
+                    </div>
                 </div>
             </div>
 
@@ -114,13 +144,20 @@
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
-        let supabaseClient, allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
+        let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
 
         const PLAT_MAP = { steam: {n:'Steam', c:'#171a21'}, gog: {n:'GOG', c:'#86328a'}, epic: {n:'Epic Games', c:'#313131'}, battlenet: {n:'BattleNet', c:'#009eff'}, ps5: {n:'PS5', c:'#003087'}, xbox: {n:'Xbox', c:'#107c10'}, switch: {n:'Nintendo Switch', c:'#e60012'}, amazon: {n:'Amazon Luna', c:'#ff9900'} };
+
+        // Initialize upon page load once auth.js verifies session
+        document.addEventListener('DOMContentLoaded', () => {
+            initSortable(); 
+            loadGames();
+        });
+
         async function loadGames() { 
             let { data, error } = await supabaseClient.from('games').select('*').order('sort_order', { ascending: true }); 
             if (!error) { 
-                allGames = data; 
+                allGames = data || []; 
                 render(); 
             } 
         }
@@ -302,7 +339,7 @@
             div.dataset.id = game.id; div.dataset.series = game.series || '';
             div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
             const platB = (game.platform || '').split(',').map(p => { const i = PLAT_MAP[p.trim()]; return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; }).join(' ');
-            div.innerHTML = `<img loading="lazy" src="${game.cover_url || ''}" class="w-28 h-full shrink-0 object-cover bg-slate-900 border-r border-slate-700 shadow-inner"><div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white"><div class="flex justify-between items-start text-white"><div class="text-left flex-1 min-w-0 pr-2"><h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3><div class="flex flex-wrap gap-1.5 mt-3">${platB}</div></div><div class="icon-square shrink-0 text-white"><button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button><button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button><button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button><button onclick="deleteGame(${game.id})" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button></div></div><div class="flex justify-between items-end"><div class="flex flex-col min-w-0 pr-2 text-left">${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}<span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span></div><select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer"><option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option><option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option><option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option><option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option><option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option><option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option><option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option><option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option><option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option><option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option><option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option></select></div></div>`;
+            div.innerHTML = `<img loading="lazy" src="${game.cover_url || ''}" class="w-28 h-full shrink-0 object-cover bg-slate-900 border-r border-slate-700 shadow-inner"><div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white"><div class="flex justify-between items-start text-white"><div class="text-left flex-1 min-w-0 pr-2"><h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3><div class="flex flex-wrap gap-1.5 mt-3">${platB}</div></div><div class="icon-square shrink-0 text-white flex gap-1"><button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button><button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button><button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button><button onclick="deleteGame('${game.id}')" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button></div></div><div class="flex justify-between items-end"><div class="flex flex-col min-w-0 pr-2 text-left">${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}<span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span></div><select onchange="updateStatus('${game.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer"><option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option><option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option><option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option><option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option><option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option><option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option><option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option><option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option><option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option><option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option><option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option></select></div></div>`;
             return div;
         }
 
@@ -371,7 +408,6 @@
             b.innerText = "⏳";
             
             try {
-                // 1. Fetch missing release dates from IGDB
                 const missingDates = allGames.filter(g => g.release_date === null || g.release_date === undefined);
                 
                 if (missingDates.length > 0) {
@@ -412,7 +448,6 @@
                     }
                 }
 
-                // 2. Re-index sort order & group series
                 let list = [...allGames].sort((a,b) => a.sort_order - b.sort_order);
                 let finalOrder = []; 
                 let processedSeries = new Set();
@@ -450,7 +485,9 @@
         
         function initSortable() { 
             ['col-playing', 'col-next', 'col-backlog'].forEach(id => { 
-                new Sortable(document.getElementById(id), { 
+                const el = document.getElementById(id);
+                if (!el) return;
+                new Sortable(el, { 
                     group: 'games', 
                     animation: 250, 
                     onEnd: async (evt) => { 
@@ -580,9 +617,28 @@
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vault_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const gToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], platform: cols[1]||'PC', series: cols[2]||null, genre: cols[3]||'Action', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; }).filter(x => x); await supabaseClient.from('games').insert(gToInsert); loadGames(); }; r.readAsText(e.target.files[0]); });
-        ;
+        function downloadTemplate() { 
+            const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; 
+            const blob = new Blob([csv], { type: 'text/csv' }); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = 'vault_template.csv'; 
+            a.click(); 
+        }
+
+        document.getElementById('csvFile').addEventListener('change', function(e) { 
+            const r = new FileReader(); 
+            r.onload = async (ev) => { 
+                const rows = ev.target.result.split('\n').slice(1); 
+                const gToInsert = rows.map(r => { 
+                    const cols = r.split(',').map(x => x?.trim()); 
+                    if (cols[0]) return { title: cols[0], platform: cols[1]||'PC', series: cols[2]||null, genre: cols[3]||'Action', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; 
+                }).filter(x => x); 
+                await supabaseClient.from('games').insert(gToInsert); 
+                loadGames(); 
+            }; 
+            r.readAsText(e.target.files[0]); 
+        });
     </script>
 </body>
 </html>
