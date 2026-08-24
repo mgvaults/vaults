@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MG Vaults - Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vault - Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 2rem; }
+    nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 2rem; }
+    .user-info { display: flex; align-items: center; gap: 1rem; }
+    .user-info img { width: 36px; height: 36px; border-radius: 50%; }
+    .btn-logout { background: #ef4444; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+    .nav-card { background: #1e293b; padding: 2rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; border: 1px solid #334155; transition: transform 0.2s; }
+    .nav-card:hover { transform: translateY(-4px); border-color: #38bdf8; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="flex items-center justify-center min-h-screen">
-    <div class="glass-panel p-8 rounded-xl shadow-2xl text-center max-w-md w-full">
-        <h1 class="text-3xl font-bold mb-6 accent-text">MG Vaults</h1>
-        <button id="googleLogin" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded transition-colors">
-            Sign in with Google
-        </button>
+<body>
+
+  <nav>
+    <h2>Media Library</h2>
+    <div class="user-info">
+      <img id="avatar" src="" alt="User Avatar" style="display:none;" />
+      <span id="user-email">Loading...</span>
+      <button id="logout-btn" class="btn-logout">Logout</button>
     </div>
+  </nav>
 
-    <script src="auth.js"></script>
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+  <main class="grid">
+    <a href="games.html" class="nav-card">🎮 Games Page</a>
+    <a href="books.html" class="nav-card">📚 Books Page</a>
+    <a href="movies.html" class="nav-card">🎬 Movies Page</a>
+  </main>
 
-  const supabase = createClient(
-    "https://zioiamijgblwxlfevcdr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o"
-  );
-
-  document.getElementById('loginBtn').onclick = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: "https://mgvaults.github.io/vaults/index.html"
-      }
-    });
-  };
-</script>
+  <script src="auth.js"></script>
 </body>
 </html>
