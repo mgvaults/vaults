@@ -18,13 +18,22 @@
     </div>
 
     <script src="auth.js"></script>
-    <script>
-        document.getElementById('googleLogin').addEventListener('click', async () => {
-            await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: 'https://mgvaults.github.io/vaults/index.html' }
-            });
-        });
-    </script>
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+
+  const supabase = createClient(
+    "https://zioiamijgblwxlfevcdr.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o"
+  );
+
+  document.getElementById('loginBtn').onclick = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: "https://mgvaults.github.io/vaults/index.html"
+      }
+    });
+  };
+</script>
 </body>
 </html>
