@@ -310,21 +310,61 @@
             }
         }
 
-        function createCard(game) {
-            const isS = game.series && game.series.trim() !== '';
-            const nowSec = Math.floor(Date.now() / 1000);
-            
-            const rDate = parseReleaseDate(game.release_date);
-            const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
-            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
-            
-            const div = document.createElement('div');
-            div.dataset.id = game.id; div.dataset.series = game.series || '';
-            div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
-            const platB = (game.platform || '').split(',').map(p => { const i = PLAT_MAP[p.trim()]; return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; }).join(' ');
-            div.innerHTML = `<img loading="lazy" src="${game.cover_url || ''}" class="w-28 h-full shrink-0 object-cover bg-slate-900 border-r border-slate-700 shadow-inner"><div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white"><div class="flex justify-between items-start text-white"><div class="text-left flex-1 min-w-0 pr-2"><h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3><div class="flex flex-wrap gap-1.5 mt-3">${platB}</div></div><div class="icon-square shrink-0 text-white flex gap-1"><button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button><button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button><button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button><button onclick="deleteGame('${game.id}')" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button></div></div><div class="flex justify-between items-end"><div class="flex flex-col min-w-0 pr-2 text-left">${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}<span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span></div><select onchange="updateStatus('${game.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer"><option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option><option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option><option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option><option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option><option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option><option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option><option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option><option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option><option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option><option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option><option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option></select></div></div>`;
-            return div;
-        }
+function createCard(game) {
+    const isS = game.series && game.series.trim() !== '';
+    const nowSec = Math.floor(Date.now() / 1000);
+    
+    const rDate = parseReleaseDate(game.release_date);
+    const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
+    const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
+    
+    const div = document.createElement('div');
+    div.dataset.id = game.id; 
+    div.dataset.series = game.series || '';
+    div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
+    
+    const platB = (game.platform || '').split(',').map(p => { 
+        const i = PLAT_MAP[p.trim()]; 
+        return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
+    }).join(' ');
+
+    div.innerHTML = `
+        <img loading="lazy" src="${game.cover_url || ''}" class="game-card-cover border-r border-slate-700 shadow-inner">
+        <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
+            <div class="flex justify-between items-start text-white">
+                <div class="text-left flex-1 min-w-0 pr-2">
+                    <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3>
+                    <div class="flex flex-wrap gap-1.5 mt-3">${platB}</div>
+                </div>
+                <div class="icon-square shrink-0 text-white flex gap-1">
+                    <button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button>
+                    <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button>
+                    <button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button>
+                    <button onclick="deleteGame('${game.id}')" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button>
+                </div>
+            </div>
+            <div class="flex justify-between items-end">
+                <div class="flex flex-col min-w-0 pr-2 text-left">
+                    ${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}
+                    <span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span>
+                </div>
+                <select onchange="updateStatus('${game.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer">
+                    <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                    <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                    <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                    <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                    <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                    <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                    <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                    <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                    <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                    <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option>
+                    <option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option>
+                </select>
+            </div>
+        </div>`;
+    return div;
+}
 
         function toggleView(v) { 
             currentViewMode = v;
