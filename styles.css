@@ -1,18 +1,23 @@
+/* Core Layout & Theme Styles */
 body {
-    background-color: #0f172a; /* Tailwind slate-900 */
-    color: #f8fafc; /* Tailwind slate-50 */
+    background-color: #0f172a;
+    color: #f8fafc;
 }
+
 .glass-panel {
-    background: rgba(30, 41, 59, 0.7); /* Tailwind slate-800 with opacity */
+    background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .accent-text {
-    color: #818cf8; /* Tailwind indigo-400 */
+    color: #818cf8;
 }
+
+/* Game Cover Image Setup */
 .cover-wrapper {
     position: relative;
-    width: 120px; /* Adjust width to match original card proportions */
+    width: 120px;
     height: 100%;
     min-height: 120px;
     border-radius: 0.75rem 0 0 0.75rem;
@@ -26,37 +31,33 @@ body {
 .cover-img { 
     width: 100%; 
     height: 100%; 
-    object-fit: contain; /* Prevents cropping artwork */
-    background-color: #0f172a; /* Subtle backing for non-standard aspect ratios */
-/* Platform Logo Filter Buttons (Restored to larger size with light background) */
+    object-fit: cover;
+    background-color: #0f172a;
+}
+
+/* Original Dark Platform Filter Buttons */
 .plat-box {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #475569;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: 6px;
 }
 
-.plat-box:hover {
-    background: #64748b;
-    transform: translateY(-2px);
-}
-
+.plat-box:hover, 
 .plat-box.active {
-    background: #f8fafc;
     border-color: #6366f1;
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+    background: #1e1b4b;
 }
 
 .plat-box img {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
 }
 
@@ -87,7 +88,7 @@ body {
     border-style: dashed !important; 
 }
 
-/* Layout Utilities & Typography */
+/* Utility Classes & Typography */
 .clamp-2 { 
     display: -webkit-box; 
     -webkit-line-clamp: 2; 
