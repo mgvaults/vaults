@@ -10,3 +10,22 @@ body {
 .accent-text {
     color: #818cf8; /* Tailwind indigo-400 */
 }
+.cover-wrapper {
+    position: relative;
+    width: 120px; /* Adjust width to match original card proportions */
+    height: 100%;
+    min-height: 120px;
+    border-radius: 0.75rem 0 0 0.75rem;
+    overflow: hidden;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover-img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; /* Prevents cropping artwork */
+    background-color: #0f172a; /* Subtle backing for non-standard aspect ratios */
+}
