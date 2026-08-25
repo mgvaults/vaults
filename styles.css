@@ -29,3 +29,36 @@ body {
     object-fit: contain; /* Prevents cropping artwork */
     background-color: #0f172a; /* Subtle backing for non-standard aspect ratios */
 }
+/* Styling for the platform logo filter buttons */
+.platform-filter-btn {
+    width: 44px;                 /* Increased box size */
+    height: 44px;
+    border-radius: 12px;
+    background-color: #475569;   /* Lighter slate background for high contrast */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;                /* Keeps icon centered with generous padding */
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.platform-filter-btn:hover {
+    background-color: #64748b;   /* Slightly brighter on hover */
+    transform: translateY(-2px);
+}
+
+.platform-filter-btn.active {
+    background-color: #f8fafc;   /* Full light background when selected */
+    border-color: #6366f1;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Platform Icon sizing inside the tile */
+.platform-filter-btn img,
+.platform-filter-btn svg {
+    width: 28px;                 /* Larger icon scale */
+    height: 28px;
+    object-fit: contain;
+}
