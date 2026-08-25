@@ -28,37 +28,103 @@ body {
     height: 100%; 
     object-fit: contain; /* Prevents cropping artwork */
     background-color: #0f172a; /* Subtle backing for non-standard aspect ratios */
-}
-/* Styling for the platform logo filter buttons */
-.platform-filter-btn {
-    width: 44px;                 /* Increased box size */
+/* Platform Logo Filter Buttons (Restored to larger size with light background) */
+.plat-box {
+    width: 44px;
     height: 44px;
-    border-radius: 12px;
-    background-color: #475569;   /* Lighter slate background for high contrast */
-    border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;                /* Keeps icon centered with generous padding */
-    transition: all 0.2s ease;
+    background: #475569;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 6px;
 }
 
-.platform-filter-btn:hover {
-    background-color: #64748b;   /* Slightly brighter on hover */
+.plat-box:hover {
+    background: #64748b;
     transform: translateY(-2px);
 }
 
-.platform-filter-btn.active {
-    background-color: #f8fafc;   /* Full light background when selected */
+.plat-box.active {
+    background: #f8fafc;
     border-color: #6366f1;
     box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
 }
 
-/* Platform Icon sizing inside the tile */
-.platform-filter-btn img,
-.platform-filter-btn svg {
-    width: 28px;                 /* Larger icon scale */
+.plat-box img {
+    width: 28px;
     height: 28px;
     object-fit: contain;
+}
+
+/* Badges & Card Formatting */
+.plat-badge { 
+    font-size: 10px; 
+    font-weight: 800; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    color: white; 
+    text-transform: uppercase; 
+}
+
+.game-card { 
+    display: flex; 
+    background: #1e293b; 
+    border-radius: 1rem; 
+    overflow: hidden; 
+    height: 130px; 
+}
+
+.series-chained { 
+    border-left: 4px solid #6366f1 !important; 
+}
+
+.unreleased-card { 
+    opacity: 0.75; 
+    border-style: dashed !important; 
+}
+
+/* Layout Utilities & Typography */
+.clamp-2 { 
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+}
+
+.column-height { 
+    min-height: 200px; 
+}
+
+.col-filter { 
+    background: #0f172a; 
+    border: 1px solid #334155; 
+    padding: 6px 12px; 
+    border-radius: 10px; 
+    color: white; 
+    font-size: 12px; 
+    outline: none; 
+}
+
+.genre-label { 
+    font-size: 11px; 
+    color: #94a3b8; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+}
+
+.series-label { 
+    font-size: 11px; 
+    color: #818cf8; 
+    font-weight: 800; 
+    text-transform: uppercase; 
+}
+
+.icon-square button { 
+    width: 28px; 
+    height: 28px; 
+    font-size: 12px; 
 }
