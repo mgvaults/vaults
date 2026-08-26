@@ -29,19 +29,13 @@
                 <h1 class="text-3xl font-black tracking-tighter text-sky-400 uppercase italic">Movies & TV Vault</h1>
                 <div class="flex items-center gap-2">
                     <div class="toolbox-dropdown">
-                        <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
-                        <div class="toolbox-menu">
-                            <button id="repairBtn" onclick="repairSortOrder()" class="toolbox-item text-amber-400">
-                                <span>🔧</span> Repair Sorting
-                            </button>
-                            <button onclick="downloadTemplate()" class="toolbox-item">
-                                <span>💾</span> CSV Template
-                            </button>
-                            <button onclick="document.getElementById('csvFile').click()" class="toolbox-item">
-                                <span>📥</span> Import CSV
-                            </button>
-                        </div>
-                    </div>
+    <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+    <div class="toolbox-menu">
+        <button id="repairBtn" onclick="repairSortOrder()" title="Repair Sort & Dates" class="toolbox-item-icon text-amber-400">🔧</button>
+        <button onclick="downloadTemplate()" title="Download CSV Template" class="toolbox-item-icon">💾</button>
+        <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="toolbox-item-icon">📥</button>
+    </div>
+</div>
                     <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-sky-400">🪄</button>
                     <button onclick="toggleView('archive')" title="Archive / Watched" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                     <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
