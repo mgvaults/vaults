@@ -1,7 +1,7 @@
 /* Core Layout & Theme Styles */
 body {
     background-color: #0f172a;
-    color: #f8fafc;
+    color: #f1f5f9;
 }
 
 .glass-panel {
@@ -14,76 +14,119 @@ body {
     color: #818cf8;
 }
 
-/* Platform Logo Filter Buttons (Restores proper sizing) */
-.plat-box {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px;
-    min-height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    overflow: hidden;
-}
-
-.plat-box:hover, 
-.plat-box.active {
-    border-color: #6366f1;
-    background: #1e1b4b;
-}
-
-/* Hard cap icon images inside platform buttons so SVGs can't expand */
-.plat-box img,
-.plat-box svg {
-    max-width: 20px !important;
-    max-height: 20px !important;
-    width: 20px !important;
-    height: 20px !important;
-    object-fit: contain !important;
-}
-
-/* Badges & Card Formatting */
-.plat-badge { 
-    font-size: 10px; 
-    font-weight: 800; 
-    padding: 2px 6px; 
-    border-radius: 4px; 
-    color: white; 
-    text-transform: uppercase; 
-}
-
-.game-card { 
+/* Platform Filter Boxes */
+.plat-box { 
+    width: 44px; 
+    height: 44px; 
+    background: white; 
+    border-radius: 10px; 
     display: flex; 
-    background: #1e293b; 
-    border-radius: 1rem; 
-    overflow: hidden; 
-    height: 130px; 
+    align-items: center; 
+    justify-content: center; 
+    border: 2px solid #334155; 
+    cursor: pointer; 
+    transition: all 0.2s; 
+    opacity: 0.25; 
+    color: black; 
+    font-weight: 900; 
 }
 
-/* Cover Image inside Game Cards */
+.plat-box.active { 
+    opacity: 1; 
+    transform: scale(1.1); 
+    border-color: #6366f1; 
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.6); 
+}
+
+.plat-box img { 
+    width: 26px; 
+    height: 26px; 
+    object-fit: contain; 
+}
+
+/* Game Card Formatting */
+.game-card { 
+    background-color: #1e293b; 
+    border-radius: 1.5rem; 
+    overflow: hidden; 
+    display: flex; 
+    height: 160px; 
+    border: 1px solid rgba(255,255,255,0.1); 
+    transition: opacity 0.3s ease; 
+}
+
 .game-card-cover {
-    width: 95px !important;
+    width: 112px !important; /* Matches original w-28 */
     height: 100% !important;
-    object-fit: contain !important;
+    object-fit: cover !important;
     background-color: #0f172a;
     flex-shrink: 0;
 }
 
 .series-chained { 
-    border-left: 4px solid #6366f1 !important; 
+    border-left: 8px solid #fb923c !important; 
 }
 
 .unreleased-card { 
-    opacity: 0.75; 
-    border-style: dashed !important; 
+    filter: grayscale(1); 
+    opacity: 0.45; 
+    border: 1px dashed rgba(255,255,255,0.3) !important; 
 }
 
-/* Utility Classes & Typography */
+/* Typography & Labels */
+.series-label { 
+    color: #fb923c; 
+    font-weight: 800; 
+    font-size: 12px; 
+    text-transform: uppercase; 
+    margin-top: 4px; 
+}
+
+.genre-label { 
+    color: #a3e635; 
+    font-weight: 800; 
+    font-size: 12px; 
+    text-transform: uppercase; 
+}
+
+.plat-badge { 
+    font-size: 11px; 
+    font-weight: 900; 
+    padding: 2px 10px; 
+    border-radius: 6px; 
+    color: white; 
+    text-transform: uppercase; 
+    background: #334155; 
+    display: inline-block; 
+}
+
+/* 2x2 Button Grid */
+.icon-square { 
+    display: grid; 
+    grid-template-columns: 36px 36px; 
+    grid-template-rows: 36px 36px; 
+    gap: 6px; 
+}
+
+/* Columns & Inputs */
+.column-height { 
+    min-height: 450px; 
+    border: 2px dashed rgba(255,255,255,0.05); 
+    border-radius: 24px; 
+    padding: 12px; 
+}
+
+.col-filter { 
+    background: rgba(30, 41, 59, 0.9); 
+    border: 1px solid rgba(255,255,255,0.2); 
+    border-radius: 99px; 
+    padding: 4px 16px; 
+    font-size: 11px; 
+    outline: none; 
+    width: 180px; 
+    color: white; 
+}
+
 .clamp-2 { 
     display: -webkit-box; 
     -webkit-line-clamp: 2; 
@@ -91,36 +134,21 @@ body {
     overflow: hidden; 
 }
 
-.column-height { 
-    min-height: 200px; 
+/* Custom Scrollbars */
+#searchResults::-webkit-scrollbar, 
+#seriesResults::-webkit-scrollbar { 
+    width: 8px; 
 }
 
-.col-filter { 
-    background: #0f172a; 
-    border: 1px solid #334155; 
-    padding: 6px 12px; 
+#searchResults::-webkit-scrollbar-track, 
+#seriesResults::-webkit-scrollbar-track { 
+    background: #1e293b; 
     border-radius: 10px; 
-    color: white; 
-    font-size: 12px; 
-    outline: none; 
 }
 
-.genre-label { 
-    font-size: 11px; 
-    color: #94a3b8; 
-    font-weight: 700; 
-    text-transform: uppercase; 
-}
-
-.series-label { 
-    font-size: 11px; 
-    color: #818cf8; 
-    font-weight: 800; 
-    text-transform: uppercase; 
-}
-
-.icon-square button { 
-    width: 28px; 
-    height: 28px; 
-    font-size: 12px; 
+#searchResults::-webkit-scrollbar-thumb, 
+#seriesResults::-webkit-scrollbar-thumb { 
+    background: #4f46e5; 
+    border-radius: 10px; 
+    border: 2px solid #1e293b; 
 }
