@@ -1,241 +1,120 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Cinema Vault</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Shared Centralized Auth Logic -->
-    <script src="auth.js" defer></script>
-
-    <style>
-        body { 
-            background-color: #0f172a; 
-            color: #f1f5f9; 
-            min-height: 100vh;
-        }
-
-        .media-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .media-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.2s ease;
-            position: relative;
-        }
-        .media-card:hover { transform: translateY(-4px); }
-
-        .cover-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 2 / 3;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            background: #1e293b;
-            box-shadow: 0 6px 12px -3px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .cover-wrapper.is-series {
-            border-left: 5px solid #fb923c !important;
-        }
-
-        .cover-img { width: 100%; height: 100%; object-fit: cover; }
-
-        .cover-fallback {
-            position: absolute;
-            inset: 0;
-            padding: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            text-align: center;
-        }
-
-        .card-toolbar {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.4rem 0.2rem 0;
-        }
-
-        .tool-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 2px 4px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: #94a3b8;
-            transition: all 0.15s;
-        }
-        .tool-btn:hover { color: #f8fafc; background-color: #334155; }
-
-        #searchResults, #seriesResults { 
-            max-height: 320px; 
-            overflow-y: auto; 
-            z-index: 1000; 
-        }
-
-        #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 6px; }
-        #searchResults::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-
-        .status-popover {
-            position: fixed;
-            z-index: 99999;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            width: 140px;
-            padding: 4px 0;
-        }
-
-        .badge {
-            font-size: 10px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-
-        .type-badge-movie { background: #3b82f6; color: white; }
-        .type-badge-tv { background: #8b5cf6; color: white; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movies & TV Vault</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+  <script>
+    window.tailwind = { config: { suppressDeprecationWarnings: true } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js" defer></script>
 </head>
-<body class="p-3 sm:p-6 font-sans">
 
-    <!-- Global Floating Status Dropdown Menu Container -->
-    <div id="globalStatusMenu" class="status-popover hidden text-xs font-bold text-slate-200">
-        <button onclick="applyStatusChange('Watchlist')" class="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2">
-            <span>🍿</span> Watchlist
-        </button>
-        <button onclick="applyStatusChange('Watching')" class="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2">
-            <span>📺</span> Watching
-        </button>
-        <button onclick="applyStatusChange('Watched')" class="w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2">
-            <span>✅</span> Watched
-        </button>
-    </div>
-
-    <!-- Main Application Container -->
+<body class="bg-slate-900 min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
     <div id="mainApp">
-        <div class="max-w-6xl mx-auto pb-36">
-            
-            <header class="flex justify-between items-center py-4 mb-6 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto">
+            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
-                    <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center text-white">🏠</a>
-                    <button onclick="handleLogout()" title="Lock Vault / Logout" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700 text-slate-200 shadow-sm">🔒</button>
+                   <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center hover:bg-indigo-500">🏠</a>
+                   <a href="games.html" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</a>
+                   <a href="books.html" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</a>
+                   <button onclick="handleLogout()" title="Lock Vault / Logout" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic flex items-center gap-2">
-                    <span>🎬</span> Cinema Vault
-                </h1>
-                <div class="w-24"></div> <!-- Balancing Spacer -->
+                <h1 class="text-3xl font-black tracking-tighter text-sky-400 uppercase italic">Movies & TV Vault</h1>
+                <div class="flex items-center gap-2">
+                    <div class="toolbox-dropdown">
+                        <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="toolbox-menu">
+                            <button id="repairBtn" onclick="repairSortOrder()" class="toolbox-item text-amber-400">
+                                <span>🔧</span> Repair Sorting
+                            </button>
+                            <button onclick="downloadTemplate()" class="toolbox-item">
+                                <span>💾</span> CSV Template
+                            </button>
+                            <button onclick="document.getElementById('csvFile').click()" class="toolbox-item">
+                                <span>📥</span> Import CSV
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-sky-400">🪄</button>
+                    <button onclick="toggleView('archive')" title="Archive / Watched" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
+                </div>
+                <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
-            <!-- Search & Add Input Section -->
-            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-xl mb-8 relative">
-                <div class="flex flex-col gap-4">
-                    <div class="flex justify-between items-center text-xs font-black text-indigo-400 uppercase italic px-1">
-                        <span id="formModeLabel">Search & Add Movie or TV Show</span>
-                        <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-rose-400 font-bold">Cancel Edit</button>
-                    </div>
-                    
-                    <div class="relative flex gap-2">
-                        <input id="titleInput" type="text" onkeypress="handleSearchKey(event)" placeholder="Type title and press Search..." class="flex-1 bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-base focus:ring-2 ring-indigo-500/40">
-                        <button onclick="triggerSearch()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-6 rounded-2xl transition text-sm shrink-0">
-                            🔍 Search
-                        </button>
-                        <div id="searchResults" class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden"></div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <select id="typeInput" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-200 outline-none sm:col-span-1">
-                            <option value="Movie">🍿 Movie</option>
-                            <option value="TV Show">📺 TV Show</option>
-                        </select>
-
-                        <input id="directorInput" type="text" placeholder="Director / Creator" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-200 outline-none sm:col-span-1">
+            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+                <div id="activeSessionBox" class="lg:col-span-5 bg-sky-950/20 p-6 rounded-[2.5rem] border border-sky-500/20 shadow-inner">
+                    <h2 class="text-sky-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Watching</h2>
+                    <div id="col-watching" class="space-y-5"></div>
+                </div>
+                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
+                    <div class="flex flex-col gap-4 relative">
+                        <div class="text-[10px] font-black text-sky-400 uppercase px-1 italic flex justify-between">
+                            <span id="formModeLabel">TMDB Search / Entry</span>
+                            <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button>
+                        </div>
+                        <input id="titleInput" type="text" oninput="searchMedia(this.value)" placeholder="Search Movie or TV Series..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
+                        <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
                         
-                        <div class="relative sm:col-span-1">
-                            <input id="seriesInput" list="existingSeriesList" type="text" placeholder="Franchise / Universe" class="w-full bg-slate-900 p-3.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-200 outline-none italic">
-                            <datalist id="existingSeriesList"></datalist>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <select id="mediaTypeInput" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                                <option value="Movie">Movie 🎬</option>
+                                <option value="TV Series">TV Series 📺</option>
+                            </select>
+                            <input id="genreInput" type="text" placeholder="Genre" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            <input id="yearInput" type="text" placeholder="Release Year" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
                         </div>
 
-                        <input id="genreInput" type="text" placeholder="Genre (e.g. Sci-Fi)" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 text-sm font-bold text-slate-200 outline-none sm:col-span-1">
-                    </div>
-
-                    <button onclick="submitForm()" id="submitBtn" class="w-full bg-indigo-600 py-3.5 rounded-xl font-black uppercase text-sm text-white hover:bg-indigo-500 transition shadow">
-                        Add To Vault
-                    </button>
-                </div>
-            </div>
-
-            <!-- Currently Watching Showcase -->
-            <div class="bg-indigo-950/30 p-6 rounded-[2rem] border border-indigo-500/20 shadow-sm mb-8">
-                <h2 class="text-indigo-400 font-black text-xs uppercase tracking-widest mb-4 flex items-center gap-2 italic">
-                    📺 Currently Watching
-                </h2>
-                <div id="col-watching" class="media-grid min-h-[160px]"></div>
-            </div>
-
-            <!-- Main Vault Shelf (Watchlist & Watched) -->
-            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-sm">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-700 pb-4">
-                    <div>
-                        <h2 class="font-black text-xl uppercase tracking-wider text-white italic">Cinema Library</h2>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5" id="vaultCount">0 items</p>
-                    </div>
-                    
-                    <div class="flex flex-wrap items-center gap-3">
-                        <select id="statusFilter" onchange="render()" class="bg-slate-900 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-3 py-2 outline-none">
-                            <option value="ALL">All Vault Items</option>
-                            <option value="Watchlist">Watchlist (🍿)</option>
-                            <option value="Watched">Finished (✅)</option>
-                        </select>
-
-                        <select id="typeFilter" onchange="render()" class="bg-slate-900 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-3 py-2 outline-none">
-                            <option value="ALL">All Types</option>
-                            <option value="Movie">Movies</option>
-                            <option value="TV Show">TV Shows</option>
-                        </select>
-
-                        <input id="vaultSearch" type="text" oninput="render()" placeholder="Filter title/franchise..." class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-xl px-4 py-2 outline-none w-44">
+                        <div class="flex gap-3 text-white relative">
+                            <div class="flex-1 flex gap-2">
+                                <input id="seriesInput" type="text" placeholder="Franchise / Universe (e.g., MCU, Star Wars)" class="w-full bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold italic">
+                                <input id="seriesNumInput" type="number" step="0.1" placeholder="Part #" class="w-24 bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            </div>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-sky-600 px-10 rounded-2xl font-black uppercase text-sm text-white hover:bg-sky-500">Commit</button>
+                        </div>
                     </div>
                 </div>
-
-                <div id="col-vault" class="media-grid"></div>
             </div>
 
+            <div id="queueView">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Watchlist & Library</h2>
+                    <input id="filterQueue" type="text" oninput="render()" placeholder="Filter media..." class="col-filter">
+                </div>
+                <div id="col-queue" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 min-h-[450px]"></div>
+            </div>
+
+            <div id="altView" class="hidden">
+                <div class="flex justify-between items-center mb-10">
+                    <div class="w-44"></div>
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                </div>
+                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            </div>
+
+            <div id="wishlistView" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-sky-400 font-black text-3xl uppercase tracking-widest italic">Wishlist Vault</h2>
+                </div>
+                <div id="col-wishlist" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // TMDB API Key
-        const TMDB_API_KEY = 'cc8704bb1bd344f8aaa7309acb9c3e1f'; 
+        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+        const TMDB_KEY = 'cc8704bb1bd344f8aaa7309acb9c3e1f';
 
-        let allMedia = [], editingId = null, activeMediaForStatus = null;
-
-        const GENRE_MAP = {
-            28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime',
-            99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History',
-            27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi',
-            10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western',
-            10759: 'Action & Adventure', 10762: 'Kids', 10763: 'News', 10764: 'Reality',
-            10765: 'Sci-Fi & Fantasy', 10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics'
-        };
+        let allMedia = [], editingId = null, currentViewMode = 'queue';
 
         document.addEventListener('DOMContentLoaded', () => {
             loadMedia();
@@ -243,281 +122,176 @@
 
         async function loadMedia() { 
             let { data, error } = await supabaseClient.from('movies').select('*').order('sort_order', { ascending: true }); 
-            if (!error && data) { 
-                allMedia = data; 
-                updateSeriesDatalist();
+            if (!error) { 
+                allMedia = data || []; 
                 render(); 
             } 
-        }
-
-        function updateSeriesDatalist() {
-            const datalist = document.getElementById('existingSeriesList');
-            datalist.innerHTML = '';
-            
-            const seriesSet = new Set();
-            allMedia.forEach(m => {
-                if (m.series && m.series.trim()) {
-                    seriesSet.add(m.series.trim());
-                }
-            });
-
-            seriesSet.forEach(sName => {
-                const opt = document.createElement('option');
-                opt.value = sName;
-                datalist.appendChild(opt);
-            });
-        }
-
-        function handleSearchKey(e) { if (e.key === 'Enter') { e.preventDefault(); triggerSearch(); } }
-        function triggerSearch() { searchTMDB(document.getElementById('titleInput').value); }
-
-        async function searchTMDB(q) {
-            const r = document.getElementById('searchResults');
-            const query = q ? q.trim() : '';
-            if (query.length < 2) { r.classList.add('hidden'); r.innerHTML = ''; return; }
-
-            r.innerHTML = `<div class="p-4 text-xs font-bold text-indigo-400 italic">Searching movie & TV databases...</div>`;
-            r.classList.remove('hidden');
-
-            try {
-                let url = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false`;
-                let response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`TMDB API Error (${response.status}: ${response.statusText})`);
-                }
-
-                let data = await response.json();
-                
-                if (data.results && data.results.length > 0) {
-                    const filtered = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv').slice(0, 8);
-                    
-                    if (filtered.length === 0) {
-                        r.innerHTML = `<div class="p-4 text-xs font-bold text-slate-400">No matching movies or TV shows found.</div>`;
-                        return;
-                    }
-
-                    renderSearchResults(filtered.map(item => {
-                        const isMovie = item.media_type === 'movie';
-                        const title = isMovie ? item.title : item.name;
-                        const releaseDate = isMovie ? item.release_date : item.first_air_date;
-                        const year = releaseDate && releaseDate.length >= 4 ? releaseDate.split('-')[0] : 'TBA';
-                        const cover = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
-                        const genre = (item.genre_ids && item.genre_ids[0]) ? GENRE_MAP[item.genre_ids[0]] || 'Drama' : 'Drama';
-
-                        return {
-                            title: title || 'Untitled',
-                            type: isMovie ? 'Movie' : 'TV Show',
-                            year: year,
-                            cover: cover,
-                            genre: genre
-                        };
-                    }));
-                } else {
-                    r.innerHTML = `<div class="p-4 text-xs font-bold text-slate-400">No titles found. Enter details manually.</div>`;
-                }
-            } catch (err) {
-                console.error("Lookup Error:", err);
-                r.innerHTML = `<div class="p-4 text-xs font-bold text-rose-400">Lookup Error: ${err.message}. Check browser console or API key.</div>`;
-            }
-        }
-
-        function renderSearchResults(items) {
-            const r = document.getElementById('searchResults');
-            let html = '';
-            items.forEach(item => {
-                const safeTitle = item.title.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-                const safeGenre = item.genre.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-
-                html += `
-                    <div onclick="selectSearchResult('${safeTitle}', '${item.type}', '${item.cover}', '${safeGenre}', '${item.year}')" 
-                         class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-3 border-b border-slate-700 transition-colors text-left">
-                        ${item.cover ? `<img src="${item.cover}" class="w-9 h-12 object-cover rounded shadow shrink-0">` : '<div class="w-9 h-12 bg-slate-900 rounded flex items-center justify-center text-[8px] text-slate-500 shrink-0">No Poster</div>'}
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-black text-white truncate">${item.title}</p>
-                            <p class="text-[11px] font-semibold text-slate-400 truncate">${item.type} • ${item.year} • ${item.genre}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            r.innerHTML = html;
-        }
-
-        function selectSearchResult(title, type, cover, genre, year) {
-            const tIn = document.getElementById('titleInput');
-            tIn.value = title;
-            if (cover) tIn.dataset.img = cover;
-            if (year) tIn.dataset.year = year;
-            
-            document.getElementById('typeInput').value = type;
-            document.getElementById('genreInput').value = genre;
-            document.getElementById('searchResults').classList.add('hidden');
-            document.getElementById('seriesInput').focus();
         }
 
         async function submitForm() {
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
+            const mtIn = document.getElementById('mediaTypeInput');
+            const gIn = document.getElementById('genreInput');
+            const yIn = document.getElementById('yearInput');
+            const sIn = document.getElementById('seriesInput');
+            const snIn = document.getElementById('seriesNumInput');
+            
             if (!tIn.value.trim()) return;
             submitBtn.disabled = true;
 
             try {
                 const cover = tIn.dataset.img || '';
-                const release_year = tIn.dataset.year || new Date().getFullYear().toString();
-                const type = document.getElementById('typeInput').value;
-                const director = document.getElementById('directorInput').value.trim() || '';
-                const series = document.getElementById('seriesInput').value.trim() || '';
-                const genre = document.getElementById('genreInput').value.trim() || 'Drama';
+                const series = sIn.value.trim() || null;
+                const seriesNum = snIn.value ? parseFloat(snIn.value) : null;
+                let defaultStatus = currentViewMode === 'wishlist' ? 'Wishlist' : 'Plan to Watch';
 
                 if (editingId) {
                     const cur = allMedia.find(m => m.id === editingId);
-                    await supabaseClient.from('movies').update({ 
-                        title: tIn.value.trim(), type, director, series, genre,
-                        cover_url: cover || cur.cover_url, release_year: release_year || cur.release_year
-                    }).eq('id', editingId);
+                    const payload = { 
+                        title: tIn.value.trim(),
+                        media_type: mtIn.value,
+                        genre: gIn.value.trim() || 'Entertainment',
+                        release_year: yIn.value.trim() || '',
+                        series, 
+                        series_num: seriesNum,
+                        cover_url: cover || cur.cover_url
+                    };
+                    
+                    const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
+                    if (error) throw error;
                 } else {
-                    let nextSort = allMedia.length > 0 ? Math.max(...allMedia.map(m => m.sort_order || 0)) + 100 : 100;
-                    await supabaseClient.from('movies').insert([{ 
-                        title: tIn.value.trim(), type, director, series, genre, 
-                        cover_url: cover, release_year, status: 'Watchlist', sort_order: nextSort 
+                    let next = allMedia.length > 0 ? Math.max(...allMedia.map(m => m.sort_order)) + 100 : 100;
+                    const { error } = await supabaseClient.from('movies').insert([{ 
+                        title: tIn.value.trim(), 
+                        media_type: mtIn.value,
+                        genre: gIn.value.trim() || 'Entertainment',
+                        release_year: yIn.value.trim() || '',
+                        series, 
+                        series_num: seriesNum,
+                        cover_url: cover, 
+                        status: defaultStatus, 
+                        sort_order: next 
                     }]);
+                    if (error) throw error;
                 }
+
                 resetForm(); 
                 await loadMedia();
-            } catch (err) { alert(`Error saving entry: ${err.message}`); } 
-            finally { submitBtn.disabled = false; }
+
+            } catch (err) {
+                console.error("Save failed:", err);
+                alert(`Error saving media item: ${err.message || 'Check database table standard'}`);
+            } finally {
+                submitBtn.disabled = false;
+            }
         }
 
         function resetForm() { 
             editingId = null;
             const tIn = document.getElementById('titleInput'); 
-            tIn.value = ''; delete tIn.dataset.img; delete tIn.dataset.year; 
-            document.getElementById('directorInput').value = ''; 
-            document.getElementById('seriesInput').value = ''; 
+            tIn.value = ''; 
+            delete tIn.dataset.img; 
+
             document.getElementById('genreInput').value = '';
+            document.getElementById('yearInput').value = '';
+            document.getElementById('seriesInput').value = ''; 
+            document.getElementById('seriesNumInput').value = ''; 
             document.getElementById('searchResults').classList.add('hidden');
-            document.getElementById('submitBtn').innerText = "Add To Vault"; 
-            document.getElementById('formModeLabel').innerText = "Search & Add Movie or TV Show"; 
+            document.getElementById('searchResults').innerHTML = '';
+
+            document.getElementById('submitBtn').innerText = "Commit"; 
+            document.getElementById('formModeLabel').innerText = "TMDB Search / Entry"; 
             document.getElementById('cancelEdit').classList.add('hidden'); 
         }
 
         function render() {
-            closeStatusMenu();
-            const filterText = document.getElementById('vaultSearch').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
+            const fQ = document.getElementById('filterQueue').value.toLowerCase();
+            const fA = document.getElementById('filterAlt').value.toLowerCase();
 
-            const watchingCol = document.getElementById('col-watching');
-            const vaultCol = document.getElementById('col-vault');
-            watchingCol.innerHTML = '';
-            vaultCol.innerHTML = '';
+            const cols = { 
+                watching: document.getElementById('col-watching'), 
+                queue: document.getElementById('col-queue'), 
+                alt: document.getElementById('col-alt'), 
+                wishlist: document.getElementById('col-wishlist')
+            };
+            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            const watchingItems = allMedia.filter(m => m.status === 'Watching');
-            if (watchingItems.length === 0) {
-                watchingCol.innerHTML = `<p class="text-xs text-indigo-400 font-bold italic col-span-full">Nothing currently being watched.</p>`;
-            } else {
-                watchingItems.forEach(m => watchingCol.appendChild(createCoverCard(m)));
-            }
-
-            const mainVaultItems = allMedia.filter(m => {
-                if (m.status === 'Watching') return false;
+            if (currentViewMode === 'queue') {
+                allMedia.filter(m => m.status === 'Watching').forEach(m => cols.watching.appendChild(createCard(m)));
                 
-                const matchesStatus = statusFilter === 'ALL' || m.status === statusFilter;
-                const matchesType = typeFilter === 'ALL' || m.type === typeFilter;
-                const matchesText = m.title.toLowerCase().includes(filterText) || 
-                                    (m.director && m.director.toLowerCase().includes(filterText)) ||
-                                    (m.series && m.series.toLowerCase().includes(filterText));
-                return matchesStatus && matchesType && matchesText;
-            });
-
-            document.getElementById('vaultCount').innerText = `${mainVaultItems.length} items`;
-
-            if (mainVaultItems.length === 0) {
-                vaultCol.innerHTML = `<div class="col-span-full text-center text-slate-500 py-8 font-bold text-xs">No entries match criteria.</div>`;
-            } else {
-                mainVaultItems.forEach(m => vaultCol.appendChild(createCoverCard(m)));
+                allMedia.filter(m => m.status === 'Plan to Watch')
+                    .filter(m => m.title.toLowerCase().includes(fQ) || (m.series && m.series.toLowerCase().includes(fQ)))
+                    .forEach(m => cols.queue.appendChild(createCard(m)));
+            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
+                const target = currentViewMode === 'archive' ? 'Watched' : 'Not Interested';
+                allMedia.filter(m => m.status === target)
+                    .filter(m => m.title.toLowerCase().includes(fA) || (m.series && m.series.toLowerCase().includes(fA)))
+                    .forEach(m => cols.alt.appendChild(createCard(m)));
+            } else if (currentViewMode === 'wishlist') {
+                allMedia.filter(m => m.status === 'Wishlist')
+                    .forEach(m => cols.wishlist.appendChild(createCard(m)));
             }
         }
 
-        function createCoverCard(media) {
-            const isSeries = media.series && media.series.trim() !== '';
-            let statusIcon = '🍿'; 
-            if (media.status === 'Watching') statusIcon = '📺'; 
-            else if (media.status === 'Watched') statusIcon = '✅';
-
-            const typeBadgeClass = media.type === 'TV Show' ? 'type-badge-tv' : 'type-badge-movie';
-
-            const div = document.createElement('div');
-            div.className = 'media-card';
+        function createCard(item) {
+            const isS = item.series && item.series.trim() !== '';
             
+            const div = document.createElement('div');
+            div.dataset.id = item.id; 
+            div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''}`;
+
             div.innerHTML = `
-                <div class="cover-wrapper ${isSeries ? 'is-series' : ''}" title="${media.title} (${media.release_year}) ${isSeries ? `[${media.series}]` : ''}">
-                    ${media.cover_url ? 
-                        `<img loading="lazy" src="${media.cover_url}" class="cover-img" alt="${media.title}">` : 
-                        `<div class="cover-fallback">
-                            <p class="font-black text-xs leading-tight uppercase clamp-2 text-white">${media.title}</p>
-                            <p class="text-[10px] opacity-80 font-bold text-slate-400">${media.release_year || ''}</p>
-                         </div>`
-                    }
-                </div>
-
-                <div class="card-toolbar">
-                    <span class="badge ${typeBadgeClass}">${media.type === 'TV Show' ? 'TV' : 'Film'}</span>
-                    
-                    <button onclick="openStatusMenu(event, ${media.id})" class="tool-btn" title="Change status">
-                        ${statusIcon}
-                    </button>
-
-                    <button onclick='editMedia(${JSON.stringify(media).replace(/'/g, "&apos;")})' class="tool-btn hover:text-indigo-400" title="Edit details">
-                        ✏️
-                    </button>
-
-                    <button onclick="deleteMedia(${media.id})" class="tool-btn hover:text-rose-400" title="Delete entry">
-                        ✕
-                    </button>
-                </div>
-            `;
+                <img src="${item.cover_url || ''}" class="game-card-cover border-r border-slate-700 shadow-inner" alt="${item.title}">
+                <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
+                    <div class="flex justify-between items-start text-white">
+                        <div class="text-left flex-1 min-w-0 pr-2">
+                            <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${item.title}</h3>
+                            <span class="plat-badge shadow-sm mt-2" style="background:${item.media_type === 'TV Series' ? '#0284c7' : '#e11d48'}">${item.media_type || 'Movie'}</span>
+                        </div>
+                        <div class="flex gap-2 shrink-0 text-white">
+                            <button onclick='editMedia(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-slate-800 p-2.5 rounded-lg flex items-center justify-center text-base hover:bg-slate-700 transition">✏️</button>
+                            <button onclick="deleteMedia('${item.id}')" class="bg-slate-800 p-2.5 rounded-lg flex items-center justify-center text-base hover:bg-rose-900 transition">✕</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div class="flex flex-col min-w-0 pr-2 text-left">
+                            ${isS ? `<span class="series-label truncate">${item.series} ${item.series_num ? '#' + item.series_num : ''}</span>` : ''}
+                            <span class="genre-label truncate">${item.genre || 'Media'} • ${item.release_year || 'N/A'}</span>
+                        </div>
+                        <select onchange="updateStatus('${item.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer">
+                            <option value="Plan to Watch" ${item.status === 'Plan to Watch' ? 'selected' : ''}>Plan to Watch</option>
+                            <option value="Watching" ${item.status === 'Watching' ? 'selected' : ''}>Watching</option>
+                            <option value="Wishlist" ${item.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                            <option value="Watched" ${item.status === 'Watched' ? 'selected' : ''}>Watched (Archive)</option>
+                            <option value="Not Interested" ${item.status === 'Not Interested' ? 'selected' : ''}>Trash</option>
+                        </select>
+                    </div>
+                </div>`;
             return div;
         }
 
-        function openStatusMenu(e, mediaId) {
-            e.stopPropagation();
-            activeMediaForStatus = mediaId;
+        function toggleView(v) { 
+            currentViewMode = v;
+            const qv = document.getElementById('queueView');
+            const dt = document.getElementById('dashboardTop');
+            const as = document.getElementById('activeSessionBox');
+            const ia = document.getElementById('inputArea');
+            const av = document.getElementById('altView');
+            const wv = document.getElementById('wishlistView');
 
-            const menu = document.getElementById('globalStatusMenu');
-            const rect = e.currentTarget.getBoundingClientRect();
-            
-            const menuHeight = 115;
-            const spaceBelow = window.innerHeight - rect.bottom;
-
-            let leftPos = rect.left;
-            if (leftPos + 140 > window.innerWidth) {
-                leftPos = window.innerWidth - 150;
-            }
-
-            if (spaceBelow < menuHeight && rect.top > menuHeight) {
-                menu.style.top = `${rect.top - menuHeight - 4}px`;
+            if(v === 'queue') {
+                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'block'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                av.style.display = 'none'; wv.style.display = 'none';
+            } else if(v === 'wishlist') {
+                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
+                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
             } else {
-                menu.style.top = `${rect.bottom + 6}px`;
+                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
+                document.getElementById('altTitle').innerText = v === 'archive' ? 'Watched Archive' : 'Scrap Yard';
+                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
             }
-
-            menu.style.left = `${leftPos}px`;
-            menu.classList.remove('hidden');
-        }
-
-        function closeStatusMenu() {
-            const menu = document.getElementById('globalStatusMenu');
-            if (menu) menu.classList.add('hidden');
-            activeMediaForStatus = null;
-        }
-
-        async function applyStatusChange(newStatus) {
-            if (!activeMediaForStatus) return;
-            const targetId = activeMediaForStatus;
-            closeStatusMenu();
-
-            await supabaseClient.from('movies').update({ status: newStatus }).eq('id', targetId);
-            loadMedia();
+            render();
         }
 
         function editMedia(m) { 
@@ -527,31 +301,81 @@
             const tIn = document.getElementById('titleInput');
             tIn.value = m.title; 
             if (m.cover_url) tIn.dataset.img = m.cover_url;
-            if (m.release_year) tIn.dataset.year = m.release_year;
 
-            document.getElementById('typeInput').value = m.type || 'Movie';
-            document.getElementById('directorInput').value = m.director || '';
-            document.getElementById('seriesInput').value = m.series || '';
+            document.getElementById('mediaTypeInput').value = m.media_type || 'Movie';
             document.getElementById('genreInput').value = m.genre || '';
+            document.getElementById('yearInput').value = m.release_year || '';
+            document.getElementById('seriesInput').value = m.series || ''; 
+            document.getElementById('seriesNumInput').value = m.series_num || ''; 
 
             document.getElementById('formModeLabel').innerText = "Updating: " + m.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
         }
 
-        function exitEditMode() { resetForm(); }
+        function exitEditMode() { resetForm(); toggleView(currentViewMode); }
+        async function updateStatus(id, s) { await supabaseClient.from('movies').update({ status:s }).eq('id', id); loadMedia(); }
+        async function deleteMedia(id) { if(confirm('Delete media?')) { await supabaseClient.from('movies').delete().eq('id', id); loadMedia(); } }
 
-        async function deleteMedia(id) { 
-            if(confirm('Remove this title from your vault?')) { 
-                await supabaseClient.from('movies').delete().eq('id', id); 
-                loadMedia(); 
+        async function searchMedia(q) { 
+            const r = document.getElementById('searchResults'); 
+            const trimmedQuery = q ? q.trim() : '';
+
+            if (trimmedQuery.length < 2) { 
+                r.classList.add('hidden'); 
+                r.innerHTML = '';
+                return; 
             } 
+
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(trimmedQuery)}`);
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`;
+                    r.classList.remove('hidden');
+                    return;
+                }
+
+                r.innerHTML = data.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv').map(item => {
+                    const isTV = item.media_type === 'tv';
+                    const title = (isTV ? item.name : item.title || '').replace(/"/g, '&quot;');
+                    const dateStr = isTV ? item.first_air_date : item.release_date;
+                    const year = dateStr ? dateStr.split('-')[0] : 'N/A';
+                    const cover = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
+                    const mType = isTV ? 'TV Series' : 'Movie';
+                    
+                    return `
+                        <div onclick="selectMedia(&quot;${title}&quot;, &quot;${mType}&quot;, &quot;${cover}&quot;, &quot;${year}&quot;)" 
+                             class="p-4 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
+                            ${cover ? `<img src="${cover}" class="w-12 h-16 object-cover rounded shadow bg-slate-900">` : '<div class="w-12 h-16 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
+                            <div>
+                                <p class="text-sm font-bold text-white">${title}</p>
+                                <p class="text-xs text-sky-400 font-normal mt-0.5">${mType} • ${year}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join(''); 
+                
+                r.classList.remove('hidden');
+
+            } catch (err) {
+                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Search error: ${err.message}</div>`;
+                r.classList.remove('hidden');
+            }
         }
 
-        // Global click listeners
+        function selectMedia(t, mt, c, y) { 
+            const tIn = document.getElementById('titleInput'); 
+            tIn.value = t; 
+            if (c) tIn.dataset.img = c;
+            
+            document.getElementById('mediaTypeInput').value = mt;
+            document.getElementById('yearInput').value = y;
+            document.getElementById('searchResults').classList.add('hidden'); 
+            document.getElementById('seriesInput').focus();
+        }
+
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#globalStatusMenu')) {
-                closeStatusMenu();
-            }
             if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) {
                 document.getElementById('searchResults').classList.add('hidden');
             }
