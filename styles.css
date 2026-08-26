@@ -15,47 +15,53 @@ body {
 }
 
 /* Toolbox Dropdown Menu */
+/* Container centered around the button */
 .toolbox-dropdown {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    justify-content: center;
 }
 
+/* Icon-only drop menu aligned directly below the button */
 .toolbox-menu {
     display: none;
     position: absolute;
-    right: 0;
     top: 100%;
-    margin-top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
     background: #1e293b;
     border: 1px solid #334155;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     z-index: 100;
-    min-width: 220px;
     padding: 6px;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .toolbox-dropdown:hover .toolbox-menu {
-    display: block;
+    display: flex;
 }
 
-.toolbox-item {
+/* Match header button size (2.5 pad + text-2xl = ~44px wide/high) */
+.toolbox-item-icon {
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    color: #f1f5f9;
-    font-size: 13px;
-    font-weight: 700;
+    justify-content: center;
+    background-color: #0f172a;
+    border: 1px solid #334155;
     border-radius: 0.75rem;
+    font-size: 1.25rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    width: 100%;
-    text-align: left;
+    transition: all 0.2s ease;
 }
 
-.toolbox-item:hover {
+.toolbox-item-icon:hover {
     background-color: #334155;
+    transform: scale(1.05);
 }
 
 /* Platform Filter Boxes (Games Vault) */
