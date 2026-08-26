@@ -14,7 +14,51 @@ body {
     color: #818cf8;
 }
 
-/* Platform Filter Boxes */
+/* Toolbox Dropdown Menu */
+.toolbox-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.toolbox-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 8px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 100;
+    min-width: 220px;
+    padding: 6px;
+}
+
+.toolbox-dropdown:hover .toolbox-menu {
+    display: block;
+}
+
+.toolbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.toolbox-item:hover {
+    background-color: #334155;
+}
+
+/* Platform Filter Boxes (Games Vault) */
 .plat-box { 
     width: 44px; 
     height: 44px; 
@@ -44,7 +88,7 @@ body {
     object-fit: contain; 
 }
 
-/* Game Card Formatting */
+/* Card Formatting */
 .game-card { 
     background-color: #1e293b; 
     border-radius: 1.5rem; 
