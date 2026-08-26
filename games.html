@@ -54,11 +54,11 @@
                             <div onclick="toggleP('steam')" id="i-steam" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"></div>
                             <div onclick="toggleP('gog')" id="i-gog" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg"></div>
                             <div onclick="toggleP('epic')" id="i-epic" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg"></div>
-                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px; font-weight:bold;">BN</span></div>
+                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px;">BN</span></div>
                             <div onclick="toggleP('ps5')" id="i-ps5" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg"></div>
                             <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg"></div>
                             <div onclick="toggleP('switch')" id="i-switch" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg"></div>
-                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px; font-weight:bold;">A</span></div>
+                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px;">A</span></div>
                         </div>
                         <div class="flex gap-3 text-white relative">
                             <div class="flex-1 relative">
@@ -131,7 +131,6 @@
 
         const PLAT_MAP = { steam: {n:'Steam', c:'#171a21'}, gog: {n:'GOG', c:'#86328a'}, epic: {n:'Epic Games', c:'#313131'}, battlenet: {n:'BattleNet', c:'#009eff'}, ps5: {n:'PS5', c:'#003087'}, xbox: {n:'Xbox', c:'#107c10'}, switch: {n:'Nintendo Switch', c:'#e60012'}, amazon: {n:'Amazon Luna', c:'#ff9900'} };
 
-        // Initialize upon page load once auth.js verifies session
         document.addEventListener('DOMContentLoaded', () => {
             initSortable(); 
             loadGames();
@@ -310,61 +309,61 @@
             }
         }
 
-function createCard(game) {
-    const isS = game.series && game.series.trim() !== '';
-    const nowSec = Math.floor(Date.now() / 1000);
-    
-    const rDate = parseReleaseDate(game.release_date);
-    const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
-    const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
-    
-    const div = document.createElement('div');
-    div.dataset.id = game.id; 
-    div.dataset.series = game.series || '';
-    div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
-    
-    const platB = (game.platform || '').split(',').map(p => { 
-        const i = PLAT_MAP[p.trim()]; 
-        return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
-    }).join(' ');
+        function createCard(game) {
+            const isS = game.series && game.series.trim() !== '';
+            const nowSec = Math.floor(Date.now() / 1000);
+            
+            const rDate = parseReleaseDate(game.release_date);
+            const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
+            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
+            
+            const div = document.createElement('div');
+            div.dataset.id = game.id; 
+            div.dataset.series = game.series || '';
+            div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
+            
+            const platB = (game.platform || '').split(',').map(p => { 
+                const i = PLAT_MAP[p.trim()]; 
+                return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
+            }).join(' ');
 
-    div.innerHTML = `
-        <img loading="lazy" src="${game.cover_url || ''}" class="game-card-cover border-r border-slate-700 shadow-inner">
-        <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
-            <div class="flex justify-between items-start text-white">
-                <div class="text-left flex-1 min-w-0 pr-2">
-                    <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3>
-                    <div class="flex flex-wrap gap-1.5 mt-3">${platB}</div>
-                </div>
-                <div class="icon-square shrink-0 text-white flex gap-1">
-                    <button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button>
-                    <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button>
-                    <button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button>
-                    <button onclick="deleteGame('${game.id}')" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button>
-                </div>
-            </div>
-            <div class="flex justify-between items-end">
-                <div class="flex flex-col min-w-0 pr-2 text-left">
-                    ${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}
-                    <span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span>
-                </div>
-                <select onchange="updateStatus('${game.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer">
-                    <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
-                    <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
-                    <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
-                    <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
-                    <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
-                    <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
-                    <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
-                    <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
-                    <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
-                    <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option>
-                    <option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option>
-                </select>
-            </div>
-        </div>`;
-    return div;
-}
+            div.innerHTML = `
+                <img loading="lazy" src="${game.cover_url || ''}" class="game-card-cover border-r border-slate-700 shadow-inner">
+                <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
+                    <div class="flex justify-between items-start text-white">
+                        <div class="text-left flex-1 min-w-0 pr-2">
+                            <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3>
+                            <div class="flex flex-wrap gap-1.5 mt-3">${platB}</div>
+                        </div>
+                        <div class="icon-square shrink-0 text-white">
+                            <button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button>
+                            <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button>
+                            <button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button>
+                            <button onclick="deleteGame('${game.id}')" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div class="flex flex-col min-w-0 pr-2 text-left">
+                            ${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}
+                            <span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span>
+                        </div>
+                        <select onchange="updateStatus('${game.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer">
+                            <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                            <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                            <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                            <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                            <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                            <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                            <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                            <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                            <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                            <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option>
+                            <option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option>
+                        </select>
+                    </div>
+                </div>`;
+            return div;
+        }
 
         function toggleView(v) { 
             currentViewMode = v;
