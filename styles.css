@@ -56,7 +56,7 @@ body {
 }
 
 .game-card-cover {
-    width: 112px !important; /* Matches original w-28 */
+    width: 112px !important;
     height: 100% !important;
     object-fit: cover !important;
     background-color: #0f172a;
