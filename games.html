@@ -5,23 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Games Vault</title>
   
-  <!-- Inline Favicon to prevent 404 console errors -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
-
-  <!-- Tailwind CSS Configuration & CDN -->
   <script>
     window.tailwind = { config: { suppressDeprecationWarnings: true } };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Custom External Stylesheet -->
   <link rel="stylesheet" href="styles.css">
-  
-  <!-- SortableJS for drag-and-drop -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Shared Centralized Auth Logic -->
   <script src="auth.js" defer></script>
 </head>
 
@@ -30,14 +21,27 @@
         <div class="max-w-7xl mx-auto">
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
-                   <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center">🏠</a>
+                   <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center hover:bg-indigo-500">🏠</a>
+                   <a href="books.html" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</a>
+                   <a href="movies.html" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</a>
                    <button onclick="handleLogout()" title="Lock Vault / Logout" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
-                   <button onclick="downloadTemplate()" title="CSV Template" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">💾</button>
-                   <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📥</button>
                 </div>
                 <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Games Vault</h1>
-                <div class="flex gap-2">
-                    <button id="repairBtn" onclick="repairSortOrder()" title="Repair All Sorting & Release Dates" class="p-2.5 px-4 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-xl text-2xl transition hover:bg-amber-600">🔧</button>
+                <div class="flex items-center gap-2">
+                    <div class="toolbox-dropdown">
+                        <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="toolbox-menu">
+                            <button id="repairBtn" onclick="repairSortOrder()" class="toolbox-item text-amber-400">
+                                <span>🔧</span> Repair Sort & Dates
+                            </button>
+                            <button onclick="downloadTemplate()" class="toolbox-item">
+                                <span>💾</span> CSV Template
+                            </button>
+                            <button onclick="document.getElementById('csvFile').click()" class="toolbox-item">
+                                <span>📥</span> Import CSV
+                            </button>
+                        </div>
+                    </div>
                     <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
                     <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                     <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
@@ -47,7 +51,7 @@
 
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
                 <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-6 rounded-[2.5rem] border border-indigo-500/20 shadow-inner">
-                    <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Active Session</h2>
+                    <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Playing</h2>
                     <div id="col-playing" class="space-y-5"></div>
                 </div>
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
@@ -435,13 +439,12 @@
         
         async function repairSortOrder() { 
             const b = document.getElementById('repairBtn'); 
-            b.innerText = "⏳";
+            b.innerText = "⏳ Processing...";
             
             try {
                 const missingDates = allGames.filter(g => g.release_date === null || g.release_date === undefined);
                 
                 if (missingDates.length > 0) {
-                    b.innerText = `⏳ (0/${missingDates.length})`;
                     let count = 0;
 
                     for (let g of missingDates) {
@@ -506,7 +509,7 @@
                 console.error("Rebuild failed:", err);
                 alert(`Rebuild error: ${err.message}`);
             } finally {
-                b.innerText = "🔧"; 
+                b.innerHTML = "<span>🔧</span> Repair Sort & Dates"; 
                 loadGames(); 
             }
         }
