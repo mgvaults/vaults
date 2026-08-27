@@ -46,7 +46,7 @@
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
                 <div id="activeSessionBox" class="lg:col-span-5 bg-amber-950/20 p-6 rounded-[2.5rem] border border-amber-500/20 shadow-inner">
                     <h2 class="text-amber-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Reading</h2>
-                    <div id="col-reading" class="space-y-4"></div>
+                    <div id="col-reading" class="flex flex-wrap gap-4 justify-center sm:justify-start"></div>
                 </div>
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
                     <div class="flex flex-col gap-4 relative">
@@ -78,7 +78,7 @@
                     <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Bookshelf & Reading Queue</h2>
                     <input id="filterShelf" type="text" oninput="render()" placeholder="Filter books..." class="col-filter">
                 </div>
-                <div id="col-shelf" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 min-h-[450px]"></div>
+                <div id="col-shelf" class="flex flex-wrap gap-4 min-h-[450px]"></div>
             </div>
 
             <div id="altView" class="hidden">
@@ -87,14 +87,14 @@
                     <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter books..." class="col-filter">
                 </div>
-                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+                <div id="col-alt" class="flex flex-wrap gap-4"></div>
             </div>
 
             <div id="wishlistView" class="hidden">
                 <div class="text-center mb-8">
                     <h2 class="text-amber-400 font-black text-3xl uppercase tracking-widest italic">Book Wishlist</h2>
                 </div>
-                <div id="col-wishlist" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="col-wishlist" class="flex flex-wrap gap-4 justify-center sm:justify-start"></div>
             </div>
         </div>
     </div>
@@ -226,11 +226,14 @@
             
             const div = document.createElement('div');
             div.dataset.id = book.id; 
-            div.className = `game-card border border-slate-700 shadow-xl relative ${isS ? 'series-chained' : ''}`;
+            div.className = `poster-card ${isS ? 'series-chained' : ''}`;
+            div.title = `${book.title}${book.author ? ' by ' + book.author : ''}`;
 
             div.innerHTML = `
-                <img src="${book.cover_url || ''}" class="game-card-cover" alt="${book.title}">
+                <img src="${book.cover_url || ''}" class="poster-cover" alt="${book.title}">
                 
+                ${book.series_num ? `<span class="series-badge-overlay">#${book.series_num}</span>` : ''}
+
                 <!-- Vertical Action Icons Sidebar -->
                 <div class="card-actions-sidebar">
                     <button title="Edit" onclick='editBook(${JSON.stringify(book).replace(/'/g, "&apos;")})' class="action-btn">✏️</button>
@@ -238,18 +241,6 @@
                     <button title="Finished" onclick="updateStatus('${book.id}', 'Finished')" class="action-btn ${book.status === 'Finished' ? 'active' : ''}">🏆</button>
                     <button title="Wishlist" onclick="updateStatus('${book.id}', 'Wishlist')" class="action-btn ${book.status === 'Wishlist' ? 'active' : ''}">📋</button>
                     <button title="Delete" onclick="deleteBook('${book.id}')" class="action-btn text-rose-400">✕</button>
-                </div>
-
-                <!-- Book Info -->
-                <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
-                    <div>
-                        <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${book.title}</h3>
-                        <p class="text-xs text-amber-400 font-bold mt-1">by ${book.author || 'Unknown'}</p>
-                    </div>
-                    <div class="flex flex-col min-w-0 text-left">
-                        ${isS ? `<span class="series-label truncate">${book.series} ${book.series_num ? '#' + book.series_num : ''}</span>` : ''}
-                        <span class="genre-label truncate">${book.genre || 'Book'}</span>
-                    </div>
                 </div>`;
             return div;
         }
