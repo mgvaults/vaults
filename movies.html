@@ -29,13 +29,13 @@
                 <h1 class="text-3xl font-black tracking-tighter text-sky-400 uppercase italic">Movies & TV Vault</h1>
                 <div class="flex items-center gap-2">
                     <div class="toolbox-dropdown">
-    <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
-    <div class="toolbox-menu">
-        <button id="repairBtn" onclick="repairSortOrder()" title="Repair Sort & Dates" class="toolbox-item-icon text-amber-400">🔧</button>
-        <button onclick="downloadTemplate()" title="Download CSV Template" class="toolbox-item-icon">💾</button>
-        <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="toolbox-item-icon">📥</button>
-    </div>
-</div>
+                        <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="toolbox-menu">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair Sort & Dates" class="toolbox-item-icon text-amber-400">🔧</button>
+                            <button onclick="downloadTemplate()" title="Download CSV Template" class="toolbox-item-icon">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="toolbox-item-icon">📥</button>
+                        </div>
+                    </div>
                     <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-sky-400">🪄</button>
                     <button onclick="toggleView('archive')" title="Archive / Watched" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                     <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
@@ -46,7 +46,7 @@
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
                 <div id="activeSessionBox" class="lg:col-span-5 bg-sky-950/20 p-6 rounded-[2.5rem] border border-sky-500/20 shadow-inner">
                     <h2 class="text-sky-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Watching</h2>
-                    <div id="col-watching" class="space-y-5"></div>
+                    <div id="col-watching" class="space-y-4"></div>
                 </div>
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
                     <div class="flex flex-col gap-4 relative">
@@ -82,7 +82,7 @@
                     <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Watchlist & Library</h2>
                     <input id="filterQueue" type="text" oninput="render()" placeholder="Filter media..." class="col-filter">
                 </div>
-                <div id="col-queue" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 min-h-[450px]"></div>
+                <div id="col-queue" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 min-h-[450px]"></div>
             </div>
 
             <div id="altView" class="hidden">
@@ -91,14 +91,14 @@
                     <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
                 </div>
-                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
             </div>
 
             <div id="wishlistView" class="hidden">
                 <div class="text-center mb-8">
                     <h2 class="text-sky-400 font-black text-3xl uppercase tracking-widest italic">Wishlist Vault</h2>
                 </div>
-                <div id="col-wishlist" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                <div id="col-wishlist" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
     </div>
@@ -233,33 +233,29 @@
             
             const div = document.createElement('div');
             div.dataset.id = item.id; 
-            div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''}`;
+            div.className = `game-card border border-slate-700 shadow-xl relative ${isS ? 'series-chained' : ''}`;
 
             div.innerHTML = `
-                <img src="${item.cover_url || ''}" class="game-card-cover border-r border-slate-700 shadow-inner" alt="${item.title}">
+                <img src="${item.cover_url || ''}" class="game-card-cover" alt="${item.title}">
+                
+                <!-- Vertical Action Icons Sidebar -->
+                <div class="card-actions-sidebar">
+                    <button title="Edit" onclick='editMedia(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="action-btn">✏️</button>
+                    <button title="Watching" onclick="updateStatus('${item.id}', 'Watching')" class="action-btn ${item.status === 'Watching' ? 'active' : ''}">👁️</button>
+                    <button title="Watched" onclick="updateStatus('${item.id}', 'Watched')" class="action-btn ${item.status === 'Watched' ? 'active' : ''}">🏆</button>
+                    <button title="Wishlist Disabled" class="action-btn disabled" disabled>📋</button>
+                    <button title="Delete" onclick="deleteMedia('${item.id}')" class="action-btn text-rose-400">✕</button>
+                </div>
+
+                <!-- Movie / Show Info -->
                 <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
-                    <div class="flex justify-between items-start text-white">
-                        <div class="text-left flex-1 min-w-0 pr-2">
-                            <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${item.title}</h3>
-                            <span class="plat-badge shadow-sm mt-2" style="background:${item.media_type === 'TV Series' ? '#0284c7' : '#e11d48'}">${item.media_type || 'Movie'}</span>
-                        </div>
-                        <div class="flex gap-2 shrink-0 text-white">
-                            <button onclick='editMedia(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-slate-800 p-2.5 rounded-lg flex items-center justify-center text-base hover:bg-slate-700 transition">✏️</button>
-                            <button onclick="deleteMedia('${item.id}')" class="bg-slate-800 p-2.5 rounded-lg flex items-center justify-center text-base hover:bg-rose-900 transition">✕</button>
-                        </div>
+                    <div>
+                        <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${item.title}</h3>
+                        <span class="plat-badge shadow-sm mt-2" style="background:${item.media_type === 'TV Series' ? '#0284c7' : '#e11d48'}">${item.media_type || 'Movie'}</span>
                     </div>
-                    <div class="flex justify-between items-end">
-                        <div class="flex flex-col min-w-0 pr-2 text-left">
-                            ${isS ? `<span class="series-label truncate">${item.series} ${item.series_num ? '#' + item.series_num : ''}</span>` : ''}
-                            <span class="genre-label truncate">${item.genre || 'Media'} • ${item.release_year || 'N/A'}</span>
-                        </div>
-                        <select onchange="updateStatus('${item.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer">
-                            <option value="Plan to Watch" ${item.status === 'Plan to Watch' ? 'selected' : ''}>Plan to Watch</option>
-                            <option value="Watching" ${item.status === 'Watching' ? 'selected' : ''}>Watching</option>
-                            <option value="Wishlist" ${item.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
-                            <option value="Watched" ${item.status === 'Watched' ? 'selected' : ''}>Watched (Archive)</option>
-                            <option value="Not Interested" ${item.status === 'Not Interested' ? 'selected' : ''}>Trash</option>
-                        </select>
+                    <div class="flex flex-col min-w-0 text-left">
+                        ${isS ? `<span class="series-label truncate">${item.series} ${item.series_num ? '#' + item.series_num : ''}</span>` : ''}
+                        <span class="genre-label truncate">${item.genre || 'Media'} • ${item.release_year || 'N/A'}</span>
                     </div>
                 </div>`;
             return div;
