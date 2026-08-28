@@ -53,7 +53,7 @@
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
                         </div>
                     </div>
-                    <button onclick="toggleView('archive')" id="btn-archive" title="Trophy Vault (Watched)" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="toggleView('archive')" id="btn-archive" title="Trophy Room (Watched)" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
@@ -166,7 +166,7 @@
             if (mode === 'archive') {
                 btnA.className = "bg-emerald-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg";
                 btnQ.className = "bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700";
-                title.innerText = "Movies Trophy Vault";
+                title.innerText = "Movies Trophy Room";
                 title.className = "text-3xl font-black tracking-tighter text-emerald-400 uppercase italic";
             } else {
                 btnQ.className = "bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg";
@@ -215,9 +215,9 @@
                             <p class="text-xs text-slate-400 mt-1">${movie.release_year || 'N/A'}</p>
                         </div>
                         <div class="mt-3 flex justify-between items-center text-xs">
-                            <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[80px]">${movie.genre || 'Movie'}</span>
-                            <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-xs py-1 px-2 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer">
-                                <option value="Plan to Watch" ${movie.status !== 'Watching' && movie.status !== 'Watched' ? 'selected' : ''}>Plan to Watch</option>
+                            <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[70px]">${movie.genre || 'Movie'}</span>
+                            <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-xs py-1 px-1.5 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer">
+                                <option value="Archives" ${movie.status !== 'Watching' && movie.status !== 'Watched' ? 'selected' : ''}>Archives</option>
                                 <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
                                 <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
                             </select>
@@ -265,7 +265,7 @@
         }
 
         async function addMovieFromApi(title, release_year, genre, cover_url) {
-            await supabaseClient.from('movies').insert([{ title, release_year, genre, cover_url, status: 'Plan to Watch' }]);
+            await supabaseClient.from('movies').insert([{ title, release_year, genre, cover_url, status: 'Archives' }]);
             document.getElementById('searchResultsDropdown').classList.add('hidden');
             document.getElementById('apiSearchInput').value = '';
             loadMovies();
@@ -275,7 +275,7 @@
             const title = document.getElementById('apiSearchInput').value;
             const genre = document.getElementById('manualGenre').value;
             if (!title) return alert('Please enter a title');
-            await supabaseClient.from('movies').insert([{ title, genre, status: 'Plan to Watch' }]);
+            await supabaseClient.from('movies').insert([{ title, genre, status: 'Archives' }]);
             document.getElementById('apiSearchInput').value = '';
             document.getElementById('manualGenre').value = '';
             loadMovies();
