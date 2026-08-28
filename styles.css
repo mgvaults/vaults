@@ -14,39 +14,47 @@ body {
     color: #818cf8;
 }
 
-/* Platform Selectors & Platform Logos Fix */
+/* Platform Selectors - Fixed Blowup Issue */
 .platform-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 .platform-card {
-    width: 90px;
-    height: 70px;
+    width: 90px !important;
+    height: 70px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+    min-height: 70px !important;
+    max-height: 70px !important;
     background: #1e293b;
     border: 1px solid #334155;
     border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: 6px;
+    padding: 6px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 
 .platform-card img, 
 .platform-card svg {
-    max-width: 48px !important;
-    max-height: 36px !important;
-    width: auto !important;
-    height: auto !important;
+    max-width: 40px !important;
+    max-height: 32px !important;
+    width: 40px !important;
+    height: 32px !important;
     object-fit: contain !important;
-    display: block;
-    margin: 0 auto;
+    display: block !important;
+    margin: 0 auto !important;
+    flex-shrink: 0 !important;
 }
 
 .platform-card:hover {
@@ -108,58 +116,71 @@ body {
     transform: scale(1.05);
 }
 
-/* Expanded Poster Card Layout (Height adjusted from 220px to 255px to fix clipped titles) */
+/* Strict Card Sizing - Fixed Poster Clipping */
 .poster-card { 
-    background-color: #1e293b; 
-    border-radius: 1rem; 
-    overflow: hidden; 
-    display: flex; 
-    width: 175px;
-    height: 255px; 
-    border: 1px solid rgba(255,255,255,0.1); 
-    position: relative;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: #1e293b !important; 
+    border-radius: 1rem !important; 
+    overflow: hidden !important; 
+    display: flex !important; 
+    flex-direction: row !important;
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+    height: 260px !important; 
+    min-height: 260px !important;
+    max-height: 260px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important; 
+    position: relative !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    box-sizing: border-box !important;
 }
 
 .poster-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.5) !important;
 }
 
 .poster-cover {
-    width: 130px !important;
-    height: 100% !important;
+    width: 135px !important;
+    min-width: 135px !important;
+    max-width: 135px !important;
+    height: 260px !important;
     object-fit: cover !important;
-    background-color: #0f172a;
-    flex-shrink: 0;
+    background-color: #0f172a !important;
+    flex-shrink: 0 !important;
+    display: block !important;
 }
 
 /* Vertical Action Icon Sidebar */
 .card-actions-sidebar {
-    width: 45px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    padding: 6px 0;
-    background-color: #1e293b;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    flex-shrink: 0;
+    width: 45px !important;
+    min-width: 45px !important;
+    max-width: 45px !important;
+    height: 260px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 6px 0 !important;
+    background-color: #1e293b !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .action-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 1rem !important;
     opacity: 0.6;
     transition: all 0.15s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 6px 0;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 6px 0 !important;
 }
 
 .action-btn:hover {
@@ -177,50 +198,50 @@ body {
     filter: grayscale(1);
 }
 
-/* Games Vault Platform Badges Styling */
+/* Platform Badges */
 .platform-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 800;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #ffffff;
-    background-color: #3b82f6;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: inline-block !important;
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    border-radius: 6px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #ffffff !important;
+    background-color: #3b82f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-.platform-badge.gog { background-color: #a855f7; }
-.platform-badge.steam { background-color: #0284c7; }
-.platform-badge.epic { background-color: #334155; }
-.platform-badge.playstation { background-color: #1d4ed8; }
-.platform-badge.xbox { background-color: #15803d; }
-.platform-badge.switch { background-color: #dc2626; }
+.platform-badge.gog { background-color: #a855f7 !important; }
+.platform-badge.steam { background-color: #0284c7 !important; }
+.platform-badge.epic { background-color: #334155 !important; }
+.platform-badge.playstation { background-color: #1d4ed8 !important; }
+.platform-badge.xbox { background-color: #15803d !important; }
+.platform-badge.switch { background-color: #dc2626 !important; }
 
-/* Series Banner Indicator */
+/* Series Chained Indicator */
 .series-chained { 
     border-left: 6px solid #fb923c !important; 
 }
 
-/* Expanded Series Badge Overlay (Bottom Right of Artwork Area) */
+/* Series Badge Overlay */
 .series-badge-overlay {
-    position: absolute;
-    bottom: 8px;
-    right: 52px;
-    background: #0f172a;
-    color: #fb923c;
-    font-size: 12px;
-    font-weight: 900;
-    padding: 3px 8px;
-    border-radius: 6px;
-    border: 1px solid #fb923c;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    z-index: 20;
-    pointer-events: none;
+    position: absolute !important;
+    bottom: 8px !important;
+    right: 52px !important;
+    background: #0f172a !important;
+    color: #fb923c !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    border: 1px solid #fb923c !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5) !important;
+    z-index: 20 !important;
+    pointer-events: none !important;
 }
 
-/* Columns & Inputs */
+/* Layout Columns & Inputs */
 .column-height { 
     min-height: 450px; 
     border: 2px dashed rgba(255,255,255,0.05); 
@@ -239,7 +260,7 @@ body {
     color: white; 
 }
 
-/* Custom Scrollbars */
+/* Scrollbar Styles */
 #searchResults::-webkit-scrollbar { 
     width: 8px; 
 }
