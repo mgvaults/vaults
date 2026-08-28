@@ -53,14 +53,21 @@
         <div class="max-w-7xl mx-auto">
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
-                   <button onclick="toggleView('queue')" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🏠</button>
+                   <button onclick="toggleView('queue')" title="Games Vault" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🏠</button>
+                   <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
+                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
                    <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
-                   <button onclick="downloadTemplate()" title="CSV Template" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">💾</button>
-                   <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📥</button>
                 </div>
                 <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">The Vault</h1>
-                <div class="flex gap-2">
-                    <button id="repairBtn" onclick="repairSortOrder()" title="Repair All Sorting & Release Dates" class="p-2.5 px-4 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-xl text-2xl transition hover:bg-amber-600">🔧</button>
+                <div class="flex items-center gap-2">
+                    <div class="relative group">
+                        <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair All" class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white">🔧</button>
+                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
+                        </div>
+                    </div>
                     <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
                     <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                     <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
@@ -85,6 +92,7 @@
                             <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px;">BN</span></div>
                             <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg"></div>
                             <div onclick="toggleP('switch')" id="i-switch" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg"></div>
+                            <div onclick="toggleP('playstation')" id="i-playstation" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg"></div>
                             <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px;">A</span></div>
                         </div>
                         <div class="flex gap-3 text-white relative">
@@ -145,7 +153,16 @@
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
 
-        const PLAT_MAP = { steam: {n:'Steam', c:'#171a21'}, gog: {n:'GOG', c:'#86328a'}, epic: {n:'Epic Games', c:'#313131'}, battlenet: {n:'BattleNet', c:'#009eff'}, xbox: {n:'Xbox', c:'#107c10'}, switch: {n:'Nintendo Switch', c:'#e60012'}, amazon: {n:'Amazon Luna', c:'#ff9900'} };
+        const PLAT_MAP = { 
+            steam: {n:'Steam', c:'#171a21'}, 
+            gog: {n:'GOG', c:'#86328a'}, 
+            epic: {n:'Epic Games', c:'#313131'}, 
+            battlenet: {n:'BattleNet', c:'#009eff'}, 
+            xbox: {n:'Xbox', c:'#107c10'}, 
+            switch: {n:'Nintendo Switch', c:'#e60012'}, 
+            playstation: {n:'PlayStation', c:'#003791'}, 
+            amazon: {n:'Amazon Luna', c:'#ff9900'} 
+        };
 
         // --- Google OAuth Auth Handlers ---
         async function initAuth() {
