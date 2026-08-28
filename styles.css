@@ -1,277 +1,437 @@
-/* Core Layout & Theme Styles */
-body {
-    background-color: #0f172a;
-    color: #f1f5f9;
-}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games Vault</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+  <script>
+    window.tailwind = { config: { suppressDeprecationWarnings: true } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js" defer></script>
+  <style>
+    /* Strict Layout Overrides to Guarantee Two Columns and Constrained Platform Icons */
+    .platform-card {
+        width: 100px !important;
+        height: 75px !important;
+        max-width: 100px !important;
+        max-height: 75px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+    }
+    .platform-card svg, .platform-card img {
+        max-width: 32px !important;
+        max-height: 32px !important;
+        width: 32px !important;
+        height: 32px !important;
+        object-fit: contain !important;
+    }
+    .poster-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 160px !important;
+    }
+  </style>
+</head>
 
-.glass-panel {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+<body class="bg-slate-900 min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
+    <div id="mainApp">
+        <div class="max-w-7xl mx-auto">
+            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
+                <div class="flex items-center gap-2">
+                   <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center hover:bg-indigo-500">🏠</a>
+                   <a href="books.html" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</a>
+                   <a href="movies.html" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</a>
+                   <button onclick="handleLogout()" title="Lock Vault / Logout" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
+                </div>
+                <h1 class="text-3xl font-black tracking-tighter text-indigo-400 uppercase italic">Games Vault</h1>
+                <div class="flex items-center gap-2">
+                    <div class="toolbox-dropdown">
+                        <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="toolbox-menu">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair Sort & Dates" class="toolbox-item-icon text-amber-400">🔧</button>
+                            <button onclick="downloadTemplate()" title="Download CSV Template" class="toolbox-item-icon">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="toolbox-item-icon">📥</button>
+                        </div>
+                    </div>
+                    <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
+                    <button onclick="toggleView('archive')" title="Archive / Completed" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
+                </div>
+                <input type="file" id="csvFile" accept=".csv" class="hidden">
+            </header>
 
-.accent-text {
-    color: #818cf8;
-}
+            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+                <!-- Currently Playing Side Box -->
+                <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-6 rounded-[2.5rem] border border-indigo-500/20 shadow-inner">
+                    <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Playing</h2>
+                    <div id="col-playing" class="flex flex-col gap-4"></div>
+                </div>
+                
+                <!-- Main Input Form -->
+                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
+                    <div class="flex flex-col gap-4 relative">
+                        <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between">
+                            <span id="formModeLabel">Database Search / Entry</span>
+                            <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button>
+                        </div>
+                        
+                        <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
+                        <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
+                        
+                        <!-- Constrained Platform Selector Grid -->
+                        <div class="flex flex-wrap gap-3 justify-center my-2">
+                            <div class="platform-card bg-slate-900 border border-slate-700 rounded-xl p-2 cursor-pointer hover:border-indigo-500 text-center" onclick="selectPlatform('Steam', this)">
+                                <svg class="w-8 h-8 text-slate-300 mx-auto" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-10 10c0 4.74 3.3 8.71 7.74 9.74l2.42-3.44a3.99 3.99 0 0 1-.16-1.12c0-.36.05-.7.14-1.03l-3.07-2.18a3.001 3.001 0 0 1-3.07-2.97c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .12-.01.24-.03.36l3.08 2.19c.47-.23 1-.36 1.56-.36 1.93 0 3.5 1.57 3.5 3.5S18.43 20 16.5 20c-.56 0-1.09-.13-1.56-.36l-2.42 3.44C12.18 23.97 12.09 24 12 24a10 10 0 0 0 0-20z"/></svg>
+                                <span class="text-[10px] font-bold text-slate-400 block mt-1">Steam</span>
+                            </div>
+                            <div class="platform-card bg-slate-900 border border-slate-700 rounded-xl p-2 cursor-pointer hover:border-indigo-500 text-center" onclick="selectPlatform('GOG', this)">
+                                <span class="font-black text-xs text-purple-400 block">GOG</span>
+                                <span class="text-[10px] font-bold text-slate-400 block mt-1">GOG.com</span>
+                            </div>
+                            <div class="platform-card bg-slate-900 border border-slate-700 rounded-xl p-2 cursor-pointer hover:border-indigo-500 text-center" onclick="selectPlatform('Epic Games', this)">
+                                <svg class="w-7 h-8 text-slate-300 mx-auto" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L1.75 3.5v14.25L12 24l10.25-6.25V3.5L12 0zm6.5 15.5l-6.5 3.96-6.5-3.96V6.5l6.5-2.22 6.5 2.22v9deg"/></svg>
+                                <span class="text-[10px] font-bold text-slate-400 block mt-1">Epic</span>
+                            </div>
+                            <div class="platform-card bg-slate-900 border border-slate-700 rounded-xl p-2 cursor-pointer hover:border-indigo-500 text-center" onclick="selectPlatform('Xbox', this)">
+                                <span class="font-black text-xs text-emerald-400 block">XBOX</span>
+                                <span class="text-[10px] font-bold text-slate-400 block mt-1">Xbox</span>
+                            </div>
+                            <div class="platform-card bg-slate-900 border border-slate-700 rounded-xl p-2 cursor-pointer hover:border-indigo-500 text-center" onclick="selectPlatform('Nintendo Switch', this)">
+                                <span class="font-black text-xs text-red-500 block">SWITCH</span>
+                                <span class="text-[10px] font-bold text-slate-400 block mt-1">Switch</span>
+                            </div>
+                        </div>
 
-/* Platform Selectors - Fixed Blowup Issue */
-.platform-grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 12px !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input id="genreInput" type="text" placeholder="Genre (e.g., RPG, Shooter)" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            <input id="yearInput" type="text" placeholder="Release Year" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                        </div>
 
-.platform-card {
-    width: 90px !important;
-    height: 70px !important;
-    min-width: 90px !important;
-    max-width: 90px !important;
-    min-height: 70px !important;
-    max-height: 70px !important;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 6px !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-}
+                        <div class="flex gap-3 text-white relative">
+                            <div class="flex-1 flex gap-2">
+                                <input id="seriesInput" type="text" placeholder="Chain Series Name" class="w-full bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold italic">
+                                <input id="seriesNumInput" type="number" step="0.1" placeholder="Entry #" class="w-24 bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            </div>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-10 rounded-2xl font-black uppercase text-sm text-white hover:bg-indigo-500">Commit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-.platform-card img, 
-.platform-card svg {
-    max-width: 40px !important;
-    max-height: 32px !important;
-    width: 40px !important;
-    height: 32px !important;
-    object-fit: contain !important;
-    display: block !important;
-    margin: 0 auto !important;
-    flex-shrink: 0 !important;
-}
+            <!-- Two-Column Backlog Section -->
+            <div id="queueView" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Next Focus</h2>
+                        <input id="filterFocus" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                    </div>
+                    <div id="col-focus" class="flex flex-col gap-4 min-h-[450px] p-4 bg-slate-800/40 rounded-3xl border border-slate-800"></div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Backlog & Collection</h2>
+                        <input id="filterQueue" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                    </div>
+                    <div id="col-backlog" class="flex flex-col gap-4 min-h-[450px] p-4 bg-slate-800/40 rounded-3xl border border-slate-800"></div>
+                </div>
+            </div>
 
-.platform-card:hover {
-    background: #334155;
-    border-color: #6366f1;
-    transform: translateY(-2px);
-}
+            <div id="altView" class="hidden">
+                <div class="flex justify-between items-center mb-10">
+                    <div class="w-44"></div>
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
+                </div>
+                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
 
-.platform-card.selected {
-    border-color: #818cf8;
-    background: rgba(99, 102, 241, 0.2);
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
-}
+            <div id="wishlistView" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">Game Wishlist</h2>
+                </div>
+                <div id="col-wishlist" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+    </div>
 
-/* Toolbox Dropdown Menu */
-.toolbox-dropdown {
-    position: relative;
-    display: inline-flex;
-    justify-content: center;
-}
+    <script>
+        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+        const RAWG_KEY = '5f891df42ee942ef99824f9f4aa29db0';
 
-.toolbox-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 6px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    z-index: 100;
-    padding: 6px;
-    flex-direction: column;
-    gap: 6px;
-}
+        let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatform = 'Steam';
 
-.toolbox-dropdown:hover .toolbox-menu {
-    display: flex;
-}
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGames();
+        });
 
-.toolbox-item-icon {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 0.75rem;
-    font-size: 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+        function selectPlatform(platform, el) {
+            selectedPlatform = platform;
+            document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('border-indigo-500', 'bg-indigo-950/40'));
+            if (el) el.classList.add('border-indigo-500', 'bg-indigo-950/40');
+        }
 
-.toolbox-item-icon:hover {
-    background-color: #334155;
-    transform: scale(1.05);
-}
+        async function loadGames() { 
+            let { data, error } = await supabaseClient.from('games').select('*').order('sort_order', { ascending: true }); 
+            if (!error) { 
+                allGames = data || []; 
+                render(); 
+            } 
+        }
 
-/* Strict Card Sizing - Fixed Poster Clipping */
-.poster-card { 
-    background-color: #1e293b !important; 
-    border-radius: 1rem !important; 
-    overflow: hidden !important; 
-    display: flex !important; 
-    flex-direction: row !important;
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
-    height: 260px !important; 
-    min-height: 260px !important;
-    max-height: 260px !important;
-    border: 1px solid rgba(255,255,255,0.1) !important; 
-    position: relative !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    box-sizing: border-box !important;
-}
+        async function submitForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            const tIn = document.getElementById('titleInput');
+            const gIn = document.getElementById('genreInput');
+            const yIn = document.getElementById('yearInput');
+            const sIn = document.getElementById('seriesInput');
+            const snIn = document.getElementById('seriesNumInput');
+            
+            if (!tIn.value.trim()) return;
+            submitBtn.disabled = true;
 
-.poster-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.5) !important;
-}
+            try {
+                const cover = tIn.dataset.img || '';
+                const series = sIn.value.trim() || null;
+                const seriesNum = snIn.value ? parseFloat(snIn.value) : null;
+                let defaultStatus = currentViewMode === 'wishlist' ? 'Wishlist' : 'Backlog';
 
-.poster-cover {
-    width: 135px !important;
-    min-width: 135px !important;
-    max-width: 135px !important;
-    height: 260px !important;
-    object-fit: cover !important;
-    background-color: #0f172a !important;
-    flex-shrink: 0 !important;
-    display: block !important;
-}
+                if (editingId) {
+                    const cur = allGames.find(g => g.id === editingId);
+                    const payload = { 
+                        title: tIn.value.trim(),
+                        platform: selectedPlatform || cur.platform || 'PC',
+                        genre: gIn.value.trim() || 'Action',
+                        release_year: yIn.value.trim() || '',
+                        series, 
+                        series_num: seriesNum,
+                        cover_url: cover || cur.cover_url
+                    };
+                    
+                    const { error } = await supabaseClient.from('games').update(payload).eq('id', editingId);
+                    if (error) throw error;
+                } else {
+                    let next = allGames.length > 0 ? Math.max(...allGames.map(g => g.sort_order)) + 100 : 100;
+                    const { error } = await supabaseClient.from('games').insert([{ 
+                        title: tIn.value.trim(), 
+                        platform: selectedPlatform || 'PC',
+                        genre: gIn.value.trim() || 'Action',
+                        release_year: yIn.value.trim() || '',
+                        series, 
+                        series_num: seriesNum,
+                        cover_url: cover, 
+                        status: defaultStatus, 
+                        sort_order: next 
+                    }]);
+                    if (error) throw error;
+                }
 
-/* Vertical Action Icon Sidebar */
-.card-actions-sidebar {
-    width: 45px !important;
-    min-width: 45px !important;
-    max-width: 45px !important;
-    height: 260px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-around !important;
-    align-items: center !important;
-    padding: 6px 0 !important;
-    background-color: #1e293b !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-    flex-shrink: 0 !important;
-    box-sizing: border-box !important;
-}
+                resetForm(); 
+                await loadGames();
 
-.action-btn {
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer !important;
-    font-size: 1rem !important;
-    opacity: 0.6;
-    transition: all 0.15s ease;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    padding: 6px 0 !important;
-}
+            } catch (err) {
+                console.error("Save failed:", err);
+                alert(`Error saving game item: ${err.message || 'Check database table standard'}`);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
 
-.action-btn:hover {
-    opacity: 1;
-    transform: scale(1.25);
-}
+        function resetForm() { 
+            editingId = null;
+            const tIn = document.getElementById('titleInput'); 
+            tIn.value = ''; 
+            delete tIn.dataset.img; 
 
-.action-btn.active {
-    opacity: 1;
-}
+            document.getElementById('genreInput').value = '';
+            document.getElementById('yearInput').value = '';
+            document.getElementById('seriesInput').value = ''; 
+            document.getElementById('seriesNumInput').value = ''; 
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchResults').innerHTML = '';
 
-.action-btn.disabled {
-    opacity: 0.2;
-    cursor: not-allowed;
-    filter: grayscale(1);
-}
+            document.getElementById('submitBtn').innerText = "Commit"; 
+            document.getElementById('formModeLabel').innerText = "Database Search / Entry"; 
+            document.getElementById('cancelEdit').classList.add('hidden'); 
+        }
 
-/* Platform Badges */
-.platform-badge {
-    display: inline-block !important;
-    padding: 2px 8px !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    border-radius: 6px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    color: #ffffff !important;
-    background-color: #3b82f6 !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
+        function render() {
+            const fF = (document.getElementById('filterFocus')?.value || '').toLowerCase();
+            const fQ = (document.getElementById('filterQueue')?.value || '').toLowerCase();
+            const fA = (document.getElementById('filterAlt')?.value || '').toLowerCase();
 
-.platform-badge.gog { background-color: #a855f7 !important; }
-.platform-badge.steam { background-color: #0284c7 !important; }
-.platform-badge.epic { background-color: #334155 !important; }
-.platform-badge.playstation { background-color: #1d4ed8 !important; }
-.platform-badge.xbox { background-color: #15803d !important; }
-.platform-badge.switch { background-color: #dc2626 !important; }
+            const cols = { 
+                playing: document.getElementById('col-playing'), 
+                focus: document.getElementById('col-focus'),
+                backlog: document.getElementById('col-backlog'), 
+                alt: document.getElementById('col-alt'), 
+                wishlist: document.getElementById('col-wishlist')
+            };
+            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-/* Series Chained Indicator */
-.series-chained { 
-    border-left: 6px solid #fb923c !important; 
-}
+            if (currentViewMode === 'queue') {
+                allGames.filter(g => g.status === 'Currently Playing' || g.status === 'Playing')
+                    .forEach(g => cols.playing.appendChild(createCard(g)));
+                
+                allGames.filter(g => g.status === 'Up Next' || g.status === 'Focus')
+                    .filter(g => g.title.toLowerCase().includes(fF) || (g.series && g.series.toLowerCase().includes(fF)))
+                    .forEach(g => cols.focus.appendChild(createCard(g)));
 
-/* Series Badge Overlay */
-.series-badge-overlay {
-    position: absolute !important;
-    bottom: 8px !important;
-    right: 52px !important;
-    background: #0f172a !important;
-    color: #fb923c !important;
-    font-size: 11px !important;
-    font-weight: 900 !important;
-    padding: 2px 6px !important;
-    border-radius: 6px !important;
-    border: 1px solid #fb923c !important;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5) !important;
-    z-index: 20 !important;
-    pointer-events: none !important;
-}
+                allGames.filter(g => g.status === 'Backlog' || !g.status)
+                    .filter(g => g.title.toLowerCase().includes(fQ) || (g.series && g.series.toLowerCase().includes(fQ)))
+                    .forEach(g => cols.backlog.appendChild(createCard(g)));
+            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
+                const target = currentViewMode === 'archive' ? 'Completed' : 'Dropped';
+                allGames.filter(g => g.status === target)
+                    .filter(g => g.title.toLowerCase().includes(fA) || (g.series && g.series.toLowerCase().includes(fA)))
+                    .forEach(g => cols.alt.appendChild(createCard(g)));
+            } else if (currentViewMode === 'wishlist') {
+                allGames.filter(g => g.status === 'Wishlist')
+                    .forEach(g => cols.wishlist.appendChild(createCard(g)));
+            }
+        }
 
-/* Layout Columns & Inputs */
-.column-height { 
-    min-height: 450px; 
-    border: 2px dashed rgba(255,255,255,0.05); 
-    border-radius: 24px; 
-    padding: 12px; 
-}
+        function createCard(game) {
+            const isS = game.series && game.series.trim() !== '';
+            
+            const div = document.createElement('div');
+            div.dataset.id = game.id; 
+            div.className = `bg-slate-800/80 rounded-2xl p-3 border border-slate-700/60 flex items-center gap-4 relative overflow-hidden ${isS ? 'border-l-4 border-l-amber-500' : ''}`;
 
-.col-filter { 
-    background: rgba(30, 41, 59, 0.9); 
-    border: 1px solid rgba(255,255,255,0.2); 
-    border-radius: 99px; 
-    padding: 4px 16px; 
-    font-size: 11px; 
-    outline: none; 
-    width: 180px; 
-    color: white; 
-}
+            div.innerHTML = `
+                <img src="${game.cover_url || ''}" class="w-16 h-22 object-cover rounded-xl bg-slate-900 flex-shrink-0" alt="${game.title}">
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-white text-base truncate">${game.title}</h3>
+                    <p class="text-xs text-indigo-400 font-semibold mt-0.5">${game.platform || 'PC'} • ${game.genre || 'Game'}</p>
+                    ${game.series ? `<p class="text-xs text-amber-400 italic mt-1">${game.series} ${game.series_num ? '#' + game.series_num : ''}</p>` : ''}
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button title="Edit" onclick='editGame(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="p-2 hover:bg-slate-700 rounded-lg text-sm">✏️</button>
+                    <button title="Currently Playing" onclick="updateStatus('${game.id}', 'Currently Playing')" class="p-2 hover:bg-slate-700 rounded-lg text-sm">🎮</button>
+                    <button title="Completed" onclick="updateStatus('${game.id}', 'Completed')" class="p-2 hover:bg-slate-700 rounded-lg text-sm">🏆</button>
+                    <button title="Delete" onclick="deleteGame('${game.id}')" class="p-2 hover:bg-slate-700 rounded-lg text-sm text-rose-400">✕</button>
+                </div>`;
+            return div;
+        }
 
-/* Scrollbar Styles */
-#searchResults::-webkit-scrollbar { 
-    width: 8px; 
-}
+        function toggleView(v) { 
+            currentViewMode = v;
+            const qv = document.getElementById('queueView');
+            const dt = document.getElementById('dashboardTop');
+            const as = document.getElementById('activeSessionBox');
+            const ia = document.getElementById('inputArea');
+            const av = document.getElementById('altView');
+            const wv = document.getElementById('wishlistView');
 
-#searchResults::-webkit-scrollbar-track { 
-    background: #1e293b; 
-    border-radius: 10px; 
-}
+            if(v === 'queue') {
+                dt.style.display = 'grid'; qv.style.display = 'grid'; as.style.display = 'block'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                av.style.display = 'none'; wv.style.display = 'none';
+            } else if(v === 'wishlist') {
+                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
+                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
+            } else {
+                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
+                document.getElementById('altTitle').innerText = v === 'archive' ? 'Completed Games Archive' : 'Scrap Yard';
+                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
+            }
+            render();
+        }
 
-#searchResults::-webkit-scrollbar-thumb { 
-    background: #4f46e5; 
-    border-radius: 10px; 
-    border: 2px solid #1e293b; 
-}
+        function editGame(g) { 
+            editingId = g.id; 
+            window.scrollTo({top:0, behavior:'smooth'}); 
+            
+            const tIn = document.getElementById('titleInput');
+            tIn.value = g.title; 
+            if (g.cover_url) tIn.dataset.img = g.cover_url;
+
+            selectedPlatform = g.platform || 'Steam';
+            document.getElementById('genreInput').value = g.genre || '';
+            document.getElementById('yearInput').value = g.release_year || '';
+            document.getElementById('seriesInput').value = g.series || ''; 
+            document.getElementById('seriesNumInput').value = g.series_num || ''; 
+
+            document.getElementById('formModeLabel').innerText = "Updating: " + g.title; 
+            document.getElementById('cancelEdit').classList.remove('hidden'); 
+        }
+
+        function exitEditMode() { resetForm(); toggleView(currentViewMode); }
+        async function updateStatus(id, s) { await supabaseClient.from('games').update({ status:s }).eq('id', id); loadGames(); }
+        async function deleteGame(id) { if(confirm('Delete game?')) { await supabaseClient.from('games').delete().eq('id', id); loadGames(); } }
+
+        async function searchGames(q) { 
+            const r = document.getElementById('searchResults'); 
+            const trimmedQuery = q ? q.trim() : '';
+
+            if (trimmedQuery.length < 2) { 
+                r.classList.add('hidden'); 
+                r.innerHTML = '';
+                return; 
+            } 
+
+            try {
+                const response = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(trimmedQuery)}&page_size=8`);
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No games found.</div>`;
+                    r.classList.remove('hidden');
+                    return;
+                }
+
+                r.innerHTML = data.results.map(item => {
+                    const title = (item.name || '').replace(/"/g, '&quot;');
+                    const year = item.released ? item.released.split('-')[0] : 'N/A';
+                    const cover = item.background_image || '';
+                    const genre = (item.genres && item.genres.length > 0) ? item.genres[0].name.replace(/"/g, '&quot;') : 'Action';
+                    
+                    return `
+                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${year}&quot;)" 
+                             class="p-4 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
+                            ${cover ? `<img src="${cover}" class="w-12 h-16 object-cover rounded shadow bg-slate-900">` : '<div class="w-12 h-16 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
+                            <div>
+                                <p class="text-sm font-bold text-white">${title}</p>
+                                <p class="text-xs text-indigo-400 font-normal mt-0.5">${genre} • ${year}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join(''); 
+                
+                r.classList.remove('hidden');
+
+            } catch (err) {
+                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Search error: ${err.message}</div>`;
+                r.classList.remove('hidden');
+            }
+        }
+
+        function selectGame(t, c, g, y) { 
+            const tIn = document.getElementById('titleInput'); 
+            tIn.value = t; 
+            if (c) tIn.dataset.img = c;
+            
+            document.getElementById('genreInput').value = g;
+            document.getElementById('yearInput').value = y;
+            document.getElementById('searchResults').classList.add('hidden'); 
+            document.getElementById('seriesInput').focus();
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) {
+                document.getElementById('searchResults').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
