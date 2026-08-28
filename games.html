@@ -14,12 +14,57 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth.js" defer></script>
+  <style>
+    /* Platform selector pill styling */
+    .platform-btn {
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 0.75rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+    }
+    .platform-btn:hover, .platform-btn.active {
+        border-color: #6366f1;
+        background-color: #1e1b4b;
+    }
+
+    /* Fixed thumbnail sizing for queue cards */
+    .game-thumb {
+        width: 64px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        flex-shrink: 0;
+        background-color: #0f172a;
+    }
+
+    /* Filter input styling */
+    .col-filter {
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        color: #ffffff;
+        font-size: 0.875rem;
+        outline: none;
+    }
+    .col-filter:focus {
+        border-color: #6366f1;
+    }
+  </style>
 </head>
 
-<body class="bg-slate-900 min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
+<body class="bg-slate-900 min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden text-white">
     <div id="mainApp">
         <div class="max-w-7xl mx-auto">
-            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
+            <!-- Navigation Header -->
+            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800">
                 <div class="flex items-center gap-2">
                    <a href="dashboard.html" title="Home Dashboard" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg flex items-center justify-center hover:bg-indigo-500">🏠</a>
                    <a href="books.html" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</a>
@@ -43,12 +88,15 @@
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
+            <!-- Top Dashboard Section -->
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+                <!-- Currently Playing Box -->
                 <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-6 rounded-[2.5rem] border border-indigo-500/20 shadow-inner">
-                    <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Playing</h2>
-                    <div id="col-playing" class="flex flex-wrap gap-4 justify-center sm:justify-start"></div>
+                    <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center">Currently Playing</h2>
+                    <div id="col-playing" class="flex flex-col gap-4"></div>
                 </div>
                 
+                <!-- Main Input Form -->
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
                     <div class="flex flex-col gap-4 relative">
                         <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between">
@@ -56,80 +104,87 @@
                             <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button>
                         </div>
                         
-                        <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
-                        <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
+                        <!-- Title Input with Local Search -->
+                        <input id="titleInput" type="text" oninput="searchLocalGames(this.value)" placeholder="Enter game title..." class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-base">
+                        <div id="searchResults" class="hidden absolute top-[90px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[250px] z-50"></div>
                         
-                        <!-- Inline Styled Platform Cards to Block SVG Inflation -->
-                        <div class="platform-grid my-2">
-                            <div class="platform-card selected" onclick="selectPlatform('Steam', this)">
-                                <svg style="width:36px; height:28px;" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 2a10 10 0 0 0-10 10c0 4.74 3.3 8.71 7.74 9.74l2.42-3.44a3.99 3.99 0 0 1-.16-1.12c0-.36.05-.7.14-1.03l-3.07-2.18a3.001 3.001 0 0 1-3.07-2.97c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .12-.01.24-.03.36l3.08 2.19c.47-.23 1-.36 1.56-.36 1.93 0 3.5 1.57 3.5 3.5S18.43 20 16.5 20c-.56 0-1.09-.13-1.56-.36l-2.42 3.44C12.18 23.97 12.09 24 12 24a10 10 0 0 0 0-20z"/></svg>
-                                <span class="text-[10px] font-bold text-slate-400 mt-1">Steam</span>
-                            </div>
-                            <div class="platform-card" onclick="selectPlatform('GOG', this)">
-                                <span class="font-black text-xs text-purple-400">GOG</span>
-                                <span class="text-[10px] font-bold text-slate-400 mt-1">GOG.com</span>
-                            </div>
-                            <div class="platform-card" onclick="selectPlatform('Epic Games', this)">
-                                <svg style="width:32px; height:28px;" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 0L1.75 3.5v14.25L12 24l10.25-6.25V3.5L12 0zm6.5 15.5l-6.5 3.96-6.5-3.96V6.5l6.5-2.22 6.5 2.22v9deg"/></svg>
-                                <span class="text-[10px] font-bold text-slate-400 mt-1">Epic</span>
-                            </div>
-                            <div class="platform-card" onclick="selectPlatform('Xbox', this)">
-                                <span class="font-black text-xs text-emerald-400">XBOX</span>
-                                <span class="text-[10px] font-bold text-slate-400 mt-1">Xbox</span>
-                            </div>
-                            <div class="platform-card" onclick="selectPlatform('Nintendo Switch', this)">
-                                <span class="font-black text-xs text-red-500">SWITCH</span>
-                                <span class="text-[10px] font-bold text-slate-400 mt-1">Switch</span>
-                            </div>
+                        <!-- Platform Buttons Selector -->
+                        <div class="flex flex-wrap gap-2 justify-center my-1">
+                            <button type="button" class="platform-btn active" onclick="selectPlatform('Steam', this)">
+                                <span class="font-bold text-xs text-indigo-300">Steam</span>
+                            </button>
+                            <button type="button" class="platform-btn" onclick="selectPlatform('GOG', this)">
+                                <span class="font-bold text-xs text-purple-400">GOG</span>
+                            </button>
+                            <button type="button" class="platform-btn" onclick="selectPlatform('Epic Games', this)">
+                                <span class="font-bold text-xs text-slate-300">Epic</span>
+                            </button>
+                            <button type="button" class="platform-btn" onclick="selectPlatform('Xbox', this)">
+                                <span class="font-bold text-xs text-emerald-400">Xbox</span>
+                            </button>
+                            <button type="button" class="platform-btn" onclick="selectPlatform('Nintendo Switch', this)">
+                                <span class="font-bold text-xs text-red-400">Switch</span>
+                            </button>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <input id="genreInput" type="text" placeholder="Genre (e.g., RPG, Shooter)" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            <input id="genreInput" type="text" placeholder="Genre (e.g., RPG, Action)" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
                             <input id="yearInput" type="text" placeholder="Release Year" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
                         </div>
 
-                        <div class="flex gap-3 text-white relative">
+                        <div class="flex gap-3 relative">
                             <div class="flex-1 flex gap-2">
                                 <input id="seriesInput" type="text" placeholder="Game Franchise / Series" class="w-full bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold italic">
                                 <input id="seriesNumInput" type="number" step="0.1" placeholder="Entry #" class="w-24 bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
                             </div>
-                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-10 rounded-2xl font-black uppercase text-sm text-white hover:bg-indigo-500">Commit</button>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-8 rounded-2xl font-black uppercase text-sm text-white hover:bg-indigo-500">Commit</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="queueView">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Backlog & Library</h2>
-                    <input id="filterQueue" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
+            <!-- Restored Two-Column Queue View -->
+            <div id="queueView" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Column 1: Next Focus -->
+                <div class="bg-slate-800/40 p-6 rounded-[2.5rem] border border-slate-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-indigo-400 font-black text-sm uppercase tracking-[0.2em]">Next Focus</h2>
+                        <input id="filterFocus" type="text" oninput="render()" placeholder="Filter focus..." class="col-filter">
+                    </div>
+                    <div id="col-focus" class="flex flex-col gap-3 min-h-[350px]"></div>
                 </div>
-                <div id="col-backlog" class="flex flex-wrap gap-4 min-h-[450px]"></div>
+                
+                <!-- Column 2: Backlog & Library -->
+                <div class="bg-slate-800/40 p-6 rounded-[2.5rem] border border-slate-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.2em]">Backlog & Library</h2>
+                        <input id="filterQueue" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
+                    </div>
+                    <div id="col-backlog" class="flex flex-col gap-3 min-h-[350px]"></div>
+                </div>
             </div>
 
+            <!-- Alternative Views (Archive/Trash) -->
             <div id="altView" class="hidden">
-                <div class="flex justify-between items-center mb-10">
+                <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
-                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-center">Archive</h2>
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
                 </div>
-                <div id="col-alt" class="flex flex-wrap gap-4"></div>
+                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
+            <!-- Wishlist View -->
             <div id="wishlistView" class="hidden">
                 <div class="text-center mb-8">
                     <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">Game Wishlist</h2>
                 </div>
-                <div id="col-wishlist" class="flex flex-wrap gap-4 justify-center sm:justify-start"></div>
+                <div id="col-wishlist" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
-        const RAWG_KEY = '5f891df42ee942ef99824f9f4aa29db0';
-
         let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatform = 'Steam';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -138,8 +193,8 @@
 
         function selectPlatform(platform, el) {
             selectedPlatform = platform;
-            document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('selected'));
-            if (el) el.classList.add('selected');
+            document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+            if (el) el.classList.add('active');
         }
 
         async function loadGames() { 
@@ -171,21 +226,21 @@
                     const cur = allGames.find(g => g.id === editingId);
                     const payload = { 
                         title: tIn.value.trim(),
-                        platform: selectedPlatform || cur.platform || 'PC',
+                        platform: selectedPlatform || (cur ? cur.platform : 'Steam'),
                         genre: gIn.value.trim() || 'Action',
                         release_year: yIn.value.trim() || '',
                         series, 
                         series_num: seriesNum,
-                        cover_url: cover || cur.cover_url
+                        cover_url: cover || (cur ? cur.cover_url : '')
                     };
                     
                     const { error } = await supabaseClient.from('games').update(payload).eq('id', editingId);
                     if (error) throw error;
                 } else {
-                    let next = allGames.length > 0 ? Math.max(...allGames.map(g => g.sort_order)) + 100 : 100;
+                    let next = allGames.length > 0 ? Math.max(...allGames.map(g => g.sort_order || 0)) + 100 : 100;
                     const { error } = await supabaseClient.from('games').insert([{ 
                         title: tIn.value.trim(), 
-                        platform: selectedPlatform || 'PC',
+                        platform: selectedPlatform || 'Steam',
                         genre: gIn.value.trim() || 'Action',
                         release_year: yIn.value.trim() || '',
                         series, 
@@ -202,7 +257,7 @@
 
             } catch (err) {
                 console.error("Save failed:", err);
-                alert(`Error saving game item: ${err.message || 'Check database table standard'}`);
+                alert(`Error saving game: ${err.message}`);
             } finally {
                 submitBtn.disabled = false;
             }
@@ -227,11 +282,13 @@
         }
 
         function render() {
-            const fQ = document.getElementById('filterQueue').value.toLowerCase();
-            const fA = document.getElementById('filterAlt').value.toLowerCase();
+            const fF = (document.getElementById('filterFocus')?.value || '').toLowerCase();
+            const fQ = (document.getElementById('filterQueue')?.value || '').toLowerCase();
+            const fA = (document.getElementById('filterAlt')?.value || '').toLowerCase();
 
             const cols = { 
                 playing: document.getElementById('col-playing'), 
+                focus: document.getElementById('col-focus'),
                 backlog: document.getElementById('col-backlog'), 
                 alt: document.getElementById('col-alt'), 
                 wishlist: document.getElementById('col-wishlist')
@@ -239,9 +296,14 @@
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
             if (currentViewMode === 'queue') {
-                allGames.filter(g => g.status === 'Currently Playing' || g.status === 'Playing').forEach(g => cols.playing.appendChild(createCard(g)));
+                allGames.filter(g => g.status === 'Currently Playing' || g.status === 'Playing')
+                    .forEach(g => cols.playing.appendChild(createCard(g)));
                 
-                allGames.filter(g => g.status === 'Backlog' || g.status === 'Up Next')
+                allGames.filter(g => g.status === 'Up Next' || g.status === 'Focus')
+                    .filter(g => g.title.toLowerCase().includes(fF) || (g.series && g.series.toLowerCase().includes(fF)))
+                    .forEach(g => cols.focus.appendChild(createCard(g)));
+
+                allGames.filter(g => g.status === 'Backlog' || !g.status)
                     .filter(g => g.title.toLowerCase().includes(fQ) || (g.series && g.series.toLowerCase().includes(fQ)))
                     .forEach(g => cols.backlog.appendChild(createCard(g)));
             } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
@@ -257,26 +319,60 @@
 
         function createCard(game) {
             const isS = game.series && game.series.trim() !== '';
-            
             const div = document.createElement('div');
             div.dataset.id = game.id; 
-            div.className = `poster-card ${isS ? 'series-chained' : ''}`;
-            div.title = `${game.title} (${game.platform || 'PC'})`;
+            div.className = `bg-slate-800/90 rounded-2xl p-3 border border-slate-700/80 flex items-center gap-4 relative overflow-hidden ${isS ? 'border-l-4 border-l-amber-500' : ''}`;
 
             div.innerHTML = `
-                <img src="${game.cover_url || ''}" class="poster-cover" alt="${game.title}">
-                
-                ${game.series_num ? `<span class="series-badge-overlay">#${game.series_num}</span>` : ''}
-
-                <!-- Vertical Action Icons Sidebar -->
-                <div class="card-actions-sidebar">
-                    <button title="Edit" onclick='editGame(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="action-btn">✏️</button>
-                    <button title="Currently Playing" onclick="updateStatus('${game.id}', 'Currently Playing')" class="action-btn ${game.status === 'Currently Playing' || game.status === 'Playing' ? 'active' : ''}">🎮</button>
-                    <button title="Completed" onclick="updateStatus('${game.id}', 'Completed')" class="action-btn ${game.status === 'Completed' ? 'active' : ''}">🏆</button>
-                    <button title="Wishlist" onclick="updateStatus('${game.id}', 'Wishlist')" class="action-btn ${game.status === 'Wishlist' ? 'active' : ''}">📋</button>
-                    <button title="Delete" onclick="deleteGame('${game.id}')" class="action-btn text-rose-400">✕</button>
+                <img src="${game.cover_url || 'https://via.placeholder.com/64x80?text=No+Cover'}" class="game-thumb" alt="${game.title}">
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-white text-base truncate">${game.title}</h3>
+                    <p class="text-xs text-indigo-400 font-semibold mt-0.5">${game.platform || 'Steam'} • ${game.genre || 'Game'} ${game.release_year ? '(' + game.release_year + ')' : ''}</p>
+                    ${game.series ? `<p class="text-xs text-amber-400 italic mt-1">${game.series} ${game.series_num ? '#' + game.series_num : ''}</p>` : ''}
+                </div>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button title="Edit" onclick='editGame(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="p-2 hover:bg-slate-700 rounded-lg text-sm">✏️</button>
+                    <button title="Currently Playing" onclick="updateStatus('${game.id}', 'Currently Playing')" class="p-2 hover:bg-slate-700 rounded-lg text-sm">🎮</button>
+                    <button title="Move to Focus" onclick="updateStatus('${game.id}', 'Focus')" class="p-2 hover:bg-slate-700 rounded-lg text-sm">🎯</button>
+                    <button title="Completed" onclick="updateStatus('${game.id}', 'Completed')" class="p-2 hover:bg-slate-700 rounded-lg text-sm">🏆</button>
+                    <button title="Delete" onclick="deleteGame('${game.id}')" class="p-2 hover:bg-slate-700 rounded-lg text-sm text-rose-400">✕</button>
                 </div>`;
             return div;
+        }
+
+        function searchLocalGames(query) {
+            const resultsDiv = document.getElementById('searchResults');
+            const q = query.trim().toLowerCase();
+
+            if (!q) {
+                resultsDiv.classList.add('hidden');
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            const matches = allGames.filter(g => g.title.toLowerCase().includes(q));
+            if (matches.length === 0) {
+                resultsDiv.classList.add('hidden');
+                return;
+            }
+
+            resultsDiv.innerHTML = matches.map(g => `
+                <div onclick="selectLocalGame('${g.title.replace(/'/g, "\\'")}', '${g.genre || ''}', '${g.release_year || ''}', '${g.series || ''}')" 
+                     class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left">
+                    <p class="text-sm font-bold text-white">${g.title}</p>
+                    <p class="text-xs text-slate-400">${g.platform || 'Steam'} • ${g.genre || 'Game'}</p>
+                </div>
+            `).join('');
+
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function selectLocalGame(t, g, y, s) {
+            document.getElementById('titleInput').value = t;
+            document.getElementById('genreInput').value = g;
+            document.getElementById('yearInput').value = y;
+            document.getElementById('seriesInput').value = s;
+            document.getElementById('searchResults').classList.add('hidden');
         }
 
         function toggleView(v) { 
@@ -289,7 +385,7 @@
             const wv = document.getElementById('wishlistView');
 
             if(v === 'queue') {
-                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'block'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                dt.style.display = 'grid'; qv.style.display = 'grid'; as.style.display = 'block'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
                 av.style.display = 'none'; wv.style.display = 'none';
             } else if(v === 'wishlist') {
                 dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
@@ -310,7 +406,7 @@
             tIn.value = g.title; 
             if (g.cover_url) tIn.dataset.img = g.cover_url;
 
-            selectedPlatform = g.platform || 'Steam';
+            selectPlatform(g.platform || 'Steam');
             document.getElementById('genreInput').value = g.genre || '';
             document.getElementById('yearInput').value = g.release_year || '';
             document.getElementById('seriesInput').value = g.series || ''; 
@@ -323,63 +419,6 @@
         function exitEditMode() { resetForm(); toggleView(currentViewMode); }
         async function updateStatus(id, s) { await supabaseClient.from('games').update({ status:s }).eq('id', id); loadGames(); }
         async function deleteGame(id) { if(confirm('Delete game?')) { await supabaseClient.from('games').delete().eq('id', id); loadGames(); } }
-
-        async function searchGames(q) { 
-            const r = document.getElementById('searchResults'); 
-            const trimmedQuery = q ? q.trim() : '';
-
-            if (trimmedQuery.length < 2) { 
-                r.classList.add('hidden'); 
-                r.innerHTML = '';
-                return; 
-            } 
-
-            try {
-                const response = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(trimmedQuery)}&page_size=8`);
-                const data = await response.json();
-
-                if (!data.results || data.results.length === 0) {
-                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No games found.</div>`;
-                    r.classList.remove('hidden');
-                    return;
-                }
-
-                r.innerHTML = data.results.map(item => {
-                    const title = (item.name || '').replace(/"/g, '&quot;');
-                    const year = item.released ? item.released.split('-')[0] : 'N/A';
-                    const cover = item.background_image || '';
-                    const genre = (item.genres && item.genres.length > 0) ? item.genres[0].name.replace(/"/g, '&quot;') : 'Action';
-                    
-                    return `
-                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${year}&quot;)" 
-                             class="p-4 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
-                            ${cover ? `<img src="${cover}" class="w-12 h-16 object-cover rounded shadow bg-slate-900">` : '<div class="w-12 h-16 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
-                            <div>
-                                <p class="text-sm font-bold text-white">${title}</p>
-                                <p class="text-xs text-indigo-400 font-normal mt-0.5">${genre} • ${year}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join(''); 
-                
-                r.classList.remove('hidden');
-
-            } catch (err) {
-                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Search error: ${err.message}</div>`;
-                r.classList.remove('hidden');
-            }
-        }
-
-        function selectGame(t, c, g, y) { 
-            const tIn = document.getElementById('titleInput'); 
-            tIn.value = t; 
-            if (c) tIn.dataset.img = c;
-            
-            document.getElementById('genreInput').value = g;
-            document.getElementById('yearInput').value = y;
-            document.getElementById('searchResults').classList.add('hidden'); 
-            document.getElementById('seriesInput').focus();
-        }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) {
