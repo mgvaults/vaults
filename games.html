@@ -26,18 +26,18 @@
                    <a href="movies.html" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</a>
                    <button onclick="handleLogout()" title="Lock Vault / Logout" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Games Vault</h1>
+                <h1 class="text-3xl font-black tracking-tighter text-indigo-400 uppercase italic">Games Vault</h1>
                 <div class="flex items-center gap-2">
-<div class="toolbox-dropdown">
-    <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
-    <div class="toolbox-menu">
-        <button id="repairBtn" onclick="repairSortOrder()" title="Repair Sort & Dates" class="toolbox-item-icon text-amber-400">🔧</button>
-        <button onclick="downloadTemplate()" title="Download CSV Template" class="toolbox-item-icon">💾</button>
-        <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="toolbox-item-icon">📥</button>
-    </div>
-</div>
-                    <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
-                    <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <div class="toolbox-dropdown">
+                        <button title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="toolbox-menu">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair Sort & Dates" class="toolbox-item-icon text-amber-400">🔧</button>
+                            <button onclick="downloadTemplate()" title="Download CSV Template" class="toolbox-item-icon">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="toolbox-item-icon">📥</button>
+                        </div>
+                    </div>
+                    <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
+                    <button onclick="toggleView('archive')" title="Archive / Completed" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                     <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
@@ -46,54 +46,65 @@
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
                 <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-6 rounded-[2.5rem] border border-indigo-500/20 shadow-inner">
                     <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Currently Playing</h2>
-                    <div id="col-playing" class="space-y-5"></div>
+                    <div id="col-playing" class="flex flex-wrap gap-4 justify-center sm:justify-start"></div>
                 </div>
+                
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
                     <div class="flex flex-col gap-4 relative">
                         <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between">
                             <span id="formModeLabel">Database Search / Entry</span>
                             <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button>
                         </div>
+                        
                         <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
                         <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
-                        <div class="flex flex-wrap justify-center gap-3 py-2 border-y border-slate-700/40">
-                            <div onclick="toggleP('steam')" id="i-steam" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"></div>
-                            <div onclick="toggleP('gog')" id="i-gog" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg"></div>
-                            <div onclick="toggleP('epic')" id="i-epic" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg"></div>
-                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px;">BN</span></div>
-                            <div onclick="toggleP('ps5')" id="i-ps5" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg"></div>
-                            <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg"></div>
-                            <div onclick="toggleP('switch')" id="i-switch" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg"></div>
-                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px;">A</span></div>
-                        </div>
-                        <div class="flex gap-3 text-white relative">
-                            <div class="flex-1 relative">
-                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Chain Series Name" class="w-full bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold italic">
-                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[200px] z-50 text-white"></div>
+                        
+                        <!-- Fixed Platform Selector Grid with Constrained Logos -->
+                        <div class="platform-grid my-2">
+                            <div class="platform-card" onclick="selectPlatform('Steam', this)">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 2a10 10 0 0 0-10 10c0 4.74 3.3 8.71 7.74 9.74l2.42-3.44a3.99 3.99 0 0 1-.16-1.12c0-.36.05-.7.14-1.03l-3.07-2.18a3.001 3.001 0 0 1-3.07-2.97c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .12-.01.24-.03.36l3.08 2.19c.47-.23 1-.36 1.56-.36 1.93 0 3.5 1.57 3.5 3.5S18.43 20 16.5 20c-.56 0-1.09-.13-1.56-.36l-2.42 3.44C12.18 23.97 12.09 24 12 24a10 10 0 0 0 0-20z"/></svg>
+                                <span class="text-[10px] font-bold text-slate-400 mt-1">Steam</span>
                             </div>
-                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-12 rounded-2xl font-black uppercase text-sm text-white hover:bg-indigo-500">Commit</button>
+                            <div class="platform-card" onclick="selectPlatform('GOG', this)">
+                                <span class="font-black text-xs text-purple-400">GOG</span>
+                                <span class="text-[10px] font-bold text-slate-400 mt-1">GOG.com</span>
+                            </div>
+                            <div class="platform-card" onclick="selectPlatform('Epic Games', this)">
+                                <svg width="28" height="32" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 0L1.75 3.5v14.25L12 24l10.25-6.25V3.5L12 0zm6.5 15.5l-6.5 3.96-6.5-3.96V6.5l6.5-2.22 6.5 2.22v9deg"/></svg>
+                                <span class="text-[10px] font-bold text-slate-400 mt-1">Epic</span>
+                            </div>
+                            <div class="platform-card" onclick="selectPlatform('Xbox', this)">
+                                <span class="font-black text-xs text-emerald-400">XBOX</span>
+                                <span class="text-[10px] font-bold text-slate-400 mt-1">Xbox</span>
+                            </div>
+                            <div class="platform-card" onclick="selectPlatform('Nintendo Switch', this)">
+                                <span class="font-black text-xs text-red-500">SWITCH</span>
+                                <span class="text-[10px] font-bold text-slate-400 mt-1">Switch</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input id="genreInput" type="text" placeholder="Genre (e.g., RPG, Shooter)" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            <input id="yearInput" type="text" placeholder="Release Year" class="bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                        </div>
+
+                        <div class="flex gap-3 text-white relative">
+                            <div class="flex-1 flex gap-2">
+                                <input id="seriesInput" type="text" placeholder="Game Franchise / Series" class="w-full bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold italic">
+                                <input id="seriesNumInput" type="number" step="0.1" placeholder="Entry #" class="w-24 bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold">
+                            </div>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-10 rounded-2xl font-black uppercase text-sm text-white hover:bg-indigo-500">Commit</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="queueView">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <div>
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Next Focus</h2>
-                            <input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
-                        </div>
-                        <div id="col-next" class="column-height space-y-5"></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-slate-500 font-black text-sm uppercase tracking-[0.4em]">Backlog & Collection</h2>
-                            <input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
-                        </div>
-                        <div id="col-backlog" class="column-height space-y-5 text-left"></div>
-                    </div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Backlog & Library</h2>
+                    <input id="filterQueue" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
                 </div>
+                <div id="col-backlog" class="flex flex-wrap gap-4 min-h-[450px]"></div>
             </div>
 
             <div id="altView" class="hidden">
@@ -102,29 +113,14 @@
                     <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
                 </div>
-                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+                <div id="col-alt" class="flex flex-wrap gap-4"></div>
             </div>
 
             <div id="wishlistView" class="hidden">
                 <div class="text-center mb-8">
-                    <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">The Wishlist Vault</h2>
+                    <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">Game Wishlist</h2>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <div>
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-indigo-400 font-black text-sm uppercase tracking-[0.3em]">Released</h2>
-                            <input id="filterWishlistReleased" type="text" oninput="render()" placeholder="Filter released..." class="col-filter">
-                        </div>
-                        <div id="col-wishlist-released" class="column-height space-y-5"></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-amber-400 font-black text-sm uppercase tracking-[0.3em]">Upcoming</h2>
-                            <input id="filterWishlistUpcoming" type="text" oninput="render()" placeholder="Filter upcoming..." class="col-filter">
-                        </div>
-                        <div id="col-wishlist-upcoming" class="column-height space-y-5"></div>
-                    </div>
-                </div>
+                <div id="col-wishlist" class="flex flex-wrap gap-4 justify-center sm:justify-start"></div>
             </div>
         </div>
     </div>
@@ -132,15 +128,19 @@
     <script>
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+        const RAWG_KEY = '5f891df42ee942ef99824f9f4aa29db0';
 
-        let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
-
-        const PLAT_MAP = { steam: {n:'Steam', c:'#171a21'}, gog: {n:'GOG', c:'#86328a'}, epic: {n:'Epic Games', c:'#313131'}, battlenet: {n:'BattleNet', c:'#009eff'}, ps5: {n:'PS5', c:'#003087'}, xbox: {n:'Xbox', c:'#107c10'}, switch: {n:'Nintendo Switch', c:'#e60012'}, amazon: {n:'Amazon Luna', c:'#ff9900'} };
+        let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatform = 'Steam';
 
         document.addEventListener('DOMContentLoaded', () => {
-            initSortable(); 
             loadGames();
         });
+
+        function selectPlatform(platform, el) {
+            selectedPlatform = platform;
+            document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('selected'));
+            if (el) el.classList.add('selected');
+        }
 
         async function loadGames() { 
             let { data, error } = await supabaseClient.from('games').select('*').order('sort_order', { ascending: true }); 
@@ -150,67 +150,47 @@
             } 
         }
 
-        function toggleP(p) { 
-            if (selectedPlatforms.includes(p)) selectedPlatforms = selectedPlatforms.filter(x => x !== p); 
-            else selectedPlatforms.push(p); 
-            document.getElementById(`i-${p}`).classList.toggle('active'); 
-        }
-
-        function parseReleaseDate(val) {
-            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
-            let num = Number(val);
-            if (isNaN(num) || num <= 0) return null;
-            if (num > 32503680000) num = Math.floor(num / 1000);
-            return num;
-        }
-
         async function submitForm() {
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
+            const gIn = document.getElementById('genreInput');
+            const yIn = document.getElementById('yearInput');
             const sIn = document.getElementById('seriesInput');
+            const snIn = document.getElementById('seriesNumInput');
             
             if (!tIn.value.trim()) return;
             submitBtn.disabled = true;
 
             try {
                 const cover = tIn.dataset.img || '';
-                const genre = tIn.dataset.genre || '';
-                const releaseDate = parseReleaseDate(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
+                const seriesNum = snIn.value ? parseFloat(snIn.value) : null;
                 let defaultStatus = currentViewMode === 'wishlist' ? 'Wishlist' : 'Backlog';
 
                 if (editingId) {
                     const cur = allGames.find(g => g.id === editingId);
                     const payload = { 
-                        title: tIn.value.trim(), 
+                        title: tIn.value.trim(),
+                        platform: selectedPlatform || cur.platform || 'PC',
+                        genre: gIn.value.trim() || 'Action',
+                        release_year: yIn.value.trim() || '',
                         series, 
-                        platform: selectedPlatforms.join(','), 
-                        cover_url: cover || cur.cover_url, 
-                        genre: genre || cur.genre,
-                        release_date: releaseDate !== null ? releaseDate : cur.release_date
+                        series_num: seriesNum,
+                        cover_url: cover || cur.cover_url
                     };
-                    
-                    if (series && series !== cur.series) { 
-                        const buddies = allGames.filter(g => g.series === series); 
-                        if (buddies.length > 0) payload.sort_order = Math.max(...buddies.map(g => g.sort_order)) + 1; 
-                    }
                     
                     const { error } = await supabaseClient.from('games').update(payload).eq('id', editingId);
                     if (error) throw error;
                 } else {
                     let next = allGames.length > 0 ? Math.max(...allGames.map(g => g.sort_order)) + 100 : 100;
-                    if (series) { 
-                        const buddies = allGames.filter(g => g.series === series); 
-                        if (buddies.length > 0) next = Math.max(...buddies.map(g => g.sort_order)) + 1; 
-                    }
-                    
                     const { error } = await supabaseClient.from('games').insert([{ 
                         title: tIn.value.trim(), 
-                        platform: selectedPlatforms.join(','), 
+                        platform: selectedPlatform || 'PC',
+                        genre: gIn.value.trim() || 'Action',
+                        release_year: yIn.value.trim() || '',
                         series, 
+                        series_num: seriesNum,
                         cover_url: cover, 
-                        genre: genre || 'Action', 
-                        release_date: releaseDate, 
                         status: defaultStatus, 
                         sort_order: next 
                     }]);
@@ -222,7 +202,7 @@
 
             } catch (err) {
                 console.error("Save failed:", err);
-                alert(`Error saving game: ${err.message || 'Check database columns'}`);
+                alert(`Error saving game item: ${err.message || 'Check database table standard'}`);
             } finally {
                 submitBtn.disabled = false;
             }
@@ -233,140 +213,81 @@
             const tIn = document.getElementById('titleInput'); 
             tIn.value = ''; 
             delete tIn.dataset.img; 
-            delete tIn.dataset.genre; 
-            delete tIn.dataset.release; 
 
+            document.getElementById('genreInput').value = '';
+            document.getElementById('yearInput').value = '';
             document.getElementById('seriesInput').value = ''; 
+            document.getElementById('seriesNumInput').value = ''; 
             document.getElementById('searchResults').classList.add('hidden');
             document.getElementById('searchResults').innerHTML = '';
-            document.getElementById('seriesResults').classList.add('hidden');
-            document.getElementById('seriesResults').innerHTML = '';
 
-            selectedPlatforms = []; 
-            document.querySelectorAll('.plat-box').forEach(el => el.classList.remove('active')); 
             document.getElementById('submitBtn').innerText = "Commit"; 
             document.getElementById('formModeLabel').innerText = "Database Search / Entry"; 
             document.getElementById('cancelEdit').classList.add('hidden'); 
         }
 
         function render() {
-            const fN = document.getElementById('filterNext').value.toLowerCase();
-            const fB = document.getElementById('filterBacklog').value.toLowerCase();
+            const fQ = document.getElementById('filterQueue').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
-            const fWR = document.getElementById('filterWishlistReleased').value.toLowerCase();
-            const fWU = document.getElementById('filterWishlistUpcoming').value.toLowerCase();
 
             const cols = { 
                 playing: document.getElementById('col-playing'), 
-                next: document.getElementById('col-next'), 
                 backlog: document.getElementById('col-backlog'), 
                 alt: document.getElementById('col-alt'), 
-                wishlistReleased: document.getElementById('col-wishlist-released'),
-                wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
+                wishlist: document.getElementById('col-wishlist')
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
-            
-            const nextPri = { 'Up Next': 0, 'Started': 1 };
-            const nowSec = Math.floor(Date.now() / 1000);
 
             if (currentViewMode === 'queue') {
-                allGames.filter(g => g.status === 'Playing').forEach(g => cols.playing.appendChild(createCard(g)));
+                allGames.filter(g => g.status === 'Currently Playing' || g.status === 'Playing').forEach(g => cols.playing.appendChild(createCard(g)));
                 
-                allGames.filter(g => ['Up Next', 'Started'].includes(g.status))
-                    .filter(g => g.title.toLowerCase().includes(fN) || (g.series && g.series.toLowerCase().includes(fN)))
-                    .sort((a,b) => nextPri[a.status] - nextPri[b.status] || a.sort_order - b.sort_order)
-                    .forEach(g => cols.next.appendChild(createCard(g)));
-
-                allGames.filter(g => ['Backlog', 'Game Pass', 'PS Plus', 'Switch Online', 'Downloaded'].includes(g.status))
-                    .filter(g => g.title.toLowerCase().includes(fB) || (g.series && g.series.toLowerCase().includes(fB)))
+                allGames.filter(g => g.status === 'Backlog' || g.status === 'Up Next')
+                    .filter(g => g.title.toLowerCase().includes(fQ) || (g.series && g.series.toLowerCase().includes(fQ)))
                     .forEach(g => cols.backlog.appendChild(createCard(g)));
             } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
-                const target = currentViewMode === 'archive' ? 'Finished' : 'Not Interested';
+                const target = currentViewMode === 'archive' ? 'Completed' : 'Dropped';
                 allGames.filter(g => g.status === target)
                     .filter(g => g.title.toLowerCase().includes(fA) || (g.series && g.series.toLowerCase().includes(fA)))
                     .forEach(g => cols.alt.appendChild(createCard(g)));
             } else if (currentViewMode === 'wishlist') {
-                const wishlistGames = allGames.filter(g => g.status === 'Wishlist');
-
-                const sortByReleaseDate = (a, b) => {
-                    const dA = parseReleaseDate(a.release_date);
-                    const dB = parseReleaseDate(b.release_date);
-                    if (dA === null && dB === null) return 0;
-                    if (dA === null) return 1;
-                    if (dB === null) return -1;
-                    return dA - dB;
-                };
-
-                wishlistGames.filter(g => {
-                    const rDate = parseReleaseDate(g.release_date);
-                    return rDate !== null && rDate <= nowSec;
-                })
-                .filter(g => g.title.toLowerCase().includes(fWR) || (g.series && g.series.toLowerCase().includes(fWR)))
-                .sort(sortByReleaseDate)
-                .forEach(g => cols.wishlistReleased.appendChild(createCard(g)));
-
-                wishlistGames.filter(g => {
-                    const rDate = parseReleaseDate(g.release_date);
-                    return rDate === null || rDate > nowSec;
-                })
-                .filter(g => g.title.toLowerCase().includes(fWU) || (g.series && g.series.toLowerCase().includes(fWU)))
-                .sort(sortByReleaseDate)
-                .forEach(g => cols.wishlistUpcoming.appendChild(createCard(g)));
+                allGames.filter(g => g.status === 'Wishlist')
+                    .forEach(g => cols.wishlist.appendChild(createCard(g)));
             }
+        }
+
+        function getPlatformBadgeClass(p) {
+            if (!p) return 'platform-badge';
+            const pl = p.toLowerCase();
+            if (pl.includes('gog')) return 'platform-badge gog';
+            if (pl.includes('steam')) return 'platform-badge steam';
+            if (pl.includes('epic')) return 'platform-badge epic';
+            if (pl.includes('playstation') || pl.includes('ps')) return 'platform-badge playstation';
+            if (pl.includes('xbox')) return 'platform-badge xbox';
+            if (pl.includes('switch') || pl.includes('nintendo')) return 'platform-badge switch';
+            return 'platform-badge';
         }
 
         function createCard(game) {
             const isS = game.series && game.series.trim() !== '';
-            const nowSec = Math.floor(Date.now() / 1000);
-            
-            const rDate = parseReleaseDate(game.release_date);
-            const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
-            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
+            const platformClass = getPlatformBadgeClass(game.platform);
             
             const div = document.createElement('div');
             div.dataset.id = game.id; 
-            div.dataset.series = game.series || '';
-            div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
-            
-            const platB = (game.platform || '').split(',').map(p => { 
-                const i = PLAT_MAP[p.trim()]; 
-                return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
-            }).join(' ');
+            div.className = `poster-card ${isS ? 'series-chained' : ''}`;
+            div.title = `${game.title} (${game.platform || 'PC'})`;
 
             div.innerHTML = `
-                <img src="${game.cover_url || ''}" class="game-card-cover border-r border-slate-700 shadow-inner">
-                <div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white">
-                    <div class="flex justify-between items-start text-white">
-                        <div class="text-left flex-1 min-w-0 pr-2">
-                            <h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3>
-                            <div class="flex flex-wrap gap-1.5 mt-3">${platB}</div>
-                        </div>
-                        <div class="icon-square shrink-0 text-white">
-                            <button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button>
-                            <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button>
-                            <button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button>
-                            <button onclick="deleteGame('${game.id}')" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <div class="flex flex-col min-w-0 pr-2 text-left">
-                            ${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}
-                            <span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span>
-                        </div>
-                        <select onchange="updateStatus('${game.id}', this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer">
-                            <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
-                            <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
-                            <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
-                            <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
-                            <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
-                            <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
-                            <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
-                            <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
-                            <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
-                            <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option>
-                            <option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option>
-                        </select>
-                    </div>
+                <img src="${game.cover_url || ''}" class="poster-cover" alt="${game.title}">
+                
+                ${game.series_num ? `<span class="series-badge-overlay">#${game.series_num}</span>` : ''}
+
+                <!-- Vertical Action Icons Sidebar -->
+                <div class="card-actions-sidebar">
+                    <button title="Edit" onclick='editGame(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="action-btn">✏️</button>
+                    <button title="Currently Playing" onclick="updateStatus('${game.id}', 'Currently Playing')" class="action-btn ${game.status === 'Currently Playing' || game.status === 'Playing' ? 'active' : ''}">🎮</button>
+                    <button title="Completed" onclick="updateStatus('${game.id}', 'Completed')" class="action-btn ${game.status === 'Completed' ? 'active' : ''}">🏆</button>
+                    <button title="Wishlist" onclick="updateStatus('${game.id}', 'Wishlist')" class="action-btn ${game.status === 'Wishlist' ? 'active' : ''}">📋</button>
+                    <button title="Delete" onclick="deleteGame('${game.id}')" class="action-btn text-rose-400">✕</button>
                 </div>`;
             return div;
         }
@@ -388,182 +309,33 @@
                 qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
             } else {
                 dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
-                document.getElementById('altTitle').innerText = v === 'archive' ? 'Archive' : 'The Scrap Yard';
+                document.getElementById('altTitle').innerText = v === 'archive' ? 'Completed Games Archive' : 'Scrap Yard';
                 document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
             }
             render();
         }
 
-        function editL(g) { 
+        function editGame(g) { 
             editingId = g.id; 
-            const dt = document.getElementById('dashboardTop');
-            const as = document.getElementById('activeSessionBox');
-            const ia = document.getElementById('inputArea');
-            dt.style.display = 'grid';
-            
-            if (currentViewMode !== 'queue') {
-                as.style.display = 'none';
-                ia.classList.remove('lg:col-span-7');
-                ia.classList.add('lg:col-span-12');
-            }
-
             window.scrollTo({top:0, behavior:'smooth'}); 
             
             const tIn = document.getElementById('titleInput');
             tIn.value = g.title; 
             if (g.cover_url) tIn.dataset.img = g.cover_url;
-            if (g.genre) tIn.dataset.genre = g.genre;
-            if (g.release_date !== null && g.release_date !== undefined) tIn.dataset.release = g.release_date;
+
+            selectedPlatform = g.platform || 'Steam';
+            document.getElementById('genreInput').value = g.genre || '';
+            document.getElementById('yearInput').value = g.release_year || '';
+            document.getElementById('seriesInput').value = g.series || ''; 
+            document.getElementById('seriesNumInput').value = g.series_num || ''; 
 
             document.getElementById('formModeLabel').innerText = "Updating: " + g.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
-            
-            selectedPlatforms = (g.platform || '').split(',').filter(x => x.trim()).map(x => x.trim()); 
-            document.querySelectorAll('.plat-box').forEach(el => { 
-                el.classList.toggle('active', selectedPlatforms.includes(el.id.replace('i-', ''))); 
-            }); 
-            
-            document.getElementById('seriesInput').value = g.series || ''; 
-            searchGames(g.title); 
         }
 
-        function editP(g) { editL(g); }
-        function editS(g) { editL(g); document.getElementById('seriesInput').focus(); }
         function exitEditMode() { resetForm(); toggleView(currentViewMode); }
-        
-        async function repairSortOrder() { 
-            const b = document.getElementById('repairBtn'); 
-            b.innerText = "⏳ Processing...";
-            
-            try {
-                const missingDates = allGames.filter(g => g.release_date === null || g.release_date === undefined);
-                
-                if (missingDates.length > 0) {
-                    let count = 0;
-
-                    for (let g of missingDates) {
-                        try {
-                            const response = await fetch(`${SB_URL}/functions/v1/igdb-search`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'apikey': SB_KEY
-                                },
-                                body: JSON.stringify({ query: g.title })
-                            });
-
-                            const results = await response.json();
-
-                            if (results && results.length > 0) {
-                                const match = results.find(r => r.name.toLowerCase() === g.title.toLowerCase()) || results[0];
-                                const fetchedDate = parseReleaseDate(match.first_release_date);
-
-                                if (fetchedDate) {
-                                    await supabaseClient
-                                        .from('games')
-                                        .update({ release_date: fetchedDate })
-                                        .eq('id', g.id);
-                                }
-                            }
-                        } catch (err) {
-                            console.error(`Failed to fetch release date for ${g.title}:`, err);
-                        }
-
-                        count++;
-                        b.innerText = `⏳ (${count}/${missingDates.length})`;
-                        await new Promise(res => setTimeout(res, 200));
-                    }
-                }
-
-                let list = [...allGames].sort((a,b) => a.sort_order - b.sort_order);
-                let finalOrder = []; 
-                let processedSeries = new Set();
-
-                for (let g of list) {
-                    if (processedSeries.has(g.series)) continue;
-                    if (g.series) {
-                        let buddies = list.filter(item => item.series === g.series);
-                        finalOrder.push(...buddies); 
-                        processedSeries.add(g.series);
-                    } else { 
-                        finalOrder.push(g); 
-                    }
-                }
-
-                for (let i = 0; i < finalOrder.length; i++) { 
-                    await supabaseClient
-                        .from('games')
-                        .update({ sort_order: (i + 1) * 100 })
-                        .eq('id', finalOrder[i].id); 
-                }
-
-                alert("Vault rebuild complete: Release dates filled and sorting resynced!");
-
-            } catch (err) {
-                console.error("Rebuild failed:", err);
-                alert(`Rebuild error: ${err.message}`);
-            } finally {
-                b.innerHTML = "<span>🔧</span> Repair Sort & Dates"; 
-                loadGames(); 
-            }
-        }
-
         async function updateStatus(id, s) { await supabaseClient.from('games').update({ status:s }).eq('id', id); loadGames(); }
-        
-        function initSortable() { 
-            ['col-playing', 'col-next', 'col-backlog'].forEach(id => { 
-                const el = document.getElementById(id);
-                if (!el) return;
-                new Sortable(el, { 
-                    group: 'games', 
-                    animation: 250, 
-                    onEnd: async (evt) => { 
-                        let targetS = 'Backlog'; 
-                        if(evt.to.id === 'col-playing') targetS = 'Playing'; 
-                        else if(evt.to.id === 'col-next') targetS = 'Up Next'; 
-                        const items = Array.from(evt.to.children); 
-                        for(let i=0; i<items.length; i++) {
-                            await supabaseClient.from('games').update({ sort_order: (i + 1) * 100, status: targetS }).eq('id', items[i].dataset.id); 
-                        }
-                        loadGames(); 
-                    } 
-                }); 
-            }); 
-        }
-
-        async function deleteGame(id) { if(confirm('Delete?')) { await supabaseClient.from('games').delete().eq('id', id); loadGames(); } }
-        
-        function filterSeriesDropdown(val) {
-            const sr = document.getElementById('seriesResults');
-            const existingSeries = Array.from(new Set(allGames.map(g => g.series).filter(s => s && s.trim() !== '')));
-            const filtered = existingSeries.filter(s => s.toLowerCase().includes(val.toLowerCase().trim()));
-
-            if (filtered.length === 0) {
-                sr.classList.add('hidden');
-                return;
-            }
-
-            sr.innerHTML = filtered.map(s => {
-                const safeName = s.replace(/"/g, '&quot;');
-                return `<div onclick="selectSeries(&quot;${safeName}&quot;)" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`;
-            }).join('');
-
-            sr.classList.remove('hidden');
-        }
-
-        function selectSeries(name) {
-            document.getElementById('seriesInput').value = name;
-            document.getElementById('seriesResults').classList.add('hidden');
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) {
-                document.getElementById('seriesResults').classList.add('hidden');
-            }
-            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) {
-                document.getElementById('searchResults').classList.add('hidden');
-            }
-        });
+        async function deleteGame(id) { if(confirm('Delete game?')) { await supabaseClient.from('games').delete().eq('id', id); loadGames(); } }
 
         async function searchGames(q) { 
             const r = document.getElementById('searchResults'); 
@@ -576,43 +348,28 @@
             } 
 
             try {
-                const response = await fetch(`${SB_URL}/functions/v1/igdb-search`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SB_KEY
-                    },
-                    body: JSON.stringify({ query: trimmedQuery })
-                });
+                const response = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(trimmedQuery)}&page_size=8`);
+                const data = await response.json();
 
-                const results = await response.json();
-
-                if (results.error) {
-                    r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Error: ${results.error}</div>`;
+                if (!data.results || data.results.length === 0) {
+                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No games found.</div>`;
                     r.classList.remove('hidden');
                     return;
                 }
 
-                if (!results || results.length === 0) {
-                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`;
-                    r.classList.remove('hidden');
-                    return;
-                }
-
-                r.innerHTML = results.map(g => {
-                    const title = (g.name || '').replace(/"/g, '&quot;');
-                    const cover = g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` : '';
-                    const genre = (g.genres && g.genres[0]) ? (g.genres[0].name).replace(/"/g, '&quot;') : 'Game';
-                    const release = g.first_release_date !== undefined ? g.first_release_date : '';
-                    const yearLabel = release ? new Date(release * 1000).getFullYear() : 'TBA';
+                r.innerHTML = data.results.map(item => {
+                    const title = (item.name || '').replace(/"/g, '&quot;');
+                    const year = item.released ? item.released.split('-')[0] : 'N/A';
+                    const cover = item.background_image || '';
+                    const genre = (item.genres && item.genres.length > 0) ? item.genres[0].name.replace(/"/g, '&quot;') : 'Action';
                     
                     return `
-                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${release}&quot;)" 
+                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${year}&quot;)" 
                              class="p-4 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
                             ${cover ? `<img src="${cover}" class="w-12 h-16 object-cover rounded shadow bg-slate-900">` : '<div class="w-12 h-16 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
-                                <p class="text-sm font-bold text-white">${g.name}</p>
-                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${yearLabel}</p>
+                                <p class="text-sm font-bold text-white">${title}</p>
+                                <p class="text-xs text-indigo-400 font-normal mt-0.5">${genre} • ${year}</p>
                             </div>
                         </div>
                     `;
@@ -621,50 +378,26 @@
                 r.classList.remove('hidden');
 
             } catch (err) {
-                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
+                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Search error: ${err.message}</div>`;
                 r.classList.remove('hidden');
             }
         }
 
-        function selectGame(n, i, g, r) { 
+        function selectGame(t, c, g, y) { 
             const tIn = document.getElementById('titleInput'); 
-            tIn.value = n; 
+            tIn.value = t; 
+            if (c) tIn.dataset.img = c;
+            
+            document.getElementById('genreInput').value = g;
+            document.getElementById('yearInput').value = y;
             document.getElementById('searchResults').classList.add('hidden'); 
-            
-            if (i) tIn.dataset.img = i;
-            if (g) tIn.dataset.genre = g;
-            
-            const parsedDate = parseReleaseDate(r);
-            if (parsedDate !== null) {
-                tIn.dataset.release = parsedDate;
-            } else {
-                delete tIn.dataset.release;
-            }
-            
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { 
-            const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; 
-            const blob = new Blob([csv], { type: 'text/csv' }); 
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob); 
-            a.download = 'vault_template.csv'; 
-            a.click(); 
-        }
-
-        document.getElementById('csvFile').addEventListener('change', function(e) { 
-            const r = new FileReader(); 
-            r.onload = async (ev) => { 
-                const rows = ev.target.result.split('\n').slice(1); 
-                const gToInsert = rows.map(r => { 
-                    const cols = r.split(',').map(x => x?.trim()); 
-                    if (cols[0]) return { title: cols[0], platform: cols[1]||'PC', series: cols[2]||null, genre: cols[3]||'Action', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; 
-                }).filter(x => x); 
-                await supabaseClient.from('games').insert(gToInsert); 
-                loadGames(); 
-            }; 
-            r.readAsText(e.target.files[0]); 
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) {
+                document.getElementById('searchResults').classList.add('hidden');
+            }
         });
     </script>
 </body>
