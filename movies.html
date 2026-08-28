@@ -41,10 +41,10 @@
                 <div class="flex items-center gap-2">
                    <button onclick="window.location.href='games.html'" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</button>
                    <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
-                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🎬</button>
+                   <button onclick="toggleView('queue')" id="btn-queue" title="Movies Vault" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🎬</button>
                    <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Movies Vault</h1>
+                <h1 id="pageHeaderTitle" class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Movies Vault</h1>
                 <div class="flex items-center gap-2">
                     <div class="relative group">
                         <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
@@ -53,6 +53,7 @@
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
                         </div>
                     </div>
+                    <button onclick="toggleView('archive')" id="btn-archive" title="Trophy Vault (Watched)" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
@@ -76,6 +77,7 @@
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [];
+        let currentView = 'queue'; // 'queue' or 'archive'
 
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -106,6 +108,31 @@
             if (!error) { allMovies = data || []; render(); }
         }
 
+        function toggleView(mode) {
+            currentView = mode;
+            const btnQ = document.getElementById('btn-queue');
+            const btnA = document.getElementById('btn-archive');
+            const title = document.getElementById('pageHeaderTitle');
+
+            if (mode === 'archive') {
+                btnA.className = "bg-emerald-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg";
+                btnQ.className = "bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700";
+                title.innerText = "Movies Trophy Vault";
+                title.className = "text-3xl font-black tracking-tighter text-emerald-400 uppercase italic";
+            } else {
+                btnQ.className = "bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg";
+                btnA.className = "bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600";
+                title.innerText = "Movies Vault";
+                title.className = "text-3xl font-black tracking-tighter text-indigo-500 uppercase italic";
+            }
+            render();
+        }
+
+        async function updateStatus(id, newStatus) {
+            await supabaseClient.from('movies').update({ status: newStatus }).eq('id', id);
+            loadMovies();
+        }
+
         function render() {
             const query = document.getElementById('movieSearch').value.toLowerCase();
             const genre = document.getElementById('filterGenre').value.toLowerCase();
@@ -113,6 +140,10 @@
             grid.innerHTML = '';
 
             allMovies
+                .filter(m => {
+                    const isWatched = m.status === 'Watched';
+                    return currentView === 'archive' ? isWatched : !isWatched;
+                })
                 .filter(m => (m.title || '').toLowerCase().includes(query))
                 .filter(m => (m.genre || '').toLowerCase().includes(genre))
                 .forEach(movie => {
@@ -125,8 +156,12 @@
                             <p class="text-xs text-slate-400 mt-1">${movie.release_year || 'N/A'}</p>
                         </div>
                         <div class="mt-3 flex justify-between items-center text-xs">
-                            <span class="text-indigo-400 font-bold uppercase text-[10px]">${movie.genre || 'Movie'}</span>
-                            <span class="bg-slate-800 px-2 py-1 rounded border border-slate-700 text-slate-300 font-mono">${movie.status || 'Watched'}</span>
+                            <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[80px]">${movie.genre || 'Movie'}</span>
+                            <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-xs py-1 px-2 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer">
+                                <option value="Plan to Watch" ${movie.status !== 'Watching' && movie.status !== 'Watched' ? 'selected' : ''}>Plan to Watch</option>
+                                <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
+                                <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
+                            </select>
                         </div>
                     `;
                     grid.appendChild(card);
