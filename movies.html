@@ -326,7 +326,7 @@
                     const mType = isTV ? 'TV Series' : 'Movie';
                     
                     return `
-                        <div onclick="selectMedia(&quot;${title}&quot;, &quot;${mType}&quot;, &quot;${cover}&quot;, &quot;${year}&quot;)" 
+                        <div onclick="selectMedia(&quot;${title}&quot;, &quot;${mt}&quot;, &quot;${cover}&quot;, &quot;${year}&quot;)" 
                              class="p-4 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
                             ${cover ? `<img src="${cover}" class="w-12 h-16 object-cover rounded shadow bg-slate-900">` : '<div class="w-12 h-16 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
