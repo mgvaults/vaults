@@ -46,6 +46,9 @@
                 </div>
                 <h1 id="pageHeaderTitle" class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Books Vault</h1>
                 <div class="flex items-center gap-2">
+                    <button onclick="openApiSearchModal()" title="Add via Google Books API" class="p-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-2xl shadow-lg flex items-center gap-2">
+                        ➕ <span class="text-xs uppercase tracking-wider hidden sm:inline">Add Book</span>
+                    </button>
                     <div class="relative group">
                         <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
                         <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
@@ -65,19 +68,33 @@
             </div>
 
             <!-- Bookshelf Grid Container -->
-            <div id="bookshelfGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                <!-- Book Cards will render dynamically here -->
+            <div id="bookshelfGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        </div>
+    </div>
+
+    <!-- Google Books API Search Modal -->
+    <div id="apiModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-black text-indigo-400 uppercase italic">Search Google Books API</h2>
+                <button onclick="closeApiSearchModal()" class="text-slate-400 hover:text-white font-bold text-xl">✕</button>
             </div>
+            <div class="flex gap-2 mb-4">
+                <input id="apiSearchInput" type="text" placeholder="Type book title or author..." onkeypress="if(event.key==='Enter') searchGoogleBooks()" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl p-3 text-white outline-none">
+                <button onclick="searchGoogleBooks()" class="bg-indigo-600 hover:bg-indigo-500 font-bold px-6 py-3 rounded-xl text-white">Search</button>
+            </div>
+            <div id="apiSearchResults" class="flex-1 overflow-y-auto grid grid-cols-1 gap-3 pr-2"></div>
         </div>
     </div>
 
     <script>
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+        const GOOGLE_BOOKS_API_KEY = 'AIzaSyDXwLuSlheMRhIZPqX8J88MKbZRV7rcwws';
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allBooks = [];
-        let currentView = 'queue'; // 'queue' or 'archive'
+        let currentView = 'queue';
 
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -166,6 +183,47 @@
                     `;
                     grid.appendChild(card);
                 });
+        }
+
+        function openApiSearchModal() { document.getElementById('apiModal').classList.remove('hidden'); }
+        function closeApiSearchModal() { document.getElementById('apiModal').classList.add('hidden'); }
+
+        async function searchGoogleBooks() {
+            const query = document.getElementById('apiSearchInput').value;
+            if (!query) return;
+            const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${GOOGLE_BOOKS_API_KEY}`);
+            const data = await res.json();
+            const resultsContainer = document.getElementById('apiSearchResults');
+            resultsContainer.innerHTML = '';
+
+            if (data.items) {
+                data.items.forEach(item => {
+                    const info = item.volumeInfo;
+                    const cover = info.imageLinks ? info.imageLinks.thumbnail.replace('http:', 'https:') : '';
+                    const title = info.title || 'Untitled';
+                    const author = info.authors ? info.authors.join(', ') : 'Unknown';
+                    const genre = info.categories ? info.categories[0] : 'General';
+
+                    const el = document.createElement('div');
+                    el.className = 'flex items-center gap-4 bg-slate-800 p-3 rounded-2xl border border-slate-700';
+                    el.innerHTML = `
+                        <img src="${cover || 'https://via.placeholder.com/150x225?text=No+Cover'}" class="w-12 h-16 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-white text-sm line-clamp-1">${title}</h4>
+                            <p class="text-xs text-slate-400">${author}</p>
+                            <span class="text-[10px] text-indigo-400 font-bold uppercase">${genre}</span>
+                        </div>
+                        <button onclick='addBookFromApi(${JSON.stringify(title)}, ${JSON.stringify(author)}, ${JSON.stringify(genre)}, ${JSON.stringify(cover)})' class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-2 rounded-xl text-white font-bold">Add</button>
+                    `;
+                    resultsContainer.appendChild(el);
+                });
+            }
+        }
+
+        async function addBookFromApi(title, author, genre, cover_url) {
+            await supabaseClient.from('books').insert([{ title, author, genre, cover_url, status: 'Plan to Read' }]);
+            closeApiSearchModal();
+            loadBooks();
         }
 
         function downloadTemplate() {
