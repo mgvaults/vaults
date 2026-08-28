@@ -14,6 +14,53 @@ body {
     color: #818cf8;
 }
 
+/* Platform Selectors & Platform Logos Fix */
+.platform-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.platform-card {
+    width: 90px;
+    height: 70px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 6px;
+}
+
+.platform-card img, 
+.platform-card svg {
+    max-width: 48px !important;
+    max-height: 36px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block;
+    margin: 0 auto;
+}
+
+.platform-card:hover {
+    background: #334155;
+    border-color: #6366f1;
+    transform: translateY(-2px);
+}
+
+.platform-card.selected {
+    border-color: #818cf8;
+    background: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+}
+
 /* Toolbox Dropdown Menu */
 .toolbox-dropdown {
     position: relative;
@@ -61,14 +108,14 @@ body {
     transform: scale(1.05);
 }
 
-/* Compact Poster Card Layout */
+/* Expanded Poster Card Layout (Height adjusted from 220px to 255px to fix clipped titles) */
 .poster-card { 
     background-color: #1e293b; 
     border-radius: 1rem; 
     overflow: hidden; 
     display: flex; 
-    width: 170px;
-    height: 220px; 
+    width: 175px;
+    height: 255px; 
     border: 1px solid rgba(255,255,255,0.1); 
     position: relative;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
@@ -81,7 +128,7 @@ body {
 }
 
 .poster-cover {
-    width: 125px !important;
+    width: 130px !important;
     height: 100% !important;
     object-fit: cover !important;
     background-color: #0f172a;
@@ -130,24 +177,46 @@ body {
     filter: grayscale(1);
 }
 
+/* Games Vault Platform Badges Styling */
+.platform-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    background-color: #3b82f6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.platform-badge.gog { background-color: #a855f7; }
+.platform-badge.steam { background-color: #0284c7; }
+.platform-badge.epic { background-color: #334155; }
+.platform-badge.playstation { background-color: #1d4ed8; }
+.platform-badge.xbox { background-color: #15803d; }
+.platform-badge.switch { background-color: #dc2626; }
+
 /* Series Banner Indicator */
 .series-chained { 
     border-left: 6px solid #fb923c !important; 
 }
 
-/* Series Badge Number Overlay (Bottom Right of Poster Area) */
+/* Expanded Series Badge Overlay (Bottom Right of Artwork Area) */
 .series-badge-overlay {
     position: absolute;
-    bottom: 6px;
-    right: 51px;
-    background: rgba(15, 23, 42, 0.85);
+    bottom: 8px;
+    right: 52px;
+    background: #0f172a;
     color: #fb923c;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 900;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 6px;
-    border: 1px solid rgba(251, 146, 60, 0.4);
-    backdrop-filter: blur(4px);
+    border: 1px solid #fb923c;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    z-index: 20;
     pointer-events: none;
 }
 
