@@ -7,11 +7,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f1f5f9; }
+        body { background-color: #0b0f19; color: #f1f5f9; }
         .media-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; }
         .media-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
         .media-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: #0f172a; }
-        #authScreen { background-color: #0f172a; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 180px; color: white; }
     </style>
 </head>
@@ -37,7 +37,7 @@
     <!-- Main Application -->
     <div id="mainApp" style="display: none;">
         <div class="max-w-7xl mx-auto">
-            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
+            <header class="flex justify-between items-center py-4 mb-6 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
                    <button onclick="window.location.href='games.html'" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</button>
                    <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
@@ -46,9 +46,6 @@
                 </div>
                 <h1 id="pageHeaderTitle" class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Movies Vault</h1>
                 <div class="flex items-center gap-2">
-                    <button onclick="openApiSearchModal()" title="Add via TMDB API" class="p-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-2xl shadow-lg flex items-center gap-2">
-                        ➕ <span class="text-xs uppercase tracking-wider hidden sm:inline">Add Movie</span>
-                    </button>
                     <div class="relative group">
                         <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
                         <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
@@ -61,39 +58,44 @@
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
-            <!-- Control Bar (Matching Games Layout) -->
-            <div class="bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl mb-10 flex flex-col md:flex-row gap-4 items-center justify-between">
-                <!-- Left Controls: Quick Toggles -->
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <button onclick="toggleWatchingFilter()" id="btn-watching-filter" class="p-3 px-5 bg-slate-900 border border-slate-700 rounded-2xl text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:border-indigo-500 transition flex items-center gap-2">
-                        🍿 <span>Currently Watching</span>
-                    </button>
+            <!-- Dual Card Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                
+                <!-- Left Card: Currently Watching / Active Session -->
+                <div class="lg:col-span-5 bg-slate-900/60 border border-slate-800/80 rounded-[2rem] p-6 flex flex-col justify-between min-h-[220px]">
+                    <div class="text-xs font-black italic uppercase tracking-wider text-indigo-400 mb-3">CURRENTLY WATCHING</div>
+                    <div id="activeSessionContainer" class="flex-1 flex items-center justify-center">
+                        <p class="text-slate-500 text-sm font-semibold italic">No active view</p>
+                    </div>
                 </div>
 
-                <!-- Right Controls: Search Inputs -->
-                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-2/3 items-center justify-end">
-                    <input id="filterGenre" type="text" oninput="render()" placeholder="Filter genre..." class="col-filter py-3.5 w-full sm:w-auto">
-                    <input id="movieSearch" type="text" oninput="render()" placeholder="Search movies or TV shows..." class="w-full sm:w-2/3 bg-slate-900 p-3.5 rounded-2xl outline-none border border-slate-700 text-white text-sm">
+                <!-- Right Card: Database Search / Entry -->
+                <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800/80 rounded-[2rem] p-6 flex flex-col gap-4">
+                    <div class="text-[11px] font-black italic uppercase tracking-widest text-indigo-400">DATABASE SEARCH / ENTRY</div>
+                    
+                    <div class="relative">
+                        <input id="apiSearchInput" type="text" placeholder="Search for movie or TV show title..." onkeypress="if(event.key==='Enter') searchTmdb()" class="w-full bg-[#0b0f19] border border-slate-800/80 rounded-2xl p-4 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition">
+                        <button onclick="searchTmdb()" class="absolute right-3 top-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-4 py-2 rounded-xl transition">SEARCH API</button>
+                    </div>
+
+                    <div id="searchResultsDropdown" class="hidden max-h-48 overflow-y-auto bg-[#0b0f19] border border-slate-800 rounded-xl p-2 flex flex-col gap-2"></div>
+
+                    <div class="flex gap-3 mt-1">
+                        <input id="manualGenre" type="text" placeholder="Release Year / Genre" class="flex-1 bg-[#0b0f19] border border-slate-800/80 rounded-2xl p-4 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition">
+                        <button onclick="commitManualMovie()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs tracking-widest px-8 rounded-2xl transition shadow-lg">COMMIT</button>
+                    </div>
                 </div>
+
+            </div>
+
+            <!-- Library Filter Controls -->
+            <div class="bg-slate-900/40 p-4 rounded-2xl border border-slate-800/60 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <input id="movieSearch" type="text" oninput="render()" placeholder="Filter library by title..." class="w-full sm:w-2/3 bg-[#0b0f19] p-3 rounded-xl border border-slate-800 text-white text-xs outline-none">
+                <input id="filterGenre" type="text" oninput="render()" placeholder="Filter genre..." class="col-filter py-2 w-full sm:w-auto">
             </div>
 
             <!-- Poster Grid Container -->
             <div id="moviesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-        </div>
-    </div>
-
-    <!-- TMDB API Search Modal -->
-    <div id="apiModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-black text-indigo-400 uppercase italic">Search TMDB Database</h2>
-                <button onclick="closeApiSearchModal()" class="text-slate-400 hover:text-white font-bold text-xl">✕</button>
-            </div>
-            <div class="flex gap-2 mb-4">
-                <input id="apiSearchInput" type="text" placeholder="Type movie or show title..." onkeypress="if(event.key==='Enter') searchTmdb()" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl p-3 text-white outline-none">
-                <button onclick="searchTmdb()" class="bg-indigo-600 hover:bg-indigo-500 font-bold px-6 py-3 rounded-xl text-white">Search</button>
-            </div>
-            <div id="apiSearchResults" class="flex-1 overflow-y-auto grid grid-cols-1 gap-3 pr-2"></div>
         </div>
     </div>
 
@@ -105,7 +107,6 @@
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [];
         let currentView = 'queue';
-        let filterWatchingOnly = false;
 
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -133,18 +134,27 @@
 
         async function loadMovies() {
             let { data, error } = await supabaseClient.from('movies').select('*');
-            if (!error) { allMovies = data || []; render(); }
+            if (!error) { allMovies = data || []; render(); updateActiveSession(); }
         }
 
-        function toggleWatchingFilter() {
-            filterWatchingOnly = !filterWatchingOnly;
-            const btn = document.getElementById('btn-watching-filter');
-            if (filterWatchingOnly) {
-                btn.className = "p-3 px-5 bg-indigo-600 border border-indigo-500 rounded-2xl text-xs font-bold uppercase tracking-wider text-white transition flex items-center gap-2 shadow-lg";
+        function updateActiveSession() {
+            const activeContainer = document.getElementById('activeSessionContainer');
+            const activeMovie = allMovies.find(m => m.status === 'Watching');
+
+            if (activeMovie) {
+                activeContainer.innerHTML = `
+                    <div class="flex items-center gap-4 w-full">
+                        <img src="${activeMovie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" class="w-16 h-24 object-cover rounded-xl border border-slate-700">
+                        <div>
+                            <h4 class="font-black text-white text-base leading-tight">${activeMovie.title}</h4>
+                            <p class="text-xs text-slate-400 mt-1">${activeMovie.release_year || 'N/A'}</p>
+                            <span class="inline-block mt-2 text-[10px] bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 px-2 py-0.5 rounded-md font-bold uppercase">${activeMovie.genre || 'Movie'}</span>
+                        </div>
+                    </div>
+                `;
             } else {
-                btn.className = "p-3 px-5 bg-slate-900 border border-slate-700 rounded-2xl text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:border-indigo-500 transition flex items-center gap-2";
+                activeContainer.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">No active view</p>`;
             }
-            render();
         }
 
         function toggleView(mode) {
@@ -180,7 +190,6 @@
 
             allMovies
                 .filter(m => {
-                    if (filterWatchingOnly) return m.status === 'Watching';
                     const isWatched = m.status === 'Watched';
                     return currentView === 'archive' ? isWatched : !isWatched;
                 })
@@ -208,18 +217,16 @@
                 });
         }
 
-        function openApiSearchModal() { document.getElementById('apiModal').classList.remove('hidden'); }
-        function closeApiSearchModal() { document.getElementById('apiModal').classList.add('hidden'); }
-
         async function searchTmdb() {
             const query = document.getElementById('apiSearchInput').value;
             if (!query) return;
             const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
             const data = await res.json();
-            const resultsContainer = document.getElementById('apiSearchResults');
-            resultsContainer.innerHTML = '';
+            const dropdown = document.getElementById('searchResultsDropdown');
+            dropdown.innerHTML = '';
 
             if (data.results) {
+                dropdown.classList.remove('hidden');
                 data.results.forEach(item => {
                     if (item.media_type !== 'movie' && item.media_type !== 'tv') return;
 
@@ -230,24 +237,37 @@
                     const genre = item.media_type === 'tv' ? 'TV Show' : 'Movie';
 
                     const el = document.createElement('div');
-                    el.className = 'flex items-center gap-4 bg-slate-800 p-3 rounded-2xl border border-slate-700';
+                    el.className = 'flex items-center justify-between bg-slate-800/80 p-2 rounded-xl border border-slate-700/50 hover:border-indigo-500 cursor-pointer';
+                    el.onclick = () => addMovieFromApi(title, year, genre, cover);
                     el.innerHTML = `
-                        <img src="${cover || 'https://via.placeholder.com/150x225?text=No+Poster'}" class="w-12 h-16 object-cover rounded-lg">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-white text-sm line-clamp-1">${title}</h4>
-                            <p class="text-xs text-slate-400">${year}</p>
-                            <span class="text-[10px] text-indigo-400 font-bold uppercase">${genre}</span>
+                        <div class="flex items-center gap-3">
+                            <img src="${cover || 'https://via.placeholder.com/150x225?text=No+Poster'}" class="w-8 h-10 object-cover rounded">
+                            <div>
+                                <h5 class="text-xs font-bold text-white leading-tight">${title}</h5>
+                                <p class="text-[10px] text-slate-400">${year} • ${genre}</p>
+                            </div>
                         </div>
-                        <button onclick='addMovieFromApi(${JSON.stringify(title)}, ${JSON.stringify(year)}, ${JSON.stringify(genre)}, ${JSON.stringify(cover)})' class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-2 rounded-xl text-white font-bold">Add</button>
+                        <span class="text-[10px] bg-indigo-600 px-2 py-1 rounded text-white font-bold uppercase">Add</span>
                     `;
-                    resultsContainer.appendChild(el);
+                    dropdown.appendChild(el);
                 });
             }
         }
 
         async function addMovieFromApi(title, release_year, genre, cover_url) {
             await supabaseClient.from('movies').insert([{ title, release_year, genre, cover_url, status: 'Plan to Watch' }]);
-            closeApiSearchModal();
+            document.getElementById('searchResultsDropdown').classList.add('hidden');
+            document.getElementById('apiSearchInput').value = '';
+            loadMovies();
+        }
+
+        async function commitManualMovie() {
+            const title = document.getElementById('apiSearchInput').value;
+            const genre = document.getElementById('manualGenre').value;
+            if (!title) return alert('Please enter a title');
+            await supabaseClient.from('movies').insert([{ title, genre, status: 'Plan to Watch' }]);
+            document.getElementById('apiSearchInput').value = '';
+            document.getElementById('manualGenre').value = '';
             loadMovies();
         }
 
