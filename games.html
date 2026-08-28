@@ -59,10 +59,10 @@
                         <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
                         <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
                         
-                        <!-- Fixed Platform Selector Grid with Constrained Logos -->
+                        <!-- Inline Styled Platform Cards to Block SVG Inflation -->
                         <div class="platform-grid my-2">
-                            <div class="platform-card" onclick="selectPlatform('Steam', this)">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 2a10 10 0 0 0-10 10c0 4.74 3.3 8.71 7.74 9.74l2.42-3.44a3.99 3.99 0 0 1-.16-1.12c0-.36.05-.7.14-1.03l-3.07-2.18a3.001 3.001 0 0 1-3.07-2.97c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .12-.01.24-.03.36l3.08 2.19c.47-.23 1-.36 1.56-.36 1.93 0 3.5 1.57 3.5 3.5S18.43 20 16.5 20c-.56 0-1.09-.13-1.56-.36l-2.42 3.44C12.18 23.97 12.09 24 12 24a10 10 0 0 0 0-20z"/></svg>
+                            <div class="platform-card selected" onclick="selectPlatform('Steam', this)">
+                                <svg style="width:36px; height:28px;" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 2a10 10 0 0 0-10 10c0 4.74 3.3 8.71 7.74 9.74l2.42-3.44a3.99 3.99 0 0 1-.16-1.12c0-.36.05-.7.14-1.03l-3.07-2.18a3.001 3.001 0 0 1-3.07-2.97c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .12-.01.24-.03.36l3.08 2.19c.47-.23 1-.36 1.56-.36 1.93 0 3.5 1.57 3.5 3.5S18.43 20 16.5 20c-.56 0-1.09-.13-1.56-.36l-2.42 3.44C12.18 23.97 12.09 24 12 24a10 10 0 0 0 0-20z"/></svg>
                                 <span class="text-[10px] font-bold text-slate-400 mt-1">Steam</span>
                             </div>
                             <div class="platform-card" onclick="selectPlatform('GOG', this)">
@@ -70,7 +70,7 @@
                                 <span class="text-[10px] font-bold text-slate-400 mt-1">GOG.com</span>
                             </div>
                             <div class="platform-card" onclick="selectPlatform('Epic Games', this)">
-                                <svg width="28" height="32" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 0L1.75 3.5v14.25L12 24l10.25-6.25V3.5L12 0zm6.5 15.5l-6.5 3.96-6.5-3.96V6.5l6.5-2.22 6.5 2.22v9deg"/></svg>
+                                <svg style="width:32px; height:28px;" viewBox="0 0 24 24" fill="currentColor" class="text-slate-300"><path d="M12 0L1.75 3.5v14.25L12 24l10.25-6.25V3.5L12 0zm6.5 15.5l-6.5 3.96-6.5-3.96V6.5l6.5-2.22 6.5 2.22v9deg"/></svg>
                                 <span class="text-[10px] font-bold text-slate-400 mt-1">Epic</span>
                             </div>
                             <div class="platform-card" onclick="selectPlatform('Xbox', this)">
@@ -255,21 +255,8 @@
             }
         }
 
-        function getPlatformBadgeClass(p) {
-            if (!p) return 'platform-badge';
-            const pl = p.toLowerCase();
-            if (pl.includes('gog')) return 'platform-badge gog';
-            if (pl.includes('steam')) return 'platform-badge steam';
-            if (pl.includes('epic')) return 'platform-badge epic';
-            if (pl.includes('playstation') || pl.includes('ps')) return 'platform-badge playstation';
-            if (pl.includes('xbox')) return 'platform-badge xbox';
-            if (pl.includes('switch') || pl.includes('nintendo')) return 'platform-badge switch';
-            return 'platform-badge';
-        }
-
         function createCard(game) {
             const isS = game.series && game.series.trim() !== '';
-            const platformClass = getPlatformBadgeClass(game.platform);
             
             const div = document.createElement('div');
             div.dataset.id = game.id; 
