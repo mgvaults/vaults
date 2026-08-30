@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b0f19; color: #f1f5f9; }
-        .media-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+        .media-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .media-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
         .media-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: #0f172a; }
         .upcoming-card img { filter: grayscale(1) opacity(0.5); }
@@ -46,6 +46,7 @@
                 </div>
                 <h1 id="pageHeaderTitle" class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Movies Vault</h1>
                 <div class="flex items-center gap-2">
+                    <button onclick="sortAlphabetically()" title="Rebuild & Sort A-Z" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-sky-600 transition">🔤</button>
                     <div class="relative group">
                         <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
                         <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
@@ -102,6 +103,7 @@
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [];
+        let newlyAddedId = null;
         let currentView = 'queue';
         const CURRENT_YEAR = new Date().getFullYear();
 
@@ -131,7 +133,17 @@
 
         async function loadMovies() {
             let { data, error } = await supabaseClient.from('movies').select('*');
-            if (!error) { allMovies = data || []; render(); updateActiveSession(); }
+            if (!error) { 
+                allMovies = data || []; 
+                render(); 
+                updateActiveSession(); 
+            }
+        }
+
+        function sortAlphabetically() {
+            allMovies.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            newlyAddedId = null;
+            render();
         }
 
         function updateActiveSession() {
@@ -145,7 +157,7 @@
                         <div>
                             <h4 class="font-black text-white text-base leading-tight">${activeMovie.title}</h4>
                             <p class="text-xs text-slate-400 mt-1">${activeMovie.release_year || 'N/A'}</p>
-                            ${activeMovie.series ? `<span class="inline-block mt-1 text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-[150px]">⚡ ${activeMovie.series}</span>` : ''}
+                            ${activeMovie.series ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-[150px]">⚡ ${activeMovie.series}</span></div>` : ''}
                             <span class="inline-block mt-2 text-[10px] bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 px-2 py-0.5 rounded-md font-bold uppercase block w-fit">${activeMovie.genre || 'Movie'}</span>
                         </div>
                     </div>
@@ -193,7 +205,18 @@
             const grid = document.getElementById('moviesGrid');
             grid.innerHTML = '';
 
-            allMovies
+            let listToRender = [...allMovies];
+            
+            // If newly added item exists, move it to index 0
+            if (newlyAddedId) {
+                const recentIdx = listToRender.findIndex(m => m.id === newlyAddedId);
+                if (recentIdx > -1) {
+                    const [recentItem] = listToRender.splice(recentIdx, 1);
+                    listToRender.unshift(recentItem);
+                }
+            }
+
+            listToRender
                 .filter(m => {
                     const isWatched = m.status === 'Watched';
                     return currentView === 'archive' ? isWatched : !isWatched;
@@ -203,13 +226,15 @@
                 .forEach(movie => {
                     const yearNum = parseInt(movie.release_year);
                     const isUpcomingYear = !isNaN(yearNum) && yearNum > CURRENT_YEAR;
-                    const isUpcomingSeason = movie.status === 'Upcoming Season';
                     const isReturningSeries = movie.is_returning_series;
+                    const hasSeries = Boolean(movie.series);
                     
                     const card = document.createElement('div');
                     card.className = `media-card p-3 flex flex-col justify-between ${isUpcomingYear ? 'upcoming-card border-slate-700/50 border-dashed' : ''}`;
                     
                     card.innerHTML = `
+                        <div class="h-1.5 w-full rounded-t-lg -mt-3 -mx-3 mb-2 ${hasSeries ? 'bg-orange-500' : 'bg-sky-400'}"></div>
+                        
                         <div>
                             <div class="relative">
                                 <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
@@ -222,18 +247,20 @@
                                 <button onclick="deleteMovie(${movie.id})" title="Delete Title" class="text-slate-500 hover:text-red-400 font-bold text-base leading-none p-1 transition">✕</button>
                             </div>
 
-                            ${movie.series ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span></div>` : ''}
-                            
                             <p class="text-xs text-slate-400 mt-1">${movie.release_year || 'N/A'}</p>
+                            ${hasSeries ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span></div>` : ''}
                         </div>
-                        <div class="mt-3 flex justify-between items-center text-xs">
-                            <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[65px]">${movie.genre || 'Movie'}</span>
-                            <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-xs py-1 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer">
-                                <option value="Archives" ${movie.status !== 'Watching' && movie.status !== 'Watched' && movie.status !== 'Upcoming Season' ? 'selected' : ''}>Archives</option>
-                                <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
-                                <option value="Upcoming Season" ${movie.status === 'Upcoming Season' ? 'selected' : ''}>Upcoming Season ⏳</option>
-                                <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
-                            </select>
+
+                        <div class="mt-3 flex flex-col gap-1.5 text-xs border-t border-slate-800/80 pt-2">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[80px]">${movie.genre || 'Movie'}</span>
+                                <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[11px] py-1 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+                                    <option value="Archives" ${movie.status !== 'Watching' && movie.status !== 'Watched' && movie.status !== 'Upcoming Season' ? 'selected' : ''}>Archives</option>
+                                    <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
+                                    <option value="Upcoming Season" ${movie.status === 'Upcoming Season' ? 'selected' : ''}>Upcoming ⏳</option>
+                                    <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
+                                </select>
+                            </div>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -299,7 +326,7 @@
         }
 
         async function addMovieFromApi(title, release_year, genre, cover_url, series, is_returning_series) {
-            await supabaseClient.from('movies').insert([{ 
+            const { data } = await supabaseClient.from('movies').insert([{ 
                 title, 
                 release_year, 
                 genre, 
@@ -307,7 +334,12 @@
                 series, 
                 is_returning_series,
                 status: 'Archives' 
-            }]);
+            }]).select();
+
+            if (data && data[0]) {
+                newlyAddedId = data[0].id;
+            }
+
             document.getElementById('searchResultsDropdown').classList.add('hidden');
             document.getElementById('apiSearchInput').value = '';
             loadMovies();
@@ -318,7 +350,12 @@
             const genre = document.getElementById('manualGenre').value;
             const series = document.getElementById('manualSeries').value;
             if (!title) return alert('Please enter a title');
-            await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]);
+
+            const { data } = await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]).select();
+            if (data && data[0]) {
+                newlyAddedId = data[0].id;
+            }
+
             document.getElementById('apiSearchInput').value = '';
             document.getElementById('manualGenre').value = '';
             document.getElementById('manualSeries').value = '';
