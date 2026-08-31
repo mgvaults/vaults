@@ -203,7 +203,7 @@
         }
 
         // Helper to serialize timestamp for database saving
-        function parseReleaseDate(val) {
+        function parseReleaseYear(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
             let num = Number(val);
             if (isNaN(num) || num <= 0) return null;
@@ -222,7 +222,7 @@
             try {
                 const cover = tIn.dataset.img || '';
                 const genre = tIn.dataset.genre || '';
-                const releaseDate = parseReleaseDate(tIn.dataset.release);
+                const ReleaseYear = parseReleaseYear(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
 
                 if (editingId) {
@@ -233,7 +233,7 @@
                         media_type: selectedType, 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
-                        release_date: releaseDate !== null ? releaseDate : cur.release_date
+                        release_date: ReleaseYear !== null ? ReleaseYear : cur.release_date
                     };
                     
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
@@ -245,7 +245,7 @@
                         series, 
                         cover_url: cover, 
                         genre: genre || 'Movie', 
-                        release_date: releaseDate, 
+                        release_date: ReleaseYear, 
                         status: 'Archive'
                     }]);
                     if (error) throw error;
@@ -534,7 +534,7 @@
             document.getElementById('searchResults').classList.add('hidden'); 
             if (i) tIn.dataset.img = i;
             if (g) tIn.dataset.genre = g;
-            const parsedDate = parseReleaseDate(r);
+            const parsedDate = parseReleaseYear(r);
             if (parsedDate !== null) tIn.dataset.release = parsedDate; else delete tIn.dataset.release;
             
             toggleType(g === 'TV Show' ? 'TV Show' : 'Movie');
