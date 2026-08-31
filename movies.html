@@ -12,7 +12,6 @@
         .movie-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .movie-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
         .movie-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
-        .unreleased-card { filter: grayscale(1); opacity: 0.5; border: 1px dashed rgba(255,255,255,0.3) !important; }
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -25,7 +24,7 @@
 </head>
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
-    <!-- Google Auth Screen -->
+    <!-- Auth Screen -->
     <div id="authScreen">
         <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
             <div class="mb-2 text-cyan-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
@@ -58,14 +57,11 @@
                     <div class="relative group">
                         <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
                         <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
-                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair All" class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white">🔧</button>
                             <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
                         </div>
                     </div>
-                    <button onclick="toggleView('wishlist')" title="Watch List Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-cyan-400">🪄</button>
-                    <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
-                    <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
+                    <button onclick="toggleView('archive')" title="Watched Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
@@ -73,7 +69,7 @@
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
                 <!-- Currently Watching Horizontal Card -->
                 <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
-                    <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Watching</h2>
+                    <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Watching 👁️</h2>
                     <div id="col-watching" class="flex-1 flex flex-col gap-3 justify-center"></div>
                 </div>
                 
@@ -107,7 +103,7 @@
                 </div>
             </div>
 
-            <!-- Main Library View (Single Full-Width Grid) -->
+            <!-- Main Library View -->
             <div id="queueView">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Vault Collection</h2>
@@ -116,37 +112,14 @@
                 <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
-            <!-- Alt View (Archive Trophy Icon / Trash Icon Views) -->
+            <!-- Watched Trophy Archive View -->
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
-                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-emerald-400 text-center">Watched Archive 🏆</h2>
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter titles..." class="col-filter">
                 </div>
                 <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-            </div>
-
-            <!-- Watch List View -->
-            <div id="wishlistView" class="hidden">
-                <div class="text-center mb-8">
-                    <h2 class="text-cyan-400 font-black text-3xl uppercase tracking-widest italic">Watch List</h2>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-cyan-400 font-black text-xs uppercase tracking-[0.3em]">Released</h2>
-                            <input id="filterWishlistReleased" type="text" oninput="render()" placeholder="Filter released..." class="col-filter">
-                        </div>
-                        <div id="col-wishlist-released" class="grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-amber-400 font-black text-xs uppercase tracking-[0.3em]">Upcoming / Unreleased</h2>
-                            <input id="filterWishlistUpcoming" type="text" oninput="render()" placeholder="Filter upcoming..." class="col-filter">
-                        </div>
-                        <div id="col-wishlist-upcoming" class="grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -191,7 +164,8 @@
         }
 
         async function loadMovies() { 
-            let { data, error } = await supabaseClient.from('movies').select('*').order('sort_order', { ascending: true }); 
+            // Alphabetical Ordering directly via Supabase query
+            let { data, error } = await supabaseClient.from('movies').select('*').order('title', { ascending: true }); 
             if (!error) { 
                 allMovies = data || []; 
                 render(); 
@@ -225,7 +199,6 @@
                 const genre = tIn.dataset.genre || '';
                 const releaseDate = parseReleaseDate(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
-                let defaultStatus = currentViewMode === 'wishlist' ? 'Watchlist' : 'Backlog';
 
                 if (editingId) {
                     const cur = allMovies.find(m => m.id === editingId);
@@ -238,20 +211,9 @@
                         release_date: releaseDate !== null ? releaseDate : cur.release_date
                     };
                     
-                    if (series && series !== cur.series) { 
-                        const buddies = allMovies.filter(m => m.series === series); 
-                        if (buddies.length > 0) payload.sort_order = Math.max(...buddies.map(m => m.sort_order)) + 1; 
-                    }
-                    
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
                     if (error) throw error;
                 } else {
-                    let next = allMovies.length > 0 ? Math.max(...allMovies.map(m => m.sort_order)) + 100 : 100;
-                    if (series) { 
-                        const buddies = allMovies.filter(m => m.series === series); 
-                        if (buddies.length > 0) next = Math.max(...buddies.map(m => m.sort_order)) + 1; 
-                    }
-                    
                     const { error } = await supabaseClient.from('movies').insert([{ 
                         title: tIn.value.trim(), 
                         media_type: selectedType, 
@@ -259,8 +221,7 @@
                         cover_url: cover, 
                         genre: genre || 'Movie', 
                         release_date: releaseDate, 
-                        status: defaultStatus, 
-                        sort_order: next 
+                        status: 'Archive' // Default status
                     }]);
                     if (error) throw error;
                 }
@@ -300,65 +261,34 @@
         function render() {
             const fM = document.getElementById('filterMain').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
-            const fWR = document.getElementById('filterWishlistReleased').value.toLowerCase();
-            const fWU = document.getElementById('filterWishlistUpcoming').value.toLowerCase();
 
             const cols = { 
                 watching: document.getElementById('col-watching'), 
                 main: document.getElementById('col-main'),
-                alt: document.getElementById('col-alt'), 
-                wishlistReleased: document.getElementById('col-wishlist-released'),
-                wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
+                alt: document.getElementById('col-alt')
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            const nowSec = Math.floor(Date.now() / 1000);
+            // In-Memory Alphabetical Sort Guard
+            const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
 
             if (currentViewMode === 'queue') {
-                const activeMovies = allMovies.filter(m => m.status === 'Watching');
+                const activeMovies = sortedList.filter(m => m.status === 'Watching');
                 if (activeMovies.length > 0) {
                     activeMovies.forEach(m => cols.watching.appendChild(createActiveCard(m)));
                 } else {
                     cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
                 }
                 
-                allMovies.filter(m => ['Backlog', 'Up Next'].includes(m.status))
+                // Everything not 'Watching' or 'Watched' stays in main Vault Collection
+                sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
                     .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
                     .forEach(m => cols.main.appendChild(createCard(m)));
 
-            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
-                const target = currentViewMode === 'archive' ? 'Watched' : 'Not Interested';
-                allMovies.filter(m => m.status === target)
+            } else if (currentViewMode === 'archive') {
+                sortedList.filter(m => m.status === 'Watched')
                     .filter(m => m.title.toLowerCase().includes(fA) || (m.series && m.series.toLowerCase().includes(fA)))
                     .forEach(m => cols.alt.appendChild(createCard(m)));
-
-            } else if (currentViewMode === 'wishlist') {
-                const wishlistItems = allMovies.filter(m => m.status === 'Watchlist');
-
-                const sortByReleaseDate = (a, b) => {
-                    const dA = parseReleaseDate(a.release_date);
-                    const dB = parseReleaseDate(b.release_date);
-                    if (dA === null && dB === null) return 0;
-                    if (dA === null) return 1;
-                    if (dB === null) return -1;
-                    return dA - dB;
-                };
-
-                wishlistItems.filter(m => {
-                    const rDate = parseReleaseDate(m.release_date);
-                    return rDate !== null && rDate <= nowSec;
-                })
-                .filter(m => m.title.toLowerCase().includes(fWR) || (m.series && m.series.toLowerCase().includes(fWR)))
-                .sort(sortByReleaseDate)
-                .forEach(m => cols.wishlistReleased.appendChild(createCard(m)));
-
-                wishlistItems.filter(m => {
-                    const rDate = parseReleaseDate(m.release_date);
-                    return rDate === null || rDate > nowSec;
-                })
-                .filter(m => m.title.toLowerCase().includes(fWU) || (m.series && m.series.toLowerCase().includes(fWU)))
-                .sort(sortByReleaseDate)
-                .forEach(m => cols.wishlistUpcoming.appendChild(createCard(m)));
             }
         }
 
@@ -385,8 +315,8 @@
                             </button>
                             
                             <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
-                                <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🍿)">🍿</button>
-                                <button onclick="updateStatus(${movie.id}, 'Backlog')" class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Collection (📦)">📦</button>
+                                <button onclick="updateStatus(${movie.id}, 'Archive')" class="p-1.5 rounded hover:bg-cyan-500/20 text-cyan-400 transition-colors" title="Move to Vault (🎬)">🎬</button>
+                                <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🏆)">🏆</button>
                             </div>
                         </div>
                     </div>
@@ -402,16 +332,14 @@
 
         function createCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const nowSec = Math.floor(Date.now() / 1000);
             const rDate = parseReleaseDate(movie.release_date);
-            const isUnreleased = movie.status === 'Watchlist' && (!rDate || rDate > nowSec);
             const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
             const typePill = movie.media_type === 'TV Show' ? '📺 TV' : '🎬 Movie';
 
             const div = document.createElement('div');
             div.dataset.id = movie.id; 
             div.dataset.series = movie.series || '';
-            div.className = `movie-card flex flex-col justify-between w-full ${isUnreleased ? 'unreleased-card' : ''}`;
+            div.className = `movie-card flex flex-col justify-between w-full`;
             
             div.innerHTML = `
                 <div>
@@ -419,7 +347,6 @@
                     <div class="p-2.5 pb-1 flex flex-col items-center">
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
                             <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
-                            ${isUnreleased ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UNRELEASED</span>` : ''}
                         </div>
                         <div class="mt-2 mb-1 w-full text-left">
                             ${hasSeries ? `<span class="inline-block text-[9px] bg-sky-600/20 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
@@ -438,11 +365,9 @@
                     <div class="flex items-center justify-between gap-1">
                         <span class="text-cyan-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${movie.genre || 'Media'}</span>
                         <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Backlog" ${['Backlog', 'Up Next'].includes(movie.status) ? 'selected' : ''}>Collection</option>
-                            <option value="Watchlist" ${movie.status === 'Watchlist' ? 'selected' : ''}>Watchlist</option>
-                            <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
-                            <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🍿</option>
-                            <option value="Not Interested" ${movie.status === 'Not Interested' ? 'selected' : ''}>Trash 🗑️</option>
+                            <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
+                            <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
+                            <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
                         </select>
                     </div>
                 </div>
@@ -457,18 +382,12 @@
             const as = document.getElementById('activeSessionBox');
             const ia = document.getElementById('inputArea');
             const av = document.getElementById('altView');
-            const wv = document.getElementById('wishlistView');
 
             if(v === 'queue') {
                 dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
-                av.style.display = 'none'; wv.style.display = 'none';
-            } else if(v === 'wishlist') {
-                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
-                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
+                av.style.display = 'none';
             } else {
-                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
-                document.getElementById('altTitle').innerText = v === 'archive' ? 'Archive' : 'The Scrap Yard';
-                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
+                dt.style.display = 'none'; qv.style.display = 'none'; av.style.display = 'block';
             }
             render();
         }
@@ -510,36 +429,6 @@
                 await supabaseClient.from('movies').delete().eq('id', editingId);
                 resetForm();
                 loadMovies();
-            }
-        }
-        
-        async function repairSortOrder() { 
-            const b = document.getElementById('repairBtn'); 
-            b.innerText = "⏳";
-            try {
-                let list = [...allMovies].sort((a,b) => a.sort_order - b.sort_order);
-                let finalOrder = []; 
-                let processedSeries = new Set();
-
-                for (let m of list) {
-                    if (processedSeries.has(m.series)) continue;
-                    if (m.series) {
-                        let buddies = list.filter(item => item.series === m.series);
-                        finalOrder.push(...buddies); 
-                        processedSeries.add(m.series);
-                    } else { 
-                        finalOrder.push(m); 
-                    }
-                }
-
-                for (let i = 0; i < finalOrder.length; i++) { 
-                    await supabaseClient.from('movies').update({ sort_order: (i + 1) * 100 }).eq('id', finalOrder[i].id); 
-                }
-                alert("Vault rebuild complete!");
-            } catch (err) {
-                alert(`Rebuild error: ${err.message}`);
-            } finally {
-                b.innerText = "🔧"; loadMovies(); 
             }
         }
 
@@ -620,8 +509,8 @@
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Backlog,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'movies_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const mToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; }).filter(x => x); await supabaseClient.from('movies').insert(mToInsert); loadMovies(); }; r.readAsText(e.target.files[0]); });
+        function downloadTemplate() { const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'movies_template.csv'; a.click(); }
+        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const mToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Archive', cover_url: cols[5]||'' }; }).filter(x => x); await supabaseClient.from('movies').insert(mToInsert); loadMovies(); }; r.readAsText(e.target.files[0]); });
 
         initAuth();
     </script>
