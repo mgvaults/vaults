@@ -17,7 +17,7 @@
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .type-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
-        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 220px; color: white; }
+        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 200px; color: white; }
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
         #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 10px; border: 2px solid #1e293b; }
@@ -109,7 +109,13 @@
             <div id="queueView">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Bookshelf Collection</h2>
-                    <input id="filterMain" type="text" oninput="render()" placeholder="Filter collection..." class="col-filter">
+                    <div class="flex items-center gap-3">
+                        <select id="sortSelect" onchange="render()" class="col-filter">
+                            <option value="title">Sort: Title / Series</option>
+                            <option value="author">Sort: Author</option>
+                        </select>
+                        <input id="filterMain" type="text" oninput="render()" placeholder="Filter collection..." class="col-filter">
+                    </div>
                 </div>
                 <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
@@ -175,7 +181,7 @@
         }
 
         async function loadBooks() { 
-            let { data, error } = await supabaseClient.from('books').select('*').order('title', { ascending: true }); 
+            let { data, error } = await supabaseClient.from('books').select('*'); 
             if (!error) { 
                 allBooks = data || []; 
                 render(); 
@@ -286,6 +292,7 @@
             const fM = document.getElementById('filterMain').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
             const fW = document.getElementById('filterWishlist') ? document.getElementById('filterWishlist').value.toLowerCase() : '';
+            const sortBy = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'title';
 
             const cols = { 
                 reading: document.getElementById('col-reading'), 
@@ -295,10 +302,43 @@
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            const sortedList = [...allBooks].sort((a, b) => a.title.localeCompare(b.title));
+            // Smart Series-Aware Sorting
+            const sortedList = [...allBooks].sort((a, b) => {
+                const aAuthor = (a.author || '').toLowerCase();
+                const bAuthor = (b.author || '').toLowerCase();
+                const aSeries = (a.series || '').trim();
+                const bSeries = (b.series || '').trim();
+                const aNum = a.series_num !== null && a.series_num !== undefined ? Number(a.series_num) : 0;
+                const bNum = b.series_num !== null && b.series_num !== undefined ? Number(b.series_num) : 0;
+
+                if (sortBy === 'author') {
+                    if (aAuthor !== bAuthor) return aAuthor.localeCompare(bAuthor);
+                    if (aSeries && bSeries) {
+                        if (aSeries.toLowerCase() !== bSeries.toLowerCase()) return aSeries.localeCompare(bSeries);
+                        return aNum - bNum;
+                    }
+                    if (aSeries && !bSeries) return -1;
+                    if (!aSeries && bSeries) return 1;
+                    return a.title.localeCompare(b.title);
+                } else {
+                    if (aSeries && bSeries && aSeries.toLowerCase() === bSeries.toLowerCase()) {
+                        return aNum - bNum;
+                    }
+                    if (aSeries && bSeries) {
+                        const sCmp = aSeries.localeCompare(bSeries);
+                        if (sCmp !== 0) return sCmp;
+                        return aNum - bNum;
+                    }
+                    const aKey = aSeries || a.title;
+                    const bKey = bSeries || b.title;
+                    const keyCmp = aKey.localeCompare(bKey);
+                    if (keyCmp !== 0) return keyCmp;
+                    return aNum - bNum;
+                }
+            });
 
             if (currentViewMode === 'queue') {
-                const activeBooks = sortedList.filter(b => b.status === 'Reading');
+                const activeBooks = [...allBooks].filter(b => b.status === 'Reading');
                 if (activeBooks.length > 0) {
                     activeBooks.forEach(b => cols.reading.appendChild(createActiveCard(b)));
                 } else {
@@ -325,7 +365,7 @@
         function createActiveCard(book) {
             const hasSeries = Boolean(book.series && book.series.trim() !== '');
             const releaseYear = parseReleaseYear(book.release_year);
-            const seriesLabel = hasSeries ? `${book.series}${book.series_num ? ' #' + book.series_num : ''}` : '';
+            const seriesLabel = hasSeries ? `${book.series}${book.series_num !== null && book.series_num !== undefined ? ' #' + book.series_num : ''}` : '';
 
             const activeBadgeStyle = hasSeries
                 ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
@@ -368,7 +408,7 @@
         function createCard(book) {
             const hasSeries = Boolean(book.series && book.series.trim() !== '');
             const releaseYear = parseReleaseYear(book.release_year);
-            const seriesLabel = hasSeries ? `${book.series}${book.series_num ? ' #' + book.series_num : ''}` : '';
+            const seriesLabel = hasSeries ? `${book.series}${book.series_num !== null && book.series_num !== undefined ? ' #' + book.series_num : ''}` : '';
 
             const div = document.createElement('div');
             div.dataset.id = book.id; 
@@ -517,7 +557,7 @@
                     const info = item.volumeInfo;
                     const title = (info.title || '').replace(/"/g, '&quot;');
                     const author = (info.authors ? info.authors.join(', ') : 'Unknown').replace(/"/g, '&quot;');
-                    const cover = info.imageLinks?.thumbnail ? info.imageLinks.thumbnail.replace('http:', 'https:') : '';
+                    const cover = info.imageLinks?.thumbnail ? info.imageLinks.thumbnail.replace('http:', 'https:').replace('zoom=1', 'zoom=2') : '';
                     const genre = (info.categories ? info.categories[0] : 'Book').replace(/"/g, '&quot;');
                     const releaseYear = info.publishedDate ? info.publishedDate.split('-')[0] : '';
                     
