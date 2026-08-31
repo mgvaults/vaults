@@ -11,7 +11,8 @@
         body { background-color: #0b0f19; color: #f1f5f9; }
         .book-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .book-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .book-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
+        .book-poster-container { width: 100%; height: 260px; background-color: #0f172a; border-radius: 0.5rem; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .book-poster-container img { width: 100%; height: 100%; object-fit: cover; }
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -229,7 +230,7 @@
                         series_num: seriesNum,
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
-                        release_date: releaseYear || cur.release_date
+                        release_year: releaseYear || cur.release_year
                     };
                     
                     const { error } = await supabaseClient.from('books').update(payload).eq('id', editingId);
@@ -242,7 +243,7 @@
                         series_num: seriesNum,
                         cover_url: cover, 
                         genre: genre || 'Book', 
-                        release_date: releaseYear, 
+                        release_year: releaseYear, 
                         status: defaultStatus
                     }]);
                     if (error) throw error;
@@ -323,18 +324,20 @@
 
         function createActiveCard(book) {
             const hasSeries = Boolean(book.series && book.series.trim() !== '');
-            const releaseYear = parseReleaseYear(book.release_date);
+            const releaseYear = parseReleaseYear(book.release_year);
             const seriesLabel = hasSeries ? `${book.series}${book.series_num ? ' #' + book.series_num : ''}` : '';
 
             const activeBadgeStyle = hasSeries
                 ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-                : 'text-amber-400 bg-amber-950/40 border-amber-800/40';
+                : 'text-sky-400 bg-sky-950/40 border-sky-800/40';
 
             const div = document.createElement('div');
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
             
             div.innerHTML = `
-                <img src="${book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${book.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
+                <div class="w-14 h-20 flex-shrink-0 bg-slate-900 rounded-md overflow-hidden flex items-center justify-center">
+                    <img src="${book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${book.title}" class="w-full h-full object-cover shadow-md" />
+                </div>
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                         ${hasSeries ? `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${seriesLabel}</span>` : `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">📚 STANDALONE</span>`}
@@ -353,7 +356,7 @@
                         </div>
                     </div>
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${book.title}</h4>
-                    <span class="text-xs text-slate-400">by ${book.author || 'Unknown'} • ${releaseYear}</span>
+                    <span class="text-xs text-slate-400">${book.author || 'Unknown'} • ${releaseYear}</span>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="text-[9px] bg-amber-900/60 text-amber-300 px-1.5 py-0.5 rounded uppercase font-semibold">📖 READING</span>
                     </div>
@@ -364,7 +367,7 @@
 
         function createCard(book) {
             const hasSeries = Boolean(book.series && book.series.trim() !== '');
-            const releaseYear = parseReleaseYear(book.release_date);
+            const releaseYear = parseReleaseYear(book.release_year);
             const seriesLabel = hasSeries ? `${book.series}${book.series_num ? ' #' + book.series_num : ''}` : '';
 
             const div = document.createElement('div');
@@ -372,14 +375,14 @@
             div.dataset.series = book.series || '';
             div.className = `book-card flex flex-col justify-between w-full`;
             
-            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-amber-400';
-            const badgeStyle = 'bg-amber-600/20 text-amber-400 border-amber-500/30';
+            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-sky-400';
+            const badgeStyle = hasSeries ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' : 'bg-sky-600/20 text-sky-400 border-sky-500/30';
 
             div.innerHTML = `
                 <div>
                     <div class="h-1.5 w-full ${topBarColor}"></div>
                     <div class="p-2.5 pb-1 flex flex-col items-center">
-                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
+                        <div class="book-poster-container shadow-inner">
                             <img src="${book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${book.title}">
                         </div>
                         <div class="mt-2 mb-1 w-full text-left">
@@ -389,7 +392,7 @@
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${book.title}</h3>
                             <button onclick='editL(${JSON.stringify(book).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
-                        <p class="text-xs text-amber-400 font-bold mt-0.5 text-left w-full truncate">by ${book.author || 'Unknown'}</p>
+                        <p class="text-xs text-amber-400 font-bold mt-0.5 text-left w-full truncate">${book.author || 'Unknown'}</p>
                         <p class="text-[11px] text-slate-400 text-left w-full">${releaseYear}</p>
                         <div class="flex flex-wrap gap-1 mt-2 w-full">
                             <span class="type-badge shadow-sm">BOOK</span>
@@ -454,7 +457,7 @@
             tIn.value = b.title; 
             if (b.cover_url) tIn.dataset.img = b.cover_url;
             if (b.genre) tIn.dataset.genre = b.genre;
-            if (b.release_date) tIn.dataset.release = b.release_date;
+            if (b.release_year) tIn.dataset.release = b.release_year;
 
             document.getElementById('formModeLabel').innerText = "Updating: " + b.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
@@ -524,7 +527,7 @@
                             ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
                                 <p class="text-sm font-bold text-white">${info.title}</p>
-                                <p class="text-xs text-amber-400 font-bold uppercase mt-0.5">by ${author} • ${releaseYear || 'TBA'}</p>
+                                <p class="text-xs text-amber-400 font-bold uppercase mt-0.5">${author} • ${releaseYear || 'TBA'}</p>
                             </div>
                         </div>
                     `;
