@@ -1,90 +1,677 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movies Collection - Currently Watching</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen p-8 flex justify-center items-start">
-
-  <!-- ==========================================
-       MOVIES CURRENTLY WATCHING COMPONENT
-     ========================================== -->
-  <div class="w-full max-w-md bg-[#0f172a] p-4 rounded-xl border border-indigo-900/50 flex flex-col gap-3 shadow-xl">
-    <span class="text-xs font-black italic tracking-wider text-indigo-400 uppercase">Currently Watching</span>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vault - Movies</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
-    <div class="flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-lg border border-slate-700/50 relative">
-      <!-- Movie Poster -->
-      <img src="https://via.placeholder.com/150x220?text=Plane+Poster" alt="Plane Movie" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0" />
+    <style>
+        body { background-color: #0b0f19; color: #f1f5f9; }
+        .movie-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+        .movie-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .movie-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
+        .column-height { min-height: 450px; border: 2px dashed rgba(255,255,255,0.05); border-radius: 24px; padding: 12px; }
+        .unreleased-card { filter: grayscale(1); opacity: 0.5; border: 1px dashed rgba(255,255,255,0.3) !important; }
+        .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
+        .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
+        #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .type-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
+        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 180px; color: white; }
+        #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
+        #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; border: 2px solid #1e293b; }
+    </style>
+</head>
+<body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
-      <!-- Details Container -->
-      <div class="flex flex-col gap-1 flex-1 min-w-0">
-        <div class="flex items-center justify-between">
-          <!-- Category Tag -->
-          <span class="text-[10px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate">
-            🎬 STANDALONE
-          </span>
-          
-          <!-- Status Dropdown Menu Container -->
-          <div class="relative status-menu-container">
-            <button onclick="toggleMenu(this)" class="p-1.5 rounded-md hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-              </svg>
+    <!-- Google Auth Screen -->
+    <div id="authScreen">
+        <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
+            <div class="mb-2 text-cyan-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-8">Authentication Required</p>
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 py-4 px-6 rounded-2xl font-black hover:bg-slate-100 transition flex items-center justify-center gap-3 uppercase tracking-wider text-sm shadow-lg">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Sign in with Google
             </button>
-            
-            <!-- Icon Dropdown Menu -->
-            <div class="dropdown-menu absolute right-0 top-full mt-1 hidden flex-row items-center gap-1 bg-[#0f172a] border border-indigo-900/80 p-1.5 rounded-lg shadow-xl z-20">
-              <button class="p-2 rounded-md hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark as Watched (🍿)">
-                <span class="text-base">🍿</span>
-              </button>
-              <button class="p-2 rounded-md hover:bg-sky-500/20 text-sky-400 transition-colors" title="Move to Watch Next (🔖)">
-                <span class="text-base">🔖</span>
-              </button>
-              <button class="p-2 rounded-md hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Backlog (📦)">
-                <span class="text-base">📦</span>
-              </button>
-            </div>
-          </div>
         </div>
-
-        <!-- Title & Year -->
-        <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">Plane</h4>
-        <span class="text-xs text-slate-400">2023</span>
-
-        <!-- Type Pill -->
-        <div class="flex items-center gap-2 mt-1">
-          <span class="text-[10px] bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded uppercase font-semibold">Movie</span>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Interactive Script for Dropdown Toggle -->
-  <script>
-    function toggleMenu(button) {
-      const container = button.closest('.status-menu-container');
-      const menu = container.querySelector('.dropdown-menu');
-      
-      document.querySelectorAll('.dropdown-menu').forEach(m => {
-        if (m !== menu) m.classList.add('hidden');
-      });
+    <!-- Main Application -->
+    <div id="mainApp" style="display: none;">
+        <div class="max-w-7xl mx-auto">
+            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
+                <div class="flex items-center gap-2">
+                   <button onclick="toggleView('queue')" title="Movies Vault" class="bg-cyan-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🎬</button>
+                   <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
+                   <button onclick="window.location.href='games.html'" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</button>
+                   <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
+                   <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
+                </div>
+                <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Movies Vault</h1>
+                <div class="flex items-center gap-2">
+                    <div class="relative group">
+                        <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair All" class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white">🔧</button>
+                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
+                        </div>
+                    </div>
+                    <button onclick="toggleView('wishlist')" title="Watch List Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-cyan-400">🪄</button>
+                    <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
+                </div>
+                <input type="file" id="csvFile" accept=".csv" class="hidden">
+            </header>
 
-      menu.classList.toggle('hidden');
-      menu.classList.toggle('flex');
-    }
+            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
+                <!-- Currently Watching (Horizontal Style with Icon Pencil Trigger) -->
+                <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
+                    <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Watching</h2>
+                    <div id="col-watching" class="flex-1 flex flex-col gap-3 justify-center"></div>
+                </div>
+                
+                <!-- Search & Entry Form -->
+                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
+                    <div class="flex flex-col gap-3 relative">
+                        <div class="text-[10px] font-black text-cyan-400 uppercase px-1 italic flex justify-between">
+                            <span id="formModeLabel">Search</span>
+                            <div class="flex gap-2">
+                                <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
+                                <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
+                            </div>
+                        </div>
+                        
+                        <input id="titleInput" type="text" oninput="searchMovies(this.value)" placeholder="Search for movie or TV show title..." class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
+                        <div id="searchResults" class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
+                        
+                        <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
+                            <div onclick="toggleType('Movie')" id="i-movie" class="type-box active" title="Movie"><span style="color:#06b6d4; font-size: 16px;">🎬</span></div>
+                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#a855f7; font-size: 16px;">📺</span></div>
+                        </div>
+                        
+                        <div class="flex gap-3 text-white relative">
+                            <div class="flex-1 relative">
+                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Collection/Franchise Series (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
+                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
+                            </div>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-cyan-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-cyan-500 transition">Commit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.status-menu-container')) {
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-          menu.classList.add('hidden');
-          menu.classList.remove('flex');
+            <!-- Queue View Layout -->
+            <div id="queueView">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Next Focus</h2>
+                            <input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                        </div>
+                        <div id="col-next" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">Backlog & Watchlist</h2>
+                            <input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
+                        </div>
+                        <div id="col-backlog" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archive / Trash Grid View -->
+            <div id="altView" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="w-44"></div>
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter titles..." class="col-filter">
+                </div>
+                <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+            </div>
+
+            <!-- Watch List View -->
+            <div id="wishlistView" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-cyan-400 font-black text-3xl uppercase tracking-widest italic">Watch List</h2>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-cyan-400 font-black text-xs uppercase tracking-[0.3em]">Released</h2>
+                            <input id="filterWishlistReleased" type="text" oninput="render()" placeholder="Filter released..." class="col-filter">
+                        </div>
+                        <div id="col-wishlist-released" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-amber-400 font-black text-xs uppercase tracking-[0.3em]">Upcoming / Unreleased</h2>
+                            <input id="filterWishlistUpcoming" type="text" oninput="render()" placeholder="Filter upcoming..." class="col-filter">
+                        </div>
+                        <div id="col-wishlist-upcoming" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let allMovies = [], editingId = null, currentViewMode = 'queue', selectedType = 'Movie';
+
+        async function initAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) showApp(); else showAuth();
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                if (session) showApp(); else showAuth();
+            });
+        }
+
+        async function loginWithGoogle() {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.href }
+            });
+            if (error) alert("OAuth error: " + error.message);
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            showAuth();
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            initSortable();
+            loadMovies();
+        }
+
+        function showAuth() {
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+
+        async function loadMovies() { 
+            let { data, error } = await supabaseClient.from('movies').select('*').order('sort_order', { ascending: true }); 
+            if (!error) { 
+                allMovies = data || []; 
+                render(); 
+            } 
+        }
+
+        function toggleType(t) { 
+            selectedType = t;
+            document.getElementById('i-movie').classList.toggle('active', t === 'Movie');
+            document.getElementById('i-tv').classList.toggle('active', t === 'TV Show');
+        }
+
+        function parseReleaseDate(val) {
+            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
+            let num = Number(val);
+            if (isNaN(num) || num <= 0) return null;
+            if (num > 32503680000) num = Math.floor(num / 1000);
+            return num;
+        }
+
+        async function submitForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            const tIn = document.getElementById('titleInput');
+            const sIn = document.getElementById('seriesInput');
+            
+            if (!tIn.value.trim()) return;
+            submitBtn.disabled = true;
+
+            try {
+                const cover = tIn.dataset.img || '';
+                const genre = tIn.dataset.genre || '';
+                const releaseDate = parseReleaseDate(tIn.dataset.release);
+                const series = sIn.value.trim() || null;
+                let defaultStatus = currentViewMode === 'wishlist' ? 'Watchlist' : 'Backlog';
+
+                if (editingId) {
+                    const cur = allMovies.find(m => m.id === editingId);
+                    const payload = { 
+                        title: tIn.value.trim(), 
+                        series, 
+                        media_type: selectedType, 
+                        cover_url: cover || cur.cover_url, 
+                        genre: genre || cur.genre,
+                        release_date: releaseDate !== null ? releaseDate : cur.release_date
+                    };
+                    
+                    if (series && series !== cur.series) { 
+                        const buddies = allMovies.filter(m => m.series === series); 
+                        if (buddies.length > 0) payload.sort_order = Math.max(...buddies.map(m => m.sort_order)) + 1; 
+                    }
+                    
+                    const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
+                    if (error) throw error;
+                } else {
+                    let next = allMovies.length > 0 ? Math.max(...allMovies.map(m => m.sort_order)) + 100 : 100;
+                    if (series) { 
+                        const buddies = allMovies.filter(m => m.series === series); 
+                        if (buddies.length > 0) next = Math.max(...buddies.map(m => m.sort_order)) + 1; 
+                    }
+                    
+                    const { error } = await supabaseClient.from('movies').insert([{ 
+                        title: tIn.value.trim(), 
+                        media_type: selectedType, 
+                        series, 
+                        cover_url: cover, 
+                        genre: genre || 'Movie', 
+                        release_date: releaseDate, 
+                        status: defaultStatus, 
+                        sort_order: next 
+                    }]);
+                    if (error) throw error;
+                }
+
+                resetForm(); 
+                await loadMovies();
+
+            } catch (err) {
+                console.error("Save failed:", err);
+                alert(`Error saving item: ${err.message || 'Check database settings'}`);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        function resetForm() { 
+            editingId = null;
+            const tIn = document.getElementById('titleInput'); 
+            tIn.value = ''; 
+            delete tIn.dataset.img; 
+            delete tIn.dataset.genre; 
+            delete tIn.dataset.release; 
+
+            document.getElementById('seriesInput').value = ''; 
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('seriesResults').classList.add('hidden');
+            document.getElementById('seriesResults').innerHTML = '';
+
+            toggleType('Movie');
+            document.getElementById('submitBtn').innerText = "Commit"; 
+            document.getElementById('formModeLabel').innerText = "Search"; 
+            document.getElementById('cancelEdit').classList.add('hidden'); 
+            document.getElementById('deleteSelectedBtn').classList.add('hidden');
+        }
+
+        function render() {
+            const fN = document.getElementById('filterNext').value.toLowerCase();
+            const fB = document.getElementById('filterBacklog').value.toLowerCase();
+            const fA = document.getElementById('filterAlt').value.toLowerCase();
+            const fWR = document.getElementById('filterWishlistReleased').value.toLowerCase();
+            const fWU = document.getElementById('filterWishlistUpcoming').value.toLowerCase();
+
+            const cols = { 
+                watching: document.getElementById('col-watching'), 
+                next: document.getElementById('col-next'), 
+                backlog: document.getElementById('col-backlog'), 
+                alt: document.getElementById('col-alt'), 
+                wishlistReleased: document.getElementById('col-wishlist-released'),
+                wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
+            };
+            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
+            
+            const nextPri = { 'Up Next': 0, 'Watching': 1 };
+            const nowSec = Math.floor(Date.now() / 1000);
+
+            if (currentViewMode === 'queue') {
+                const activeMovies = allMovies.filter(m => m.status === 'Watching');
+                if (activeMovies.length > 0) {
+                    activeMovies.forEach(m => cols.watching.appendChild(createActiveCard(m)));
+                } else {
+                    cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
+                }
+                
+                allMovies.filter(m => ['Up Next'].includes(m.status))
+                    .filter(m => m.title.toLowerCase().includes(fN) || (m.series && m.series.toLowerCase().includes(fN)))
+                    .sort((a,b) => nextPri[a.status] - nextPri[b.status] || a.sort_order - b.sort_order)
+                    .forEach(m => cols.next.appendChild(createCard(m)));
+
+                allMovies.filter(m => ['Backlog', 'Watchlist'].includes(m.status))
+                    .filter(m => m.title.toLowerCase().includes(fB) || (m.series && m.series.toLowerCase().includes(fB)))
+                    .forEach(m => cols.backlog.appendChild(createCard(m)));
+
+            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
+                const target = currentViewMode === 'archive' ? 'Watched' : 'Not Interested';
+                allMovies.filter(m => m.status === target)
+                    .filter(m => m.title.toLowerCase().includes(fA) || (m.series && m.series.toLowerCase().includes(fA)))
+                    .forEach(m => cols.alt.appendChild(createCard(m)));
+
+            } else if (currentViewMode === 'wishlist') {
+                const wishlistItems = allMovies.filter(m => m.status === 'Watchlist');
+
+                const sortByReleaseDate = (a, b) => {
+                    const dA = parseReleaseDate(a.release_date);
+                    const dB = parseReleaseDate(b.release_date);
+                    if (dA === null && dB === null) return 0;
+                    if (dA === null) return 1;
+                    if (dB === null) return -1;
+                    return dA - dB;
+                };
+
+                wishlistItems.filter(m => {
+                    const rDate = parseReleaseDate(m.release_date);
+                    return rDate !== null && rDate <= nowSec;
+                })
+                .filter(m => m.title.toLowerCase().includes(fWR) || (m.series && m.series.toLowerCase().includes(fWR)))
+                .sort(sortByReleaseDate)
+                .forEach(m => cols.wishlistReleased.appendChild(createCard(m)));
+
+                wishlistItems.filter(m => {
+                    const rDate = parseReleaseDate(m.release_date);
+                    return rDate === null || rDate > nowSec;
+                })
+                .filter(m => m.title.toLowerCase().includes(fWU) || (m.series && m.series.toLowerCase().includes(fWU)))
+                .sort(sortByReleaseDate)
+                .forEach(m => cols.wishlistUpcoming.appendChild(createCard(m)));
+            }
+        }
+
+        // Horizontal Card Renderer for Currently Watching with Pencil Icon Hover
+        function createActiveCard(movie) {
+            const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
+            const rDate = parseReleaseDate(movie.release_date);
+            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : '';
+            const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
+
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
+            
+            div.innerHTML = `
+                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
+                <div class="flex flex-col gap-1 flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        ${hasSeries ? `<span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate">🎬 STANDALONE</span>`}
+                        
+                        <!-- Icon Dropdown pencil trigger -->
+                        <div class="relative group/menu">
+                            <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                            </button>
+                            
+                            <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
+                                <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🍿)">🍿</button>
+                                <button onclick="updateStatus(${movie.id}, 'Up Next')" class="p-1.5 rounded hover:bg-sky-500/20 text-sky-400 transition-colors" title="Move to Next Focus (🔖)">🔖</button>
+                                <button onclick="updateStatus(${movie.id}, 'Backlog')" class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Backlog (📦)">📦</button>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
+                    <span class="text-xs text-slate-400">${releaseYear}</span>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[9px] bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded uppercase font-semibold">${typePill}</span>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        // Vertical Standard Card Renderer
+        function createCard(movie) {
+            const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
+            const nowSec = Math.floor(Date.now() / 1000);
+            const rDate = parseReleaseDate(movie.release_date);
+            const isUnreleased = movie.status === 'Watchlist' && (!rDate || rDate > nowSec);
+            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
+            const typePill = movie.media_type === 'TV Show' ? '📺 TV' : '🎬 Movie';
+
+            const div = document.createElement('div');
+            div.dataset.id = movie.id; 
+            div.dataset.series = movie.series || '';
+            div.className = `movie-card flex flex-col justify-between w-full ${isUnreleased ? 'unreleased-card' : ''}`;
+            
+            div.innerHTML = `
+                <div>
+                    <div class="h-1.5 w-full ${hasSeries ? 'bg-sky-500' : 'bg-cyan-500'}"></div>
+                    <div class="p-2.5 pb-1 flex flex-col items-center">
+                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
+                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
+                            ${isUnreleased ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UNRELEASED</span>` : ''}
+                        </div>
+                        <div class="mt-2 mb-1 w-full text-left">
+                            ${hasSeries ? `<span class="inline-block text-[9px] bg-sky-600/20 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
+                        </div>
+                        <div class="flex justify-between items-start gap-1.5 w-full">
+                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
+                            <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
+                        <div class="flex flex-wrap gap-1 mt-2 w-full">
+                            <span class="type-badge shadow-sm">${typePill}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-cyan-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${movie.genre || 'Media'}</span>
+                        <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+                            <option value="Backlog" ${movie.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                            <option value="Watchlist" ${movie.status === 'Watchlist' ? 'selected' : ''}>Watchlist</option>
+                            <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
+                            <option value="Up Next" ${movie.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                            <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🍿</option>
+                            <option value="Not Interested" ${movie.status === 'Not Interested' ? 'selected' : ''}>Trash 🗑️</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        function toggleView(v) { 
+            currentViewMode = v;
+            const qv = document.getElementById('queueView');
+            const dt = document.getElementById('dashboardTop');
+            const as = document.getElementById('activeSessionBox');
+            const ia = document.getElementById('inputArea');
+            const av = document.getElementById('altView');
+            const wv = document.getElementById('wishlistView');
+
+            if(v === 'queue') {
+                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                av.style.display = 'none'; wv.style.display = 'none';
+            } else if(v === 'wishlist') {
+                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
+                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
+            } else {
+                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
+                document.getElementById('altTitle').innerText = v === 'archive' ? 'Archive' : 'The Scrap Yard';
+                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
+            }
+            render();
+        }
+
+        function editL(m) { 
+            editingId = m.id; 
+            const dt = document.getElementById('dashboardTop');
+            const as = document.getElementById('activeSessionBox');
+            const ia = document.getElementById('inputArea');
+            dt.style.display = 'grid';
+            
+            if (currentViewMode !== 'queue') {
+                as.style.display = 'none';
+                ia.classList.remove('lg:col-span-7');
+                ia.classList.add('lg:col-span-12');
+            }
+
+            window.scrollTo({top:0, behavior:'smooth'}); 
+            
+            const tIn = document.getElementById('titleInput');
+            tIn.value = m.title; 
+            if (m.cover_url) tIn.dataset.img = m.cover_url;
+            if (m.genre) tIn.dataset.genre = m.genre;
+            if (m.release_date !== null && m.release_date !== undefined) tIn.dataset.release = m.release_date;
+
+            document.getElementById('formModeLabel').innerText = "Updating: " + m.title; 
+            document.getElementById('cancelEdit').classList.remove('hidden'); 
+            document.getElementById('deleteSelectedBtn').classList.remove('hidden');
+            
+            toggleType(m.media_type || 'Movie');
+            document.getElementById('seriesInput').value = m.series || ''; 
+        }
+
+        function exitEditMode() { resetForm(); toggleView(currentViewMode); }
+
+        async function deleteSelectedFromForm() {
+            if (!editingId) return;
+            if (confirm("Are you sure you want to delete this title?")) {
+                await supabaseClient.from('movies').delete().eq('id', editingId);
+                resetForm();
+                loadMovies();
+            }
+        }
+        
+        async function repairSortOrder() { 
+            const b = document.getElementById('repairBtn'); 
+            b.innerText = "⏳";
+            try {
+                let list = [...allMovies].sort((a,b) => a.sort_order - b.sort_order);
+                let finalOrder = []; 
+                let processedSeries = new Set();
+
+                for (let m of list) {
+                    if (processedSeries.has(m.series)) continue;
+                    if (m.series) {
+                        let buddies = list.filter(item => item.series === m.series);
+                        finalOrder.push(...buddies); 
+                        processedSeries.add(m.series);
+                    } else { 
+                        finalOrder.push(m); 
+                    }
+                }
+
+                for (let i = 0; i < finalOrder.length; i++) { 
+                    await supabaseClient.from('movies').update({ sort_order: (i + 1) * 100 }).eq('id', finalOrder[i].id); 
+                }
+                alert("Vault rebuild complete!");
+            } catch (err) {
+                alert(`Rebuild error: ${err.message}`);
+            } finally {
+                b.innerText = "🔧"; loadMovies(); 
+            }
+        }
+
+        async function updateStatus(id, s) { await supabaseClient.from('movies').update({ status:s }).eq('id', id); loadMovies(); }
+        
+        function initSortable() { 
+            ['col-next', 'col-backlog'].forEach(id => { 
+                const el = document.getElementById(id);
+                if (!el) return;
+                new Sortable(el, { 
+                    group: 'movies', 
+                    animation: 250, 
+                    onEnd: async (evt) => { 
+                        let targetS = 'Backlog'; 
+                        if(evt.to.id === 'col-next') targetS = 'Up Next'; 
+                        const items = Array.from(evt.to.children); 
+                        for(let i=0; i<items.length; i++) {
+                            await supabaseClient.from('movies').update({ sort_order: (i + 1) * 100, status: targetS }).eq('id', items[i].dataset.id); 
+                        }
+                        loadMovies(); 
+                    } 
+                }); 
+            }); 
+        }
+
+        function filterSeriesDropdown(val) {
+            const sr = document.getElementById('seriesResults');
+            const existingSeries = Array.from(new Set(allMovies.map(m => m.series).filter(s => s && s.trim() !== '')));
+            const filtered = existingSeries.filter(s => s.toLowerCase().includes(val.toLowerCase().trim()));
+
+            if (filtered.length === 0) { sr.classList.add('hidden'); return; }
+            sr.innerHTML = filtered.map(s => `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`).join('');
+            sr.classList.remove('hidden');
+        }
+
+        function selectSeries(name) {
+            document.getElementById('seriesInput').value = name;
+            document.getElementById('seriesResults').classList.add('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { document.getElementById('seriesResults').classList.add('hidden'); }
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { document.getElementById('searchResults').classList.add('hidden'); }
         });
-      }
-    });
-  </script>
 
+        // TMDb or Search endpoint fallback handler
+        async function searchMovies(q) { 
+            const r = document.getElementById('searchResults'); 
+            const trimmedQuery = q ? q.trim() : '';
+
+            if (trimmedQuery.length < 2) { r.classList.add('hidden'); r.innerHTML = ''; return; } 
+
+            try {
+                const response = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                    body: JSON.stringify({ query: trimmedQuery })
+                });
+
+                const results = await response.json();
+                if (!results || results.length === 0) { r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; r.classList.remove('hidden'); return; }
+
+                r.innerHTML = results.map(m => {
+                    const title = (m.title || m.name || '').replace(/"/g, '&quot;');
+                    const cover = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
+                    const genre = m.media_type === 'tv' ? 'TV Show' : 'Movie';
+                    const releaseStr = m.release_date || m.first_air_date || '';
+                    const release = releaseStr ? Math.floor(new Date(releaseStr).getTime() / 1000) : '';
+                    const yearLabel = releaseStr ? releaseStr.split('-')[0] : 'TBA';
+                    
+                    return `
+                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${release}&quot;)" 
+                             class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
+                            ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
+                            <div>
+                                <p class="text-sm font-bold text-white">${m.title || m.name}</p>
+                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${yearLabel}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join(''); 
+                r.classList.remove('hidden');
+            } catch (err) {
+                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
+                r.classList.remove('hidden');
+            }
+        }
+
+        function selectMovie(n, i, g, r) { 
+            const tIn = document.getElementById('titleInput'); 
+            tIn.value = n; 
+            document.getElementById('searchResults').classList.add('hidden'); 
+            if (i) tIn.dataset.img = i;
+            if (g) tIn.dataset.genre = g;
+            const parsedDate = parseReleaseDate(r);
+            if (parsedDate !== null) tIn.dataset.release = parsedDate; else delete tIn.dataset.release;
+            
+            toggleType(g === 'TV Show' ? 'TV Show' : 'Movie');
+            document.getElementById('seriesInput').focus();
+        }
+
+        function downloadTemplate() { const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Backlog,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'movies_template.csv'; a.click(); }
+        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const mToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; }).filter(x => x); await supabaseClient.from('movies').insert(mToInsert); loadMovies(); }; r.readAsText(e.target.files[0]); });
+
+        initAuth();
+    </script>
 </body>
 </html>
