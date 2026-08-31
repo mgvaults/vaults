@@ -24,7 +24,6 @@
 </head>
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
-    <!-- Auth Screen -->
     <div id="authScreen">
         <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
             <div class="mb-2 text-cyan-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
@@ -41,7 +40,6 @@
         </div>
     </div>
 
-    <!-- Main Application -->
     <div id="mainApp" style="display: none;">
         <div class="max-w-7xl mx-auto">
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
@@ -67,13 +65,11 @@
             </header>
 
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
-                <!-- Currently Watching Horizontal Card -->
                 <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
                     <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Watching 👁️</h2>
                     <div id="col-watching" class="flex-1 flex flex-col gap-3 justify-center"></div>
                 </div>
                 
-                <!-- Search & Entry Form -->
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
                     <div class="flex flex-col gap-3 relative">
                         <div class="text-[10px] font-black text-cyan-400 uppercase px-1 italic flex justify-between">
@@ -103,7 +99,6 @@
                 </div>
             </div>
 
-            <!-- Main Library View -->
             <div id="queueView">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Vault Collection</h2>
@@ -112,7 +107,6 @@
                 <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
-            <!-- Watched Trophy Archive View -->
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
@@ -177,33 +171,24 @@
             document.getElementById('i-tv').classList.toggle('active', t === 'TV Show');
         }
 
-        // Robust date parser: Handles Unix timestamps (seconds/ms), YYYY-MM-DD strings, or YYYY numbers
         function parseReleaseYear(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
-            
-            // Handle plain year string/number like 2024 or "2024"
             if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
             if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
-
-            // Handle date string formatted as YYYY-MM-DD
             if (typeof val === 'string' && val.includes('-')) {
                 const yearPart = val.split('-')[0];
                 if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
             }
-
-            // Handle Unix Timestamp (seconds or milliseconds)
             let num = Number(val);
             if (!isNaN(num) && num > 0) {
-                if (num > 32503680000) num = Math.floor(num / 1000); // convert ms to sec if needed
+                if (num > 32503680000) num = Math.floor(num / 1000);
                 const dateObj = new Date(num * 1000);
                 if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
             }
-
             return 'TBA';
         }
 
-        // Helper to serialize timestamp for database saving
-        function parseReleaseYear(val) {
+        function parseReleaseDate(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
             let num = Number(val);
             if (isNaN(num) || num <= 0) return null;
@@ -222,7 +207,7 @@
             try {
                 const cover = tIn.dataset.img || '';
                 const genre = tIn.dataset.genre || '';
-                const ReleaseYear = parseReleaseYear(tIn.dataset.release);
+                const releaseDate = parseReleaseDate(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
 
                 if (editingId) {
@@ -233,7 +218,7 @@
                         media_type: selectedType, 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
-                        release_date: ReleaseYear !== null ? ReleaseYear : cur.release_date
+                        release_date: releaseDate !== null ? releaseDate : cur.release_date
                     };
                     
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
@@ -245,7 +230,7 @@
                         series, 
                         cover_url: cover, 
                         genre: genre || 'Movie', 
-                        release_date: ReleaseYear, 
+                        release_date: releaseDate, 
                         status: 'Archive'
                     }]);
                     if (error) throw error;
@@ -294,7 +279,6 @@
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            // Sort Alphabetically
             const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
 
             if (currentViewMode === 'queue') {
@@ -321,6 +305,7 @@
             const releaseYear = parseReleaseYear(movie.release_date);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
 
+            // Light Blue for Standalone, Orange for Series
             const activeBadgeStyle = hasSeries
                 ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
                 : 'text-cyan-400 bg-cyan-950/40 border-cyan-800/40';
@@ -367,7 +352,7 @@
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
             
-            // Dynamic color styling: Orange for Series, Cyan/Blue for Standalone
+            // Light Blue for Standalone, Orange for Series
             const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
             const badgeStyle = hasSeries 
                 ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
@@ -534,7 +519,7 @@
             document.getElementById('searchResults').classList.add('hidden'); 
             if (i) tIn.dataset.img = i;
             if (g) tIn.dataset.genre = g;
-            const parsedDate = parseReleaseYear(r);
+            const parsedDate = parseReleaseDate(r);
             if (parsedDate !== null) tIn.dataset.release = parsedDate; else delete tIn.dataset.release;
             
             toggleType(g === 'TV Show' ? 'TV Show' : 'Movie');
