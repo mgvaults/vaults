@@ -107,7 +107,10 @@
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
         const TMDB_API_KEY = 'cc8704bb1bd344f8aaa7309acb9c3e1f';
 
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true }
+        });
+        
         let allMovies = [];
         let newlyAddedId = null;
         let editingMovieId = null;
@@ -115,8 +118,12 @@
         const CURRENT_YEAR = new Date().getFullYear();
 
         async function initAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showApp(); else showAuth();
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) showApp(); else showAuth();
+            } catch (e) {
+                showApp();
+            }
             supabaseClient.auth.onAuthStateChange((_e, s) => { if (s) showApp(); else showAuth(); });
         }
 
@@ -140,11 +147,13 @@
 
         async function loadMovies() {
             let { data, error } = await supabaseClient.from('movies').select('*');
-            if (!error) { 
-                allMovies = data || []; 
-                render(); 
-                updateActiveSession(); 
+            if (error) {
+                console.error("Supabase load error:", error);
+                return;
             }
+            allMovies = data || []; 
+            render(); 
+            updateActiveSession(); 
         }
 
         function sortAlphabetically() {
@@ -164,7 +173,7 @@
                         <div>
                             <h4 class="font-black text-white text-base leading-tight">${activeMovie.title}</h4>
                             <p class="text-xs text-slate-400 mt-1">${activeMovie.release_year || 'N/A'}</p>
-                            ${activeMovie.series ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-[150px]">⚡ ${activeMovie.series}</span></div>` : ''}
+                            ${activeMovie.series ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-[150px]">⚡ ${activeMovie.series}</span></div>` : `<div class="mt-1"><span class="inline-block text-[9px] bg-sky-600/20 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-[150px]">🎬 Standalone</span></div>`}
                             <span class="inline-block mt-2 text-[10px] bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 px-2 py-0.5 rounded-md font-bold uppercase block w-fit">${activeMovie.genre || 'Movie'}</span>
                         </div>
                     </div>
@@ -271,7 +280,6 @@
                 .forEach(movie => {
                     const yearNum = parseInt(movie.release_year);
                     const isUpcomingYear = !isNaN(yearNum) && yearNum > CURRENT_YEAR;
-                    const isReturningSeries = movie.is_returning_series;
                     const hasSeries = Boolean(movie.series);
                     
                     const card = document.createElement('div');
@@ -279,29 +287,28 @@
                     
                     card.innerHTML = `
                         <div>
-                            <div class="h-2 w-full ${hasSeries ? 'bg-orange-500' : 'bg-sky-400'}"></div>
+                            <div class="h-1.5 w-full ${hasSeries ? 'bg-orange-500' : 'bg-sky-400'}"></div>
                             
-                            <div class="p-3">
+                            <div class="p-2.5 pb-1">
                                 <div class="relative">
                                     <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="rounded-lg">
                                     ${isUpcomingYear ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` : ''}
-                                    ${isReturningSeries && !isUpcomingYear ? `<span class="absolute top-2 right-2 bg-cyan-900/90 text-cyan-200 border border-cyan-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">📺 Season TBA</span>` : ''}
                                 </div>
                                 
-                                <div class="flex justify-between items-start gap-2 mt-3">
+                                <div class="flex justify-between items-start gap-1.5 mt-1.5">
                                     <h3 class="font-bold text-sm text-white leading-snug line-clamp-2">${movie.title}</h3>
-                                    <button onclick="editMovie(${movie.id})" title="Edit Title" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition">✏️</button>
+                                    <button onclick="editMovie(${movie.id})" title="Edit Title" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                                 </div>
 
-                                <p class="text-xs text-slate-400 mt-1">${movie.release_year || 'N/A'}</p>
-                                ${hasSeries ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span></div>` : ''}
+                                <p class="text-xs text-slate-400 mt-0.5">${movie.release_year || 'N/A'}</p>
+                                ${hasSeries ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span></div>` : `<div class="mt-1"><span class="inline-block text-[9px] bg-sky-600/20 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span></div>`}
                             </div>
                         </div>
 
-                        <div class="px-3 pb-3 mt-1 flex flex-col gap-1.5 text-xs border-t border-slate-800/80 pt-2">
+                        <div class="px-2.5 pb-2 mt-0.5 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                             <div class="flex items-center justify-between gap-1">
                                 <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[80px]">${movie.genre || 'Movie'}</span>
-                                <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[11px] py-1 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+                                <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[11px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
                                     <option value="Archives" ${movie.status !== 'Watching' && movie.status !== 'Watched' && movie.status !== 'Upcoming Season' ? 'selected' : ''}>Archives</option>
                                     <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
                                     <option value="Upcoming Season" ${movie.status === 'Upcoming Season' ? 'selected' : ''}>Upcoming ⏳</option>
@@ -353,7 +360,6 @@
 
         async function fetchDetailsAndAdd(id, mediaType, title, release_year, genre, cover_url) {
             let series = null;
-            let is_returning_series = false;
 
             try {
                 const res = await fetch(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${TMDB_API_KEY}`);
@@ -362,28 +368,32 @@
                 if (mediaType === 'movie' && detail.belongs_to_collection) {
                     series = detail.belongs_to_collection.name.replace(/ Collection$/i, '');
                 }
-                if (mediaType === 'tv' && detail.status === 'Returning Series') {
-                    is_returning_series = true;
-                }
             } catch (e) {
                 console.log("Could not fetch collection details", e);
             }
 
-            await addMovieFromApi(title, release_year, genre, cover_url, series, is_returning_series);
+            await addMovieFromApi(title, release_year, genre, cover_url, series);
         }
 
-        async function addMovieFromApi(title, release_year, genre, cover_url, series, is_returning_series) {
+        async function addMovieFromApi(title, release_year, genre, cover_url, series) {
             resetEditForm();
             
-            const { data, error } = await supabaseClient.from('movies').insert([{ 
-                title, 
-                release_year, 
-                genre, 
-                cover_url, 
-                series, 
-                is_returning_series,
+            const payload = { 
+                title: title, 
+                release_year: release_year, 
+                genre: genre, 
+                cover_url: cover_url, 
+                series: series, 
                 status: 'Archives' 
-            }]).select();
+            };
+
+            const { data, error } = await supabaseClient.from('movies').insert([payload]).select();
+
+            if (error) {
+                alert("Failed to save to database: " + error.message);
+                console.error("Supabase insert error:", error);
+                return;
+            }
 
             if (data && data[0]) {
                 newlyAddedId = data[0].id;
@@ -400,9 +410,11 @@
             if (!title) return alert('Please enter a title');
 
             if (editingMovieId) {
-                await supabaseClient.from('movies').update({ title, genre, series }).eq('id', editingMovieId);
+                const { error } = await supabaseClient.from('movies').update({ title, genre, series }).eq('id', editingMovieId);
+                if (error) alert("Update error: " + error.message);
             } else {
-                const { data } = await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]).select();
+                const { data, error } = await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]).select();
+                if (error) alert("Insert error: " + error.message);
                 if (data && data[0]) {
                     newlyAddedId = data[0].id;
                 }
