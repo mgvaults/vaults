@@ -242,7 +242,7 @@
                         media_type: selectedType, 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
-                        release_date: releaseDate !== null ? releaseDate : cur.release_date
+                        release_year: releaseDate !== null ? releaseDate : cur.release_year
                     };
                     
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
@@ -254,7 +254,7 @@
                         series, 
                         cover_url: cover, 
                         genre: genre || 'Movie', 
-                        release_date: releaseDate, 
+                        release_year: releaseDate, 
                         status: 'Archive'
                     }]);
                     if (error) throw error;
@@ -338,7 +338,7 @@
 
         function createActiveCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const releaseYear = parseReleaseYear(movie.release_date);
+            const releaseYear = parseReleaseYear(movie.release_year);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
 
             const activeBadgeStyle = hasSeries
@@ -379,7 +379,7 @@
 
         function createCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const releaseYear = parseReleaseYear(movie.release_date);
+            const releaseYear = parseReleaseYear(movie.release_year);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV' : '🎬 Movie';
 
             const div = document.createElement('div');
@@ -474,7 +474,7 @@
             tIn.value = m.title; 
             if (m.cover_url) tIn.dataset.img = m.cover_url;
             if (m.genre) tIn.dataset.genre = m.genre;
-            if (m.release_date !== null && m.release_date !== undefined) tIn.dataset.release = m.release_date;
+            if (m.release_year !== null && m.release_year !== undefined) tIn.dataset.release = m.release_year;
 
             document.getElementById('formModeLabel').innerText = "Updating: " + m.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
