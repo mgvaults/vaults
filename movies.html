@@ -59,7 +59,9 @@
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
                         </div>
                     </div>
+                    <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-amber-600">⭐</button>
                     <button onclick="toggleView('archive')" title="Watched Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="toggleView('trash')" title="Trash Heap" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
@@ -107,6 +109,15 @@
                 <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
+            <div id="wishlistView" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="w-44"></div>
+                    <h2 class="font-black text-2xl uppercase tracking-widest italic text-amber-400 text-center">Wishlist ⭐</h2>
+                    <input id="filterWish" type="text" oninput="render()" placeholder="Filter wishlist..." class="col-filter">
+                </div>
+                <div id="col-wish" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+            </div>
+
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
@@ -114,6 +125,15 @@
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter titles..." class="col-filter">
                 </div>
                 <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+            </div>
+
+            <div id="trashView" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="w-44"></div>
+                    <h2 class="font-black text-2xl uppercase tracking-widest italic text-rose-400 text-center">Trash Heap 🗑️</h2>
+                    <input id="filterTrash" type="text" oninput="render()" placeholder="Filter trash..." class="col-filter">
+                </div>
+                <div id="col-trash" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
         </div>
     </div>
@@ -190,6 +210,10 @@
 
         function parseReleaseDate(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
+            let strVal = String(val).trim();
+            if (/^\d{4}$/.test(strVal)) {
+                return Math.floor(new Date(`${strVal}-01-01`).getTime() / 1000);
+            }
             let num = Number(val);
             if (isNaN(num) || num <= 0) return null;
             if (num > 32503680000) num = Math.floor(num / 1000);
@@ -270,12 +294,16 @@
 
         function render() {
             const fM = document.getElementById('filterMain').value.toLowerCase();
+            const fW = document.getElementById('filterWish').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
+            const fT = document.getElementById('filterTrash').value.toLowerCase();
 
             const cols = { 
                 watching: document.getElementById('col-watching'), 
                 main: document.getElementById('col-main'),
-                alt: document.getElementById('col-alt')
+                wish: document.getElementById('col-wish'),
+                alt: document.getElementById('col-alt'),
+                trash: document.getElementById('col-trash')
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
@@ -289,14 +317,22 @@
                     cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
                 }
                 
-                sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
+                sortedList.filter(m => !['Watching', 'Watched', 'Wishlist', 'Trash'].includes(m.status))
                     .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
                     .forEach(m => cols.main.appendChild(createCard(m)));
 
+            } else if (currentViewMode === 'wishlist') {
+                sortedList.filter(m => m.status === 'Wishlist')
+                    .filter(m => m.title.toLowerCase().includes(fW) || (m.series && m.series.toLowerCase().includes(fW)))
+                    .forEach(m => cols.wish.appendChild(createCard(m)));
             } else if (currentViewMode === 'archive') {
                 sortedList.filter(m => m.status === 'Watched')
                     .filter(m => m.title.toLowerCase().includes(fA) || (m.series && m.series.toLowerCase().includes(fA)))
                     .forEach(m => cols.alt.appendChild(createCard(m)));
+            } else if (currentViewMode === 'trash') {
+                sortedList.filter(m => m.status === 'Trash')
+                    .filter(m => m.title.toLowerCase().includes(fT) || (m.series && m.series.toLowerCase().includes(fT)))
+                    .forEach(m => cols.trash.appendChild(createCard(m)));
             }
         }
 
@@ -305,7 +341,6 @@
             const releaseYear = parseReleaseYear(movie.release_date);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
 
-            // Light Blue for Standalone, Orange for Series
             const activeBadgeStyle = hasSeries
                 ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
                 : 'text-cyan-400 bg-cyan-950/40 border-cyan-800/40';
@@ -352,7 +387,6 @@
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
             
-            // Light Blue for Standalone, Orange for Series
             const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
             const badgeStyle = hasSeries 
                 ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
@@ -382,9 +416,11 @@
                     <div class="flex items-center justify-between gap-1">
                         <span class="text-cyan-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${movie.genre || 'Media'}</span>
                         <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
+                            <option value="Archive" ${!['Watching', 'Watched', 'Wishlist', 'Trash'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
                             <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
+                            <option value="Wishlist" ${movie.status === 'Wishlist' ? 'selected' : ''}>Wishlist ⭐</option>
                             <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
+                            <option value="Trash" ${movie.status === 'Trash' ? 'selected' : ''}>Trash 🗑️</option>
                         </select>
                     </div>
                 </div>
@@ -395,16 +431,26 @@
         function toggleView(v) { 
             currentViewMode = v;
             const qv = document.getElementById('queueView');
+            const wv = document.getElementById('wishlistView');
             const dt = document.getElementById('dashboardTop');
             const as = document.getElementById('activeSessionBox');
             const ia = document.getElementById('inputArea');
             const av = document.getElementById('altView');
+            const tv = document.getElementById('trashView');
+
+            // Hide all views first
+            qv.style.display = 'none';
+            wv.style.display = 'none';
+            av.style.display = 'none';
+            tv.style.display = 'none';
 
             if(v === 'queue') {
                 dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
-                av.style.display = 'none';
             } else {
-                dt.style.display = 'none'; qv.style.display = 'none'; av.style.display = 'block';
+                dt.style.display = 'none';
+                if(v === 'wishlist') wv.style.display = 'block';
+                else if(v === 'archive') av.style.display = 'block';
+                else if(v === 'trash') tv.style.display = 'block';
             }
             render();
         }
@@ -509,7 +555,7 @@
                 r.classList.remove('hidden');
             } catch (err) {
                 r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
-                r.classList.remove('hidden');
+                r.classList.add('hidden');
             }
         }
 
