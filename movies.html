@@ -395,15 +395,14 @@
 
             if (editingMovieId) {
                 await supabaseClient.from('movies').update({ title, genre, series }).eq('id', editingMovieId);
-                resetEditForm();
             } else {
                 const { data } = await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]).select();
                 if (data && data[0]) {
                     newlyAddedId = data[0].id;
                 }
-                resetEditForm();
             }
 
+            resetEditForm();
             loadMovies();
         }
 
