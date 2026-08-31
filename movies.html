@@ -69,11 +69,14 @@
                 </div>
 
                 <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800/80 rounded-[2rem] p-6 flex flex-col gap-4">
-                    <div class="text-[11px] font-black italic uppercase tracking-widest text-indigo-400">DATABASE SEARCH / ENTRY</div>
+                    <div class="flex justify-between items-center">
+                        <div id="entryHeaderLabel" class="text-[11px] font-black italic uppercase tracking-widest text-indigo-400">DATABASE SEARCH / ENTRY</div>
+                        <button id="deleteEntryBtn" onclick="deleteSelectedMovie()" class="hidden bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 font-bold text-xs px-3 py-1 rounded-lg transition">🗑️ Delete Title</button>
+                    </div>
                     
                     <div class="relative">
                         <input id="apiSearchInput" type="text" placeholder="Search for movie or TV show title..." onkeypress="if(event.key==='Enter') searchTmdb()" class="w-full bg-[#0b0f19] border border-slate-800/80 rounded-2xl p-4 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition">
-                        <button onclick="searchTmdb()" class="absolute right-3 top-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-4 py-2 rounded-xl transition">SEARCH API</button>
+                        <button id="apiSearchBtn" onclick="searchTmdb()" class="absolute right-3 top-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs px-4 py-2 rounded-xl transition">SEARCH API</button>
                     </div>
 
                     <div id="searchResultsDropdown" class="hidden max-h-48 overflow-y-auto bg-[#0b0f19] border border-slate-800 rounded-xl p-2 flex flex-col gap-2"></div>
@@ -81,7 +84,7 @@
                     <div class="flex gap-3 mt-1">
                         <input id="manualGenre" type="text" placeholder="Release Year / Genre" class="flex-1 bg-[#0b0f19] border border-slate-800/80 rounded-2xl p-4 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition">
                         <input id="manualSeries" type="text" placeholder="Series / Collection (Optional)" class="flex-1 bg-[#0b0f19] border border-slate-800/80 rounded-2xl p-4 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition">
-                        <button onclick="commitManualMovie()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs tracking-widest px-8 rounded-2xl transition shadow-lg">COMMIT</button>
+                        <button id="commitBtn" onclick="commitManualMovie()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs tracking-widest px-8 rounded-2xl transition shadow-lg">COMMIT</button>
                     </div>
                 </div>
 
@@ -104,6 +107,7 @@
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [];
         let newlyAddedId = null;
+        let editingMovieId = null;
         let currentView = 'queue';
         const CURRENT_YEAR = new Date().getFullYear();
 
@@ -192,9 +196,46 @@
             loadMovies();
         }
 
-        async function deleteMovie(id) {
+        function editMovie(id) {
+            const movie = allMovies.find(m => m.id === id);
+            if (!movie) return;
+
+            editingMovieId = id;
+            document.getElementById('apiSearchInput').value = movie.title || '';
+            document.getElementById('manualGenre').value = movie.genre || movie.release_year || '';
+            document.getElementById('manualSeries').value = movie.series || '';
+
+            document.getElementById('entryHeaderLabel').innerText = "EDIT MOVIE ENTRY";
+            document.getElementById('entryHeaderLabel').className = "text-[11px] font-black italic uppercase tracking-widest text-amber-400";
+            
+            const commitBtn = document.getElementById('commitBtn');
+            commitBtn.innerText = "UPDATE";
+            commitBtn.className = "bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs tracking-widest px-8 rounded-2xl transition shadow-lg";
+
+            document.getElementById('deleteEntryBtn').classList.remove('hidden');
+        }
+
+        function resetEditForm() {
+            editingMovieId = null;
+            document.getElementById('apiSearchInput').value = '';
+            document.getElementById('manualGenre').value = '';
+            document.getElementById('manualSeries').value = '';
+
+            document.getElementById('entryHeaderLabel').innerText = "DATABASE SEARCH / ENTRY";
+            document.getElementById('entryHeaderLabel').className = "text-[11px] font-black italic uppercase tracking-widest text-indigo-400";
+            
+            const commitBtn = document.getElementById('commitBtn');
+            commitBtn.innerText = "COMMIT";
+            commitBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs tracking-widest px-8 rounded-2xl transition shadow-lg";
+
+            document.getElementById('deleteEntryBtn').classList.add('hidden');
+        }
+
+        async function deleteSelectedMovie() {
+            if (!editingMovieId) return;
             if (confirm("Are you sure you want to delete this title?")) {
-                await supabaseClient.from('movies').delete().eq('id', id);
+                await supabaseClient.from('movies').delete().eq('id', editingMovieId);
+                resetEditForm();
                 loadMovies();
             }
         }
@@ -207,7 +248,6 @@
 
             let listToRender = [...allMovies];
             
-            // If newly added item exists, move it to index 0
             if (newlyAddedId) {
                 const recentIdx = listToRender.findIndex(m => m.id === newlyAddedId);
                 if (recentIdx > -1) {
@@ -230,28 +270,30 @@
                     const hasSeries = Boolean(movie.series);
                     
                     const card = document.createElement('div');
-                    card.className = `media-card p-3 flex flex-col justify-between ${isUpcomingYear ? 'upcoming-card border-slate-700/50 border-dashed' : ''}`;
+                    card.className = `media-card flex flex-col justify-between ${isUpcomingYear ? 'upcoming-card border-slate-700/50 border-dashed' : ''}`;
                     
                     card.innerHTML = `
-                        <div class="h-1.5 w-full rounded-t-lg -mt-3 -mx-3 mb-2 ${hasSeries ? 'bg-orange-500' : 'bg-sky-400'}"></div>
-                        
                         <div>
-                            <div class="relative">
-                                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
-                                ${isUpcomingYear ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` : ''}
-                                ${isReturningSeries && !isUpcomingYear ? `<span class="absolute top-2 right-2 bg-cyan-900/90 text-cyan-200 border border-cyan-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">📺 Season TBA</span>` : ''}
-                            </div>
+                            <div class="h-2 w-full ${hasSeries ? 'bg-orange-500' : 'bg-sky-400'}"></div>
                             
-                            <div class="flex justify-between items-start gap-2 mt-3">
-                                <h3 class="font-bold text-sm text-white leading-snug line-clamp-2">${movie.title}</h3>
-                                <button onclick="deleteMovie(${movie.id})" title="Delete Title" class="text-slate-500 hover:text-red-400 font-bold text-base leading-none p-1 transition">✕</button>
-                            </div>
+                            <div class="p-3">
+                                <div class="relative">
+                                    <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="rounded-lg">
+                                    ${isUpcomingYear ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` : ''}
+                                    ${isReturningSeries && !isUpcomingYear ? `<span class="absolute top-2 right-2 bg-cyan-900/90 text-cyan-200 border border-cyan-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">📺 Season TBA</span>` : ''}
+                                </div>
+                                
+                                <div class="flex justify-between items-start gap-2 mt-3">
+                                    <h3 class="font-bold text-sm text-white leading-snug line-clamp-2">${movie.title}</h3>
+                                    <button onclick="editMovie(${movie.id})" title="Edit Title" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition">✏️</button>
+                                </div>
 
-                            <p class="text-xs text-slate-400 mt-1">${movie.release_year || 'N/A'}</p>
-                            ${hasSeries ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span></div>` : ''}
+                                <p class="text-xs text-slate-400 mt-1">${movie.release_year || 'N/A'}</p>
+                                ${hasSeries ? `<div class="mt-1"><span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span></div>` : ''}
+                            </div>
                         </div>
 
-                        <div class="mt-3 flex flex-col gap-1.5 text-xs border-t border-slate-800/80 pt-2">
+                        <div class="px-3 pb-3 mt-1 flex flex-col gap-1.5 text-xs border-t border-slate-800/80 pt-2">
                             <div class="flex items-center justify-between gap-1">
                                 <span class="text-indigo-400 font-bold uppercase text-[10px] truncate max-w-[80px]">${movie.genre || 'Movie'}</span>
                                 <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[11px] py-1 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
@@ -341,7 +383,7 @@
             }
 
             document.getElementById('searchResultsDropdown').classList.add('hidden');
-            document.getElementById('apiSearchInput').value = '';
+            resetEditForm();
             loadMovies();
         }
 
@@ -351,14 +393,17 @@
             const series = document.getElementById('manualSeries').value;
             if (!title) return alert('Please enter a title');
 
-            const { data } = await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]).select();
-            if (data && data[0]) {
-                newlyAddedId = data[0].id;
+            if (editingMovieId) {
+                await supabaseClient.from('movies').update({ title, genre, series }).eq('id', editingMovieId);
+                resetEditForm();
+            } else {
+                const { data } = await supabaseClient.from('movies').insert([{ title, genre, series, status: 'Archives' }]).select();
+                if (data && data[0]) {
+                    newlyAddedId = data[0].id;
+                }
+                resetEditForm();
             }
 
-            document.getElementById('apiSearchInput').value = '';
-            document.getElementById('manualGenre').value = '';
-            document.getElementById('manualSeries').value = '';
             loadMovies();
         }
 
