@@ -12,13 +12,12 @@
         body { background-color: #0b0f19; color: #f1f5f9; }
         .game-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .game-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .game-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: #0f172a; }
+        .game-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
         .column-height { min-height: 450px; border: 2px dashed rgba(255,255,255,0.05); border-radius: 24px; padding: 12px; }
         .unreleased-card { filter: grayscale(1); opacity: 0.5; border: 1px dashed rgba(255,255,255,0.3) !important; }
         .plat-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .plat-box.active { opacity: 1; transform: scale(1.08); border-color: #6366f1; box-shadow: 0 0 15px rgba(99, 102, 241, 0.6); }
         .plat-box img { width: 22px; height: 22px; object-fit: contain; }
-        .series-chained { border-left: 6px solid #fb923c !important; }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .plat-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
         .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 180px; color: white; }
@@ -74,17 +73,17 @@
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
-            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-                <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-6 rounded-[2.5rem] border border-indigo-500/20 shadow-inner flex flex-col justify-between">
+            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-start">
+                <div id="activeSessionBox" class="lg:col-span-4 bg-indigo-950/20 p-5 rounded-[2.5rem] border border-indigo-500/20 shadow-inner flex flex-col justify-between">
                     <h2 class="text-indigo-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-center text-center">Active Session</h2>
                     <div id="col-playing" class="flex-1 flex items-center justify-center"></div>
                 </div>
                 
                 <!-- Search & Entry Form -->
-                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
+                <div id="inputArea" class="lg:col-span-8 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
                     <div class="flex flex-col gap-3 relative">
                         <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between">
-                            <span id="formModeLabel">Database Search / Entry</span>
+                            <span id="formModeLabel">Search</span>
                             <div class="flex gap-2">
                                 <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
                                 <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
@@ -325,7 +324,7 @@
             selectedPlatforms = []; 
             document.querySelectorAll('.plat-box').forEach(el => el.classList.remove('active')); 
             document.getElementById('submitBtn').innerText = "Commit"; 
-            document.getElementById('formModeLabel').innerText = "Database Search / Entry"; 
+            document.getElementById('formModeLabel').innerText = "Search"; 
             document.getElementById('cancelEdit').classList.add('hidden'); 
             document.getElementById('deleteSelectedBtn').classList.add('hidden');
         }
@@ -418,32 +417,32 @@
             const div = document.createElement('div');
             div.dataset.id = game.id; 
             div.dataset.series = game.series || '';
-            div.className = `game-card flex flex-col justify-between ${hasSeries ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
+            div.className = `game-card flex flex-col justify-between w-full ${isUnreleased ? 'unreleased-card' : ''}`;
             
             div.innerHTML = `
                 <div>
                     <!-- Top Accent Banner -->
                     <div class="h-1.5 w-full ${hasSeries ? 'bg-orange-500' : 'bg-indigo-500'}"></div>
                     
-                    <div class="p-2.5 pb-1">
-                        <div class="relative">
-                            <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}" class="rounded-lg">
+                    <div class="p-2.5 pb-1 flex flex-col items-center">
+                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
+                            <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}">
                             ${isUnreleased ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` : ''}
                         </div>
 
                         <!-- Badges Moved ABOVE Title -->
-                        <div class="mt-2 mb-1">
-                            ${hasSeries ? `<span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` : `<span class="inline-block text-[9px] bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`}
+                        <div class="mt-2 mb-1 w-full text-left">
+                            ${hasSeries ? `<span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` : `<span class="inline-block text-[9px] bg-blue-600/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`}
                         </div>
                         
-                        <div class="flex justify-between items-start gap-1.5">
-                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2">${game.title}</h3>
+                        <div class="flex justify-between items-start gap-1.5 w-full">
+                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${game.title}</h3>
                             <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' title="Edit Game" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
 
-                        <p class="text-xs text-slate-400 mt-0.5">${releaseYear}</p>
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
                         
-                        <div class="flex flex-wrap gap-1 mt-2">
+                        <div class="flex flex-wrap gap-1 mt-2 w-full">
                             ${platB}
                         </div>
                     </div>
@@ -452,7 +451,7 @@
                 <!-- Card Footer Controls -->
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                     <div class="flex items-center justify-between gap-1">
-                        <span class="text-indigo-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1">${game.genre || 'Game'}</span>
+                        <span class="text-indigo-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${game.genre || 'Game'}</span>
                         <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
                             <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
                             <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
@@ -482,10 +481,10 @@
             const wv = document.getElementById('wishlistView');
 
             if(v === 'queue') {
-                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-8');
                 av.style.display = 'none'; wv.style.display = 'none';
             } else if(v === 'wishlist') {
-                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
+                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-8'); ia.classList.add('lg:col-span-12');
                 qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
             } else {
                 dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
@@ -504,7 +503,7 @@
             
             if (currentViewMode !== 'queue') {
                 as.style.display = 'none';
-                ia.classList.remove('lg:col-span-7');
+                ia.classList.remove('lg:col-span-8');
                 ia.classList.add('lg:col-span-12');
             }
 
