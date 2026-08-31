@@ -6,20 +6,18 @@
     <title>The Vault - Movies</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <style>
         body { background-color: #0b0f19; color: #f1f5f9; }
         .movie-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .movie-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
         .movie-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
-        .column-height { min-height: 450px; border: 2px dashed rgba(255,255,255,0.05); border-radius: 24px; padding: 12px; }
         .unreleased-card { filter: grayscale(1); opacity: 0.5; border: 1px dashed rgba(255,255,255,0.3) !important; }
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .type-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
-        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 180px; color: white; }
+        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 220px; color: white; }
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
         #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; border: 2px solid #1e293b; }
@@ -73,7 +71,7 @@
             </header>
 
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
-                <!-- Currently Watching (Horizontal Style with Icon Pencil Trigger) -->
+                <!-- Currently Watching Horizontal Card -->
                 <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
                     <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Watching</h2>
                     <div id="col-watching" class="flex-1 flex flex-col gap-3 justify-center"></div>
@@ -109,27 +107,16 @@
                 </div>
             </div>
 
-            <!-- Queue View Layout -->
+            <!-- Main Library View (Single Full-Width Grid) -->
             <div id="queueView">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Next Focus</h2>
-                            <input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
-                        </div>
-                        <div id="col-next" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">Backlog & Watchlist</h2>
-                            <input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
-                        </div>
-                        <div id="col-backlog" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
-                    </div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Vault Collection</h2>
+                    <input id="filterMain" type="text" oninput="render()" placeholder="Filter collection..." class="col-filter">
                 </div>
+                <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
-            <!-- Archive / Trash Grid View -->
+            <!-- Alt View (Archive Trophy Icon / Trash Icon Views) -->
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
@@ -150,14 +137,14 @@
                             <h2 class="text-cyan-400 font-black text-xs uppercase tracking-[0.3em]">Released</h2>
                             <input id="filterWishlistReleased" type="text" oninput="render()" placeholder="Filter released..." class="col-filter">
                         </div>
-                        <div id="col-wishlist-released" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
+                        <div id="col-wishlist-released" class="grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
                     </div>
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-amber-400 font-black text-xs uppercase tracking-[0.3em]">Upcoming / Unreleased</h2>
                             <input id="filterWishlistUpcoming" type="text" oninput="render()" placeholder="Filter upcoming..." class="col-filter">
                         </div>
-                        <div id="col-wishlist-upcoming" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
+                        <div id="col-wishlist-upcoming" class="grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
                     </div>
                 </div>
             </div>
@@ -195,7 +182,6 @@
         function showApp() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
-            initSortable();
             loadMovies();
         }
 
@@ -312,23 +298,20 @@
         }
 
         function render() {
-            const fN = document.getElementById('filterNext').value.toLowerCase();
-            const fB = document.getElementById('filterBacklog').value.toLowerCase();
+            const fM = document.getElementById('filterMain').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
             const fWR = document.getElementById('filterWishlistReleased').value.toLowerCase();
             const fWU = document.getElementById('filterWishlistUpcoming').value.toLowerCase();
 
             const cols = { 
                 watching: document.getElementById('col-watching'), 
-                next: document.getElementById('col-next'), 
-                backlog: document.getElementById('col-backlog'), 
+                main: document.getElementById('col-main'),
                 alt: document.getElementById('col-alt'), 
                 wishlistReleased: document.getElementById('col-wishlist-released'),
                 wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
-            
-            const nextPri = { 'Up Next': 0, 'Watching': 1 };
+
             const nowSec = Math.floor(Date.now() / 1000);
 
             if (currentViewMode === 'queue') {
@@ -339,14 +322,9 @@
                     cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
                 }
                 
-                allMovies.filter(m => ['Up Next'].includes(m.status))
-                    .filter(m => m.title.toLowerCase().includes(fN) || (m.series && m.series.toLowerCase().includes(fN)))
-                    .sort((a,b) => nextPri[a.status] - nextPri[b.status] || a.sort_order - b.sort_order)
-                    .forEach(m => cols.next.appendChild(createCard(m)));
-
-                allMovies.filter(m => ['Backlog', 'Watchlist'].includes(m.status))
-                    .filter(m => m.title.toLowerCase().includes(fB) || (m.series && m.series.toLowerCase().includes(fB)))
-                    .forEach(m => cols.backlog.appendChild(createCard(m)));
+                allMovies.filter(m => ['Backlog', 'Up Next'].includes(m.status))
+                    .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
+                    .forEach(m => cols.main.appendChild(createCard(m)));
 
             } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
                 const target = currentViewMode === 'archive' ? 'Watched' : 'Not Interested';
@@ -384,7 +362,6 @@
             }
         }
 
-        // Horizontal Card Renderer for Currently Watching with Pencil Icon Hover
         function createActiveCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
             const rDate = parseReleaseDate(movie.release_date);
@@ -400,7 +377,6 @@
                     <div class="flex items-center justify-between">
                         ${hasSeries ? `<span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate">🎬 STANDALONE</span>`}
                         
-                        <!-- Icon Dropdown pencil trigger -->
                         <div class="relative group/menu">
                             <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -410,8 +386,7 @@
                             
                             <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
                                 <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🍿)">🍿</button>
-                                <button onclick="updateStatus(${movie.id}, 'Up Next')" class="p-1.5 rounded hover:bg-sky-500/20 text-sky-400 transition-colors" title="Move to Next Focus (🔖)">🔖</button>
-                                <button onclick="updateStatus(${movie.id}, 'Backlog')" class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Backlog (📦)">📦</button>
+                                <button onclick="updateStatus(${movie.id}, 'Backlog')" class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Collection (📦)">📦</button>
                             </div>
                         </div>
                     </div>
@@ -425,7 +400,6 @@
             return div;
         }
 
-        // Vertical Standard Card Renderer
         function createCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
             const nowSec = Math.floor(Date.now() / 1000);
@@ -464,10 +438,9 @@
                     <div class="flex items-center justify-between gap-1">
                         <span class="text-cyan-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${movie.genre || 'Media'}</span>
                         <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Backlog" ${movie.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                            <option value="Backlog" ${['Backlog', 'Up Next'].includes(movie.status) ? 'selected' : ''}>Collection</option>
                             <option value="Watchlist" ${movie.status === 'Watchlist' ? 'selected' : ''}>Watchlist</option>
                             <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching</option>
-                            <option value="Up Next" ${movie.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
                             <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🍿</option>
                             <option value="Not Interested" ${movie.status === 'Not Interested' ? 'selected' : ''}>Trash 🗑️</option>
                         </select>
@@ -571,26 +544,6 @@
         }
 
         async function updateStatus(id, s) { await supabaseClient.from('movies').update({ status:s }).eq('id', id); loadMovies(); }
-        
-        function initSortable() { 
-            ['col-next', 'col-backlog'].forEach(id => { 
-                const el = document.getElementById(id);
-                if (!el) return;
-                new Sortable(el, { 
-                    group: 'movies', 
-                    animation: 250, 
-                    onEnd: async (evt) => { 
-                        let targetS = 'Backlog'; 
-                        if(evt.to.id === 'col-next') targetS = 'Up Next'; 
-                        const items = Array.from(evt.to.children); 
-                        for(let i=0; i<items.length; i++) {
-                            await supabaseClient.from('movies').update({ sort_order: (i + 1) * 100, status: targetS }).eq('id', items[i].dataset.id); 
-                        }
-                        loadMovies(); 
-                    } 
-                }); 
-            }); 
-        }
 
         function filterSeriesDropdown(val) {
             const sr = document.getElementById('seriesResults');
@@ -612,7 +565,6 @@
             if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { document.getElementById('searchResults').classList.add('hidden'); }
         });
 
-        // TMDb or Search endpoint fallback handler
         async function searchMovies(q) { 
             const r = document.getElementById('searchResults'); 
             const trimmedQuery = q ? q.trim() : '';
