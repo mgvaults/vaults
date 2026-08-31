@@ -164,7 +164,6 @@
         }
 
         async function loadMovies() { 
-            // Alphabetical Ordering directly via Supabase query
             let { data, error } = await supabaseClient.from('movies').select('*').order('title', { ascending: true }); 
             if (!error) { 
                 allMovies = data || []; 
@@ -178,6 +177,32 @@
             document.getElementById('i-tv').classList.toggle('active', t === 'TV Show');
         }
 
+        // Robust date parser: Handles Unix timestamps (seconds/ms), YYYY-MM-DD strings, or YYYY numbers
+        function parseReleaseYear(val) {
+            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
+            
+            // Handle plain year string/number like 2024 or "2024"
+            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
+            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
+
+            // Handle date string formatted as YYYY-MM-DD
+            if (typeof val === 'string' && val.includes('-')) {
+                const yearPart = val.split('-')[0];
+                if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
+            }
+
+            // Handle Unix Timestamp (seconds or milliseconds)
+            let num = Number(val);
+            if (!isNaN(num) && num > 0) {
+                if (num > 32503680000) num = Math.floor(num / 1000); // convert ms to sec if needed
+                const dateObj = new Date(num * 1000);
+                if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
+            }
+
+            return 'TBA';
+        }
+
+        // Helper to serialize timestamp for database saving
         function parseReleaseDate(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
             let num = Number(val);
@@ -221,7 +246,7 @@
                         cover_url: cover, 
                         genre: genre || 'Movie', 
                         release_date: releaseDate, 
-                        status: 'Archive' // Default status
+                        status: 'Archive'
                     }]);
                     if (error) throw error;
                 }
@@ -269,7 +294,7 @@
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            // In-Memory Alphabetical Sort Guard
+            // Sort Alphabetically
             const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
 
             if (currentViewMode === 'queue') {
@@ -280,7 +305,6 @@
                     cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
                 }
                 
-                // Everything not 'Watching' or 'Watched' stays in main Vault Collection
                 sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
                     .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
                     .forEach(m => cols.main.appendChild(createCard(m)));
@@ -294,9 +318,12 @@
 
         function createActiveCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const rDate = parseReleaseDate(movie.release_date);
-            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : '';
+            const releaseYear = parseReleaseYear(movie.release_date);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
+
+            const activeBadgeStyle = hasSeries
+                ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
+                : 'text-cyan-400 bg-cyan-950/40 border-cyan-800/40';
 
             const div = document.createElement('div');
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
@@ -305,7 +332,7 @@
                 <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/40 truncate">🎬 STANDALONE</span>`}
+                        ${hasSeries ? `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
                         
                         <div class="relative group/menu">
                             <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
@@ -332,8 +359,7 @@
 
         function createCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const rDate = parseReleaseDate(movie.release_date);
-            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
+            const releaseYear = parseReleaseYear(movie.release_date);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV' : '🎬 Movie';
 
             const div = document.createElement('div');
@@ -341,15 +367,21 @@
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
             
+            // Dynamic color styling: Orange for Series, Cyan/Blue for Standalone
+            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
+            const badgeStyle = hasSeries 
+                ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
+                : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
+
             div.innerHTML = `
                 <div>
-                    <div class="h-1.5 w-full ${hasSeries ? 'bg-sky-500' : 'bg-cyan-500'}"></div>
+                    <div class="h-1.5 w-full ${topBarColor}"></div>
                     <div class="p-2.5 pb-1 flex flex-col items-center">
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
                             <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
                         </div>
                         <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] bg-sky-600/20 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
+                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
                         </div>
                         <div class="flex justify-between items-start gap-1.5 w-full">
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
