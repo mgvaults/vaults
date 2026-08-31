@@ -3,136 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Vault - Games</title>
+    <title>The Vault</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <style>
-        body { background-color: #0b0f19; color: #f1f5f9; }
-        .game-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
-        .game-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .game-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
-        .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
-        .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
-        #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .type-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
-        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 220px; color: white; }
+        body { background-color: #0f172a; color: #f1f5f9; }
+        .game-card { background-color: #1e293b; border-radius: 1.5rem; overflow: hidden; display: flex; height: 160px; border: 1px solid rgba(255,255,255,0.1); transition: opacity 0.3s ease; }
+        .column-height { min-height: 450px; border: 2px dashed rgba(255,255,255,0.05); border-radius: 24px; padding: 12px; }
+        .unreleased-card { filter: grayscale(1); opacity: 0.45; border: 1px dashed rgba(255,255,255,0.3) !important; }
+        .plat-box { width: 44px; height: 44px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
+        .plat-box.active { opacity: 1; transform: scale(1.1); border-color: #6366f1; box-shadow: 0 0 15px rgba(99, 102, 241, 0.6); }
+        .plat-box img { width: 26px; height: 26px; object-fit: contain; }
+        .series-label { color: #fb923c; font-weight: 800; font-size: 12px; text-transform: uppercase; margin-top: 4px; }
+        .genre-label { color: #a3e635; font-weight: 800; font-size: 12px; text-transform: uppercase; }
+        .series-chained { border-left: 8px solid #fb923c !important; }
+        #authScreen { background-color: #0f172a; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .plat-badge { font-size: 11px; font-weight: 900; padding: 2px 10px; border-radius: 6px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
+        .icon-square { display: grid; grid-template-columns: 36px 36px; grid-template-rows: 36px 36px; gap: 6px; }
+        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 180px; color: white; }
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
-        #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; border: 2px solid #1e293b; }
+        #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; border: 2px solid #1e293b; }
     </style>
 </head>
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
+    <!-- Google Auth Screen -->
     <div id="authScreen">
         <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
-            <div class="mb-2 text-cyan-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
+            <div class="mb-2 text-indigo-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
             <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-8">Authentication Required</p>
             <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 py-4 px-6 rounded-2xl font-black hover:bg-slate-100 transition flex items-center justify-center gap-3 uppercase tracking-wider text-sm shadow-lg">
                 <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
                 Sign in with Google
             </button>
         </div>
     </div>
 
+    <!-- Main Application -->
     <div id="mainApp" style="display: none;">
         <div class="max-w-7xl mx-auto">
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
-                   <button onclick="toggleView('queue')" title="Games Vault" class="bg-cyan-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🎮</button>
-                   <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
-                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
+                   <button onclick="toggleView('queue')" title="Games Vault" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🏠</button>
                    <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
+                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
                    <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Games Vault</h1>
+                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">The Vault</h1>
                 <div class="flex items-center gap-2">
                     <div class="relative group">
                         <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
                         <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair All" class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white">🔧</button>
                             <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
                         </div>
                     </div>
-                    <button onclick="toggleView('wishlist')" title="Wishlist" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-amber-600">⭐</button>
-                    <button onclick="toggleView('archive')" title="Completed Games Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
-                    <button onclick="toggleView('trash')" title="Trash Heap" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
+                    <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
+                    <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
-            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
-                <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
-                    <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Playing 🎮</h2>
-                    <div id="col-playing" class="flex-1 flex flex-col gap-3 justify-center"></div>
+            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+                <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-6 rounded-[2.5rem] border border-indigo-500/20 shadow-inner">
+                    <h2 class="text-indigo-400 font-black text-sm uppercase tracking-widest mb-5 flex items-center gap-3 italic justify-center text-center text-white">Active Session</h2>
+                    <div id="col-playing" class="space-y-5"></div>
                 </div>
-                
-                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
-                    <div class="flex flex-col gap-3 relative">
-                        <div class="text-[10px] font-black text-cyan-400 uppercase px-1 italic flex justify-between">
-                            <span id="formModeLabel">Search</span>
-                            <div class="flex gap-2">
-                                <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
-                                <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
-                            </div>
+                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 shadow-2xl relative">
+                    <div class="flex flex-col gap-4 relative">
+                        <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between"><span id="formModeLabel">Database Search / Entry</span><button id="cancelEdit" onclick="exitEditMode()" class="hidden text-red-400">Cancel Edit</button></div>
+                        <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-5 rounded-2xl outline-none border border-slate-700 text-white text-base">
+                        <div id="searchResults" class="hidden absolute top-[110px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[400px] z-50 text-white"></div>
+                        <div class="flex flex-wrap justify-center gap-3 py-2 border-y border-slate-700/40">
+                            <div onclick="toggleP('steam')" id="i-steam" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"></div>
+                            <div onclick="toggleP('gog')" id="i-gog" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg"></div>
+                            <div onclick="toggleP('epic')" id="i-epic" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg"></div>
+                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box"><span style="color:#009eff; font-size: 16px;">BN</span></div>
+                            <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg"></div>
+                            <div onclick="toggleP('switch')" id="i-switch" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg"></div>
+                            <div onclick="toggleP('playstation')" id="i-playstation" class="plat-box"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg"></div>
+                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box"><span style="color:#ff9900; font-size: 20px;">A</span></div>
                         </div>
-                        
-                        <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
-                        <div id="searchResults" class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
-                        
-                        <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
-                            <div onclick="toggleType('Game')" id="i-game" class="type-box active" title="Game"><span style="color:#06b6d4; font-size: 16px;">🎮</span></div>
-                        </div>
-                        
                         <div class="flex gap-3 text-white relative">
                             <div class="flex-1 relative">
-                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Franchise / Series (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
-                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
+                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Chain Series Name" class="w-full bg-slate-900 p-4 rounded-2xl text-white border border-slate-700 text-sm font-bold italic">
+                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[200px] z-50 text-white"></div>
                             </div>
-                            <button onclick="submitForm()" id="submitBtn" class="bg-cyan-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-cyan-500 transition">Commit</button>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-12 rounded-2xl font-black uppercase text-sm text-white hover:bg-indigo-500">Commit</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="queueView">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Vault Collection</h2>
-                    <input id="filterMain" type="text" oninput="render()" placeholder="Filter collection..." class="col-filter">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div><div class="flex justify-between items-center mb-6"><h2 class="text-slate-400 font-black text-sm uppercase tracking-[0.4em]">Next Focus</h2><input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter"></div><div id="col-next" class="column-height space-y-5"></div></div>
+                    <div><div class="flex justify-between items-center mb-6"><h2 class="text-slate-500 font-black text-sm uppercase tracking-[0.4em]">Backlog & Collection</h2><input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter"></div><div id="col-backlog" class="column-height space-y-5 text-left"></div></div>
                 </div>
-                <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-            </div>
-
-            <div id="wishlistView" class="hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="w-44"></div>
-                    <h2 class="font-black text-2xl uppercase tracking-widest italic text-amber-400 text-center">Wishlist ⭐</h2>
-                    <input id="filterWish" type="text" oninput="render()" placeholder="Filter wishlist..." class="col-filter">
-                </div>
-                <div id="col-wish" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
             <div id="altView" class="hidden">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex justify-between items-center mb-10">
                     <div class="w-44"></div>
-                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-emerald-400 text-center">Completed Archive 🏆</h2>
-                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter titles..." class="col-filter">
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
                 </div>
-                <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+                <div id="col-alt" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
             </div>
 
-            <div id="trashView" class="hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="w-44"></div>
-                    <h2 class="font-black text-2xl uppercase tracking-widest italic text-rose-400 text-center">Trash Heap 🗑️</h2>
-                    <input id="filterTrash" type="text" oninput="render()" placeholder="Filter trash..." class="col-filter">
+            <div id="wishlistView" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">The Wishlist Vault</h2>
                 </div>
-                <div id="col-trash" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div>
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-indigo-400 font-black text-sm uppercase tracking-[0.3em]">Released</h2>
+                            <input id="filterWishlistReleased" type="text" oninput="render()" placeholder="Filter released..." class="col-filter">
+                        </div>
+                        <div id="col-wishlist-released" class="column-height space-y-5"></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-amber-400 font-black text-sm uppercase tracking-[0.3em]">Upcoming</h2>
+                            <input id="filterWishlistUpcoming" type="text" oninput="render()" placeholder="Filter upcoming..." class="col-filter">
+                        </div>
+                        <div id="col-wishlist-upcoming" class="column-height space-y-5"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -142,20 +151,43 @@
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-        let allGames = [], editingId = null, currentViewMode = 'queue', selectedType = 'Game';
+        let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
 
+        const PLAT_MAP = { 
+            steam: {n:'Steam', c:'#171a21'}, 
+            gog: {n:'GOG', c:'#86328a'}, 
+            epic: {n:'Epic Games', c:'#313131'}, 
+            battlenet: {n:'BattleNet', c:'#009eff'}, 
+            xbox: {n:'Xbox', c:'#107c10'}, 
+            switch: {n:'Nintendo Switch', c:'#e60012'}, 
+            playstation: {n:'PlayStation', c:'#003791'}, 
+            amazon: {n:'Amazon Luna', c:'#ff9900'} 
+        };
+
+        // --- Google OAuth Auth Handlers ---
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showApp(); else showAuth();
+            if (session) {
+                showApp();
+            } else {
+                showAuth();
+            }
+
             supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (session) showApp(); else showAuth();
+                if (session) {
+                    showApp();
+                } else {
+                    showAuth();
+                }
             });
         }
 
         async function loginWithGoogle() {
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.href }
+                options: {
+                    redirectTo: window.location.href
+                }
             });
             if (error) alert("OAuth error: " + error.message);
         }
@@ -168,6 +200,7 @@
         function showApp() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
+            initSortable();
             loadGames();
         }
 
@@ -176,34 +209,19 @@
             document.getElementById('mainApp').style.display = 'none';
         }
 
+        // --- Database & Data Operations ---
         async function loadGames() { 
-            let { data, error } = await supabaseClient.from('games').select('*').order('title', { ascending: true }); 
+            let { data, error } = await supabaseClient.from('games').select('*').order('sort_order', { ascending: true }); 
             if (!error) { 
-                allGames = data || []; 
+                allGames = data; 
                 render(); 
             } 
         }
 
-        function toggleType(t) { 
-            selectedType = t;
-            document.getElementById('i-game').classList.toggle('active', t === 'Game');
-        }
-
-        function parseReleaseYear(val) {
-            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
-            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
-            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
-            if (typeof val === 'string' && val.includes('-')) {
-                const yearPart = val.split('-')[0];
-                if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
-            }
-            let num = Number(val);
-            if (!isNaN(num) && num > 0) {
-                if (num > 32503680000) num = Math.floor(num / 1000);
-                const dateObj = new Date(num * 1000);
-                if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
-            }
-            return 'TBA';
+        function toggleP(p) { 
+            if (selectedPlatforms.includes(p)) selectedPlatforms = selectedPlatforms.filter(x => x !== p); 
+            else selectedPlatforms.push(p); 
+            document.getElementById(`i-${p}`).classList.toggle('active'); 
         }
 
         function parseReleaseDate(val) {
@@ -227,29 +245,42 @@
                 const genre = tIn.dataset.genre || '';
                 const releaseDate = parseReleaseDate(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
+                let defaultStatus = currentViewMode === 'wishlist' ? 'Wishlist' : 'Backlog';
 
                 if (editingId) {
                     const cur = allGames.find(g => g.id === editingId);
                     const payload = { 
                         title: tIn.value.trim(), 
                         series, 
-                        media_type: selectedType, 
+                        platform: selectedPlatforms.join(','), 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
                         release_date: releaseDate !== null ? releaseDate : cur.release_date
                     };
                     
+                    if (series && series !== cur.series) { 
+                        const buddies = allGames.filter(g => g.series === series); 
+                        if (buddies.length > 0) payload.sort_order = Math.max(...buddies.map(g => g.sort_order)) + 1; 
+                    }
+                    
                     const { error } = await supabaseClient.from('games').update(payload).eq('id', editingId);
                     if (error) throw error;
                 } else {
+                    let next = allGames.length > 0 ? Math.max(...allGames.map(g => g.sort_order)) + 100 : 100;
+                    if (series) { 
+                        const buddies = allGames.filter(g => g.series === series); 
+                        if (buddies.length > 0) next = Math.max(...buddies.map(g => g.sort_order)) + 1; 
+                    }
+                    
                     const { error } = await supabaseClient.from('games').insert([{ 
                         title: tIn.value.trim(), 
-                        media_type: selectedType, 
+                        platform: selectedPlatforms.join(','), 
                         series, 
                         cover_url: cover, 
-                        genre: genre || 'Game', 
+                        genre: genre || 'Action', 
                         release_date: releaseDate, 
-                        status: 'Archive'
+                        status: defaultStatus, 
+                        sort_order: next 
                     }]);
                     if (error) throw error;
                 }
@@ -259,7 +290,7 @@
 
             } catch (err) {
                 console.error("Save failed:", err);
-                alert(`Error saving item: ${err.message || 'Check database settings'}`);
+                alert(`Error saving game: ${err.message || 'Check database columns'}`);
             } finally {
                 submitBtn.disabled = false;
             }
@@ -279,170 +310,114 @@
             document.getElementById('seriesResults').classList.add('hidden');
             document.getElementById('seriesResults').innerHTML = '';
 
-            toggleType('Game');
+            selectedPlatforms = []; 
+            document.querySelectorAll('.plat-box').forEach(el => el.classList.remove('active')); 
             document.getElementById('submitBtn').innerText = "Commit"; 
-            document.getElementById('formModeLabel').innerText = "Search"; 
+            document.getElementById('formModeLabel').innerText = "Database Search / Entry"; 
             document.getElementById('cancelEdit').classList.add('hidden'); 
-            document.getElementById('deleteSelectedBtn').classList.add('hidden');
         }
 
         function render() {
-            const fM = document.getElementById('filterMain').value.toLowerCase();
-            const fW = document.getElementById('filterWish').value.toLowerCase();
+            const fN = document.getElementById('filterNext').value.toLowerCase();
+            const fB = document.getElementById('filterBacklog').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
-            const fT = document.getElementById('filterTrash').value.toLowerCase();
+            const fWR = document.getElementById('filterWishlistReleased').value.toLowerCase();
+            const fWU = document.getElementById('filterWishlistUpcoming').value.toLowerCase();
 
             const cols = { 
                 playing: document.getElementById('col-playing'), 
-                main: document.getElementById('col-main'),
-                wish: document.getElementById('col-wish'),
-                alt: document.getElementById('col-alt'),
-                trash: document.getElementById('col-trash')
+                next: document.getElementById('col-next'), 
+                backlog: document.getElementById('col-backlog'), 
+                alt: document.getElementById('col-alt'), 
+                wishlistReleased: document.getElementById('col-wishlist-released'),
+                wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
-
-            const sortedList = [...allGames].sort((a, b) => a.title.localeCompare(b.title));
+            
+            const nextPri = { 'Up Next': 0, 'Started': 1 };
+            const nowSec = Math.floor(Date.now() / 1000);
 
             if (currentViewMode === 'queue') {
-                const activeGames = sortedList.filter(g => g.status === 'Playing');
-                if (activeGames.length > 0) {
-                    activeGames.forEach(g => cols.playing.appendChild(createActiveCard(g)));
-                } else {
-                    cols.playing.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being played</p>`;
-                }
+                allGames.filter(g => g.status === 'Playing').forEach(g => cols.playing.appendChild(createCard(g)));
                 
-                sortedList.filter(g => !['Playing', 'Completed', 'Wishlist', 'Trash'].includes(g.status))
-                    .filter(g => g.title.toLowerCase().includes(fM) || (g.series && g.series.toLowerCase().includes(fM)))
-                    .forEach(g => cols.main.appendChild(createCard(g)));
+                allGames.filter(g => ['Up Next', 'Started'].includes(g.status))
+                    .filter(g => g.title.toLowerCase().includes(fN) || (g.series && g.series.toLowerCase().includes(fN)))
+                    .sort((a,b) => nextPri[a.status] - nextPri[b.status] || a.sort_order - b.sort_order)
+                    .forEach(g => cols.next.appendChild(createCard(g)));
 
-            } else if (currentViewMode === 'wishlist') {
-                sortedList.filter(g => g.status === 'Wishlist')
-                    .filter(g => g.title.toLowerCase().includes(fW) || (g.series && g.series.toLowerCase().includes(fW)))
-                    .forEach(g => cols.wish.appendChild(createCard(g)));
-            } else if (currentViewMode === 'archive') {
-                sortedList.filter(g => g.status === 'Completed')
+                allGames.filter(g => ['Backlog', 'Game Pass', 'PS Plus', 'Switch Online', 'Downloaded'].includes(g.status))
+                    .filter(g => g.title.toLowerCase().includes(fB) || (g.series && g.series.toLowerCase().includes(fB)))
+                    .forEach(g => cols.backlog.appendChild(createCard(g)));
+            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
+                const target = currentViewMode === 'archive' ? 'Finished' : 'Not Interested';
+                allGames.filter(g => g.status === target)
                     .filter(g => g.title.toLowerCase().includes(fA) || (g.series && g.series.toLowerCase().includes(fA)))
                     .forEach(g => cols.alt.appendChild(createCard(g)));
-            } else if (currentViewMode === 'trash') {
-                sortedList.filter(g => g.status === 'Trash')
-                    .filter(g => g.title.toLowerCase().includes(fT) || (g.series && g.series.toLowerCase().includes(fT)))
-                    .forEach(g => cols.trash.appendChild(createCard(g)));
+            } else if (currentViewMode === 'wishlist') {
+                const wishlistGames = allGames.filter(g => g.status === 'Wishlist');
+
+                const sortByReleaseDate = (a, b) => {
+                    const dA = parseReleaseDate(a.release_date);
+                    const dB = parseReleaseDate(b.release_date);
+                    if (dA === null && dB === null) return 0;
+                    if (dA === null) return 1;
+                    if (dB === null) return -1;
+                    return dA - dB;
+                };
+
+                wishlistGames.filter(g => {
+                    const rDate = parseReleaseDate(g.release_date);
+                    return rDate !== null && rDate <= nowSec;
+                })
+                .filter(g => g.title.toLowerCase().includes(fWR) || (g.series && g.series.toLowerCase().includes(fWR)))
+                .sort(sortByReleaseDate)
+                .forEach(g => cols.wishlistReleased.appendChild(createCard(g)));
+
+                wishlistGames.filter(g => {
+                    const rDate = parseReleaseDate(g.release_date);
+                    return rDate === null || rDate > nowSec;
+                })
+                .filter(g => g.title.toLowerCase().includes(fWU) || (g.series && g.series.toLowerCase().includes(fWU)))
+                .sort(sortByReleaseDate)
+                .forEach(g => cols.wishlistUpcoming.appendChild(createCard(g)));
             }
         }
 
-        function createActiveCard(game) {
-            const hasSeries = Boolean(game.series && game.series.trim() !== '');
-            const releaseYear = parseReleaseYear(game.release_date);
-
-            const activeBadgeStyle = hasSeries
-                ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-                : 'text-cyan-400 bg-cyan-950/40 border-cyan-800/40';
-
-            const div = document.createElement('div');
-            div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
-            
-            div.innerHTML = `
-                <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
-                <div class="flex flex-col gap-1 flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${game.series}</span>` : `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">🎮 STANDALONE</span>`}
-                        
-                        <div class="relative group/menu">
-                            <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                </svg>
-                            </button>
-                            
-                            <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
-                                <button onclick="updateStatus(${game.id}, 'Archive')" class="p-1.5 rounded hover:bg-cyan-500/20 text-cyan-400 transition-colors" title="Move to Vault (🎮)">🎮</button>
-                                <button onclick="updateStatus(${game.id}, 'Completed')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Completed (🏆)">🏆</button>
-                            </div>
-                        </div>
-                    </div>
-                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${game.title}</h4>
-                    <span class="text-xs text-slate-400">${releaseYear}</span>
-                    <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[9px] bg-cyan-900/60 text-cyan-300 px-1.5 py-0.5 rounded uppercase font-semibold">🎮 GAME</span>
-                    </div>
-                </div>
-            `;
-            return div;
-        }
-
         function createCard(game) {
-            const hasSeries = Boolean(game.series && game.series.trim() !== '');
-            const releaseYear = parseReleaseYear(game.release_date);
-
-            const div = document.createElement('div');
-            div.dataset.id = game.id; 
-            div.dataset.series = game.series || '';
-            div.className = `game-card flex flex-col justify-between w-full`;
+            const isS = game.series && game.series.trim() !== '';
+            const nowSec = Math.floor(Date.now() / 1000);
             
-            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
-            const badgeStyle = hasSeries 
-                ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
-                : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
-
-            div.innerHTML = `
-                <div>
-                    <div class="h-1.5 w-full ${topBarColor}"></div>
-                    <div class="p-2.5 pb-1 flex flex-col items-center">
-                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
-                            <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}">
-                        </div>
-                        <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`}
-                        </div>
-                        <div class="flex justify-between items-start gap-1.5 w-full">
-                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${game.title}</h3>
-                            <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
-                        <div class="flex flex-wrap gap-1 mt-2 w-full">
-                            <span class="type-badge shadow-sm">🎮 GAME</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <span class="text-cyan-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${game.genre || 'Game'}</span>
-                        <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Archive" ${!['Playing', 'Completed', 'Wishlist', 'Trash'].includes(game.status) ? 'selected' : ''}>Archive 🎮</option>
-                            <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing 🕹️</option>
-                            <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist ⭐</option>
-                            <option value="Completed" ${game.status === 'Completed' ? 'selected' : ''}>Completed 🏆</option>
-                            <option value="Trash" ${game.status === 'Trash' ? 'selected' : ''}>Trash 🗑️</option>
-                        </select>
-                    </div>
-                </div>
-            `;
+            const rDate = parseReleaseDate(game.release_date);
+            const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
+            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
+            
+            const div = document.createElement('div');
+            div.dataset.id = game.id; div.dataset.series = game.series || '';
+            div.className = `game-card border border-slate-700 shadow-xl relative mb-4 ${isS ? 'series-chained' : ''} ${isUnreleased ? 'unreleased-card' : ''}`;
+            const platB = (game.platform || '').split(',').map(p => { const i = PLAT_MAP[p.trim()]; return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; }).join(' ');
+            div.innerHTML = `<img loading="lazy" src="${game.cover_url || ''}" class="w-28 h-full shrink-0 object-cover bg-slate-900 border-r border-slate-700 shadow-inner"><div class="p-4 flex-1 flex flex-col justify-between overflow-hidden text-white"><div class="flex justify-between items-start text-white"><div class="text-left flex-1 min-w-0 pr-2"><h3 class="font-black text-[18px] leading-tight text-white clamp-2">${game.title}</h3><div class="flex flex-wrap gap-1.5 mt-3">${platB}</div></div><div class="icon-square shrink-0 text-white"><button onclick='editP(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🎮</button><button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔍</button><button onclick='editS(${JSON.stringify(game).replace(/'/g, "&apos;")})' class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-slate-700 transition">🔗</button><button onclick="deleteGame(${game.id})" class="bg-slate-800 rounded-lg flex items-center justify-center text-lg hover:bg-rose-900 transition">✕</button></div></div><div class="flex justify-between items-end"><div class="flex flex-col min-w-0 pr-2 text-left">${isS ? `<span class="series-label truncate">Series: ${game.series}</span>` : ''}<span class="genre-label truncate">${game.genre || 'Game'} • ${releaseYear}</span></div><select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-xs py-2 px-4 rounded-xl border border-slate-700 text-white font-black uppercase outline-none cursor-pointer"><option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option><option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option><option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option><option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option><option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option><option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option><option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option><option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option><option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option><option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished</option><option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash</option></select></div></div>`;
             return div;
         }
 
         function toggleView(v) { 
             currentViewMode = v;
             const qv = document.getElementById('queueView');
-            const wv = document.getElementById('wishlistView');
             const dt = document.getElementById('dashboardTop');
             const as = document.getElementById('activeSessionBox');
             const ia = document.getElementById('inputArea');
             const av = document.getElementById('altView');
-            const tv = document.getElementById('trashView');
-
-            // Hide all views first
-            qv.style.display = 'none';
-            wv.style.display = 'none';
-            av.style.display = 'none';
-            tv.style.display = 'none';
+            const wv = document.getElementById('wishlistView');
 
             if(v === 'queue') {
-                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'block'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+                av.style.display = 'none'; wv.style.display = 'none';
+            } else if(v === 'wishlist') {
+                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
+                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
             } else {
-                dt.style.display = 'none';
-                if(v === 'wishlist') wv.style.display = 'block';
-                else if(v === 'archive') av.style.display = 'block';
-                else if(v === 'trash') tv.style.display = 'block';
+                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
+                document.getElementById('altTitle').innerText = v === 'archive' ? 'Archive' : 'The Scrap Yard';
+                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
             }
             render();
         }
@@ -470,32 +445,136 @@
 
             document.getElementById('formModeLabel').innerText = "Updating: " + g.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
-            document.getElementById('deleteSelectedBtn').classList.remove('hidden');
             
-            toggleType('Game');
+            selectedPlatforms = (g.platform || '').split(',').filter(x => x.trim()).map(x => x.trim()); 
+            document.querySelectorAll('.plat-box').forEach(el => { 
+                el.classList.toggle('active', selectedPlatforms.includes(el.id.replace('i-', ''))); 
+            }); 
+            
             document.getElementById('seriesInput').value = g.series || ''; 
+            searchGames(g.title); 
         }
 
+        function editP(g) { editL(g); }
+        function editS(g) { editL(g); document.getElementById('seriesInput').focus(); }
         function exitEditMode() { resetForm(); toggleView(currentViewMode); }
+        
+        async function repairSortOrder() { 
+            const b = document.getElementById('repairBtn'); 
+            b.innerText = "⏳";
+            
+            try {
+                const missingDates = allGames.filter(g => g.release_date === null || g.release_date === undefined);
+                
+                if (missingDates.length > 0) {
+                    b.innerText = `⏳ (0/${missingDates.length})`;
+                    let count = 0;
 
-        async function deleteSelectedFromForm() {
-            if (!editingId) return;
-            if (confirm("Are you sure you want to delete this game?")) {
-                await supabaseClient.from('games').delete().eq('id', editingId);
-                resetForm();
-                loadGames();
+                    for (let g of missingDates) {
+                        try {
+                            const response = await fetch(`${SB_URL}/functions/v1/igdb-search`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'apikey': SB_KEY
+                                },
+                                body: JSON.stringify({ query: g.title })
+                            });
+
+                            const results = await response.json();
+
+                            if (results && results.length > 0) {
+                                const match = results.find(r => r.name.toLowerCase() === g.title.toLowerCase()) || results[0];
+                                const fetchedDate = parseReleaseDate(match.first_release_date);
+
+                                if (fetchedDate) {
+                                    await supabaseClient
+                                        .from('games')
+                                        .update({ release_date: fetchedDate })
+                                        .eq('id', g.id);
+                                }
+                            }
+                        } catch (err) {
+                            console.error(`Failed to fetch release date for ${g.title}:`, err);
+                        }
+
+                        count++;
+                        b.innerText = `⏳ (${count}/${missingDates.length})`;
+                        await new Promise(res => setTimeout(res, 200));
+                    }
+                }
+
+                let list = [...allGames].sort((a,b) => a.sort_order - b.sort_order);
+                let finalOrder = []; 
+                let processedSeries = new Set();
+
+                for (let g of list) {
+                    if (processedSeries.has(g.series)) continue;
+                    if (g.series) {
+                        let buddies = list.filter(item => item.series === g.series);
+                        finalOrder.push(...buddies); 
+                        processedSeries.add(g.series);
+                    } else { 
+                        finalOrder.push(g); 
+                    }
+                }
+
+                for (let i = 0; i < finalOrder.length; i++) { 
+                    await supabaseClient
+                        .from('games')
+                        .update({ sort_order: (i + 1) * 100 })
+                        .eq('id', finalOrder[i].id); 
+                }
+
+                alert("Vault rebuild complete: Release dates filled and sorting resynced!");
+
+            } catch (err) {
+                console.error("Rebuild failed:", err);
+                alert(`Rebuild error: ${err.message}`);
+            } finally {
+                b.innerText = "🔧"; 
+                loadGames(); 
             }
         }
 
         async function updateStatus(id, s) { await supabaseClient.from('games').update({ status:s }).eq('id', id); loadGames(); }
+        
+        function initSortable() { 
+            ['col-playing', 'col-next', 'col-backlog'].forEach(id => { 
+                new Sortable(document.getElementById(id), { 
+                    group: 'games', 
+                    animation: 250, 
+                    onEnd: async (evt) => { 
+                        let targetS = 'Backlog'; 
+                        if(evt.to.id === 'col-playing') targetS = 'Playing'; 
+                        else if(evt.to.id === 'col-next') targetS = 'Up Next'; 
+                        const items = Array.from(evt.to.children); 
+                        for(let i=0; i<items.length; i++) {
+                            await supabaseClient.from('games').update({ sort_order: (i + 1) * 100, status: targetS }).eq('id', items[i].dataset.id); 
+                        }
+                        loadGames(); 
+                    } 
+                }); 
+            }); 
+        }
 
+        async function deleteGame(id) { if(confirm('Delete?')) { await supabaseClient.from('games').delete().eq('id', id); loadGames(); } }
+        
         function filterSeriesDropdown(val) {
             const sr = document.getElementById('seriesResults');
             const existingSeries = Array.from(new Set(allGames.map(g => g.series).filter(s => s && s.trim() !== '')));
             const filtered = existingSeries.filter(s => s.toLowerCase().includes(val.toLowerCase().trim()));
 
-            if (filtered.length === 0) { sr.classList.add('hidden'); return; }
-            sr.innerHTML = filtered.map(s => `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`).join('');
+            if (filtered.length === 0) {
+                sr.classList.add('hidden');
+                return;
+            }
+
+            sr.innerHTML = filtered.map(s => {
+                const safeName = s.replace(/"/g, '&quot;');
+                return `<div onclick="selectSeries(&quot;${safeName}&quot;)" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`;
+            }).join('');
+
             sr.classList.remove('hidden');
         }
 
@@ -505,37 +584,59 @@
         }
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { document.getElementById('seriesResults').classList.add('hidden'); }
-            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { document.getElementById('searchResults').classList.add('hidden'); }
+            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) {
+                document.getElementById('seriesResults').classList.add('hidden');
+            }
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) {
+                document.getElementById('searchResults').classList.add('hidden');
+            }
         });
 
         async function searchGames(q) { 
             const r = document.getElementById('searchResults'); 
             const trimmedQuery = q ? q.trim() : '';
 
-            if (trimmedQuery.length < 2) { r.classList.add('hidden'); r.innerHTML = ''; return; } 
+            if (trimmedQuery.length < 2) { 
+                r.classList.add('hidden'); 
+                r.innerHTML = '';
+                return; 
+            } 
 
             try {
                 const response = await fetch(`${SB_URL}/functions/v1/igdb-search`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SB_KEY
+                    },
                     body: JSON.stringify({ query: trimmedQuery })
                 });
 
                 const results = await response.json();
-                if (!results || results.length === 0) { r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; r.classList.remove('hidden'); return; }
+
+                if (results.error) {
+                    r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Error: ${results.error}</div>`;
+                    r.classList.remove('hidden');
+                    return;
+                }
+
+                if (!results || results.length === 0) {
+                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`;
+                    r.classList.remove('hidden');
+                    return;
+                }
 
                 r.innerHTML = results.map(g => {
                     const title = (g.name || '').replace(/"/g, '&quot;');
-                    const cover = g.cover?.url ? `https:${g.cover.url.replace('t_thumb', 't_cover_big')}` : '';
-                    const genre = g.genres && g.genres.length > 0 ? g.genres[0].name : 'Game';
-                    const release = g.first_release_date || '';
+                    const cover = g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` : '';
+                    const genre = (g.genres && g.genres[0]) ? (g.genres[0].name).replace(/"/g, '&quot;') : 'Game';
+                    const release = g.first_release_date !== undefined ? g.first_release_date : '';
                     const yearLabel = release ? new Date(release * 1000).getFullYear() : 'TBA';
                     
                     return `
                         <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${release}&quot;)" 
-                             class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
-                            ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
+                             class="p-4 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
+                            ${cover ? `<img src="${cover}" class="w-12 h-16 object-cover rounded shadow bg-slate-900">` : '<div class="w-12 h-16 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
                                 <p class="text-sm font-bold text-white">${g.name}</p>
                                 <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${yearLabel}</p>
@@ -543,7 +644,9 @@
                         </div>
                     `;
                 }).join(''); 
+                
                 r.classList.remove('hidden');
+
             } catch (err) {
                 r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
                 r.classList.remove('hidden');
@@ -554,18 +657,24 @@
             const tIn = document.getElementById('titleInput'); 
             tIn.value = n; 
             document.getElementById('searchResults').classList.add('hidden'); 
+            
             if (i) tIn.dataset.img = i;
             if (g) tIn.dataset.genre = g;
-            const parsedDate = parseReleaseDate(r);
-            if (parsedDate !== null) tIn.dataset.release = parsedDate; else delete tIn.dataset.release;
             
-            toggleType('Game');
+            const parsedDate = parseReleaseDate(r);
+            if (parsedDate !== null) {
+                tIn.dataset.release = parsedDate;
+            } else {
+                delete tIn.dataset.release;
+            }
+            
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,media_type,series,genre,status,cover_url\nElden Ring,Game,Soulsborne,Action RPG,Archive,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'games_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const gToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Game', series: cols[2]||null, genre: cols[3]||'Game', status: cols[4]||'Archive', cover_url: cols[5]||'' }; }).filter(x => x); await supabaseClient.from('games').insert(gToInsert); loadGames(); }; r.readAsText(e.target.files[0]); });
+        function downloadTemplate() { const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vault_template.csv'; a.click(); }
+        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const gToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], platform: cols[1]||'PC', series: cols[2]||null, genre: cols[3]||'Action', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; }).filter(x => x); await supabaseClient.from('games').insert(gToInsert); loadGames(); }; r.readAsText(e.target.files[0]); });
 
+        // Initialize Auth Check on Page Load
         initAuth();
     </script>
 </body>
