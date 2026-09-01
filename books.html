@@ -209,6 +209,25 @@
             return 'TBA';
         }
 
+        // Helper function to resolve the highest quality cover available
+        function resolvePristineCover(imageLinks, isbn) {
+            if (isbn) {
+                // Primary Option: Open Library Large Cover via ISBN
+                return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+            }
+            if (imageLinks) {
+                // Secondary Option: Enhanced Google Books Image URL
+                let url = imageLinks.extraLarge || imageLinks.large || imageLinks.medium || imageLinks.thumbnail || '';
+                if (url) {
+                    return url
+                        .replace('http://', 'https://')
+                        .replace('&edge=curl', '')
+                        .replace('zoom=1', 'zoom=2');
+                }
+            }
+            return '';
+        }
+
         async function submitForm() {
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
@@ -557,7 +576,14 @@
                     const info = item.volumeInfo;
                     const title = (info.title || '').replace(/"/g, '&quot;');
                     const author = (info.authors ? info.authors.join(', ') : 'Unknown').replace(/"/g, '&quot;');
-                    const cover = info.imageLinks?.thumbnail ? info.imageLinks.thumbnail.replace('http:', 'https:').replace('zoom=1', 'zoom=2') : '';
+                    
+                    // Extract ISBN-13 or ISBN-10 if available
+                    const identifiers = info.industryIdentifiers || [];
+                    const isbnObj = identifiers.find(i => i.type === 'ISBN_13') || identifiers.find(i => i.type === 'ISBN_10');
+                    const isbn = isbnObj ? isbnObj.identifier : '';
+
+                    // Resolve high resolution cover URL
+                    const cover = resolvePristineCover(info.imageLinks, isbn);
                     const genre = (info.categories ? info.categories[0] : 'Book').replace(/"/g, '&quot;');
                     const releaseYear = info.publishedDate ? info.publishedDate.split('-')[0] : '';
                     
@@ -591,7 +617,7 @@
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,author,series,series_num,genre,status,cover_url\nDune,Frank Herbert,Dune Chronicles,1,Sci-Fi,To Read,http://books.google.com/books/content?id=B1hSG45BZegC&printsec=frontcover&img=1&zoom=1"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'books_template.csv'; a.click(); }
+        function downloadTemplate() { const csv = "title,author,series,series_num,genre,status,cover_url\nDune,Frank Herbert,Dune Chronicles,1,Sci-Fi,To Read,https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'books_template.csv'; a.click(); }
         document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const bToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], author: cols[1]||'Unknown', series: cols[2]||null, series_num: cols[3]?parseFloat(cols[3]):null, genre: cols[4]||'Book', status: cols[5]||'To Read', cover_url: cols[6]||'' }; }).filter(x => x); await supabaseClient.from('books').insert(bToInsert); loadBooks(); }; r.readAsText(e.target.files[0]); });
 
         initAuth();
