@@ -204,18 +204,6 @@
             return 'TBA';
         }
 
-        function parseReleaseDate(val) {
-            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
-            let strVal = String(val).trim();
-            if (/^\d{4}$/.test(strVal)) {
-                return Math.floor(new Date(`${strVal}-01-01`).getTime() / 1000);
-            }
-            let num = Number(val);
-            if (isNaN(num) || num <= 0) return null;
-            if (num > 32503680000) num = Math.floor(num / 1000);
-            return num;
-        }
-
         async function submitForm() {
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
@@ -227,7 +215,7 @@
             try {
                 const cover = tIn.dataset.img || '';
                 const genre = tIn.dataset.genre || '';
-                const releaseDate = parseReleaseDate(tIn.dataset.release);
+                const releaseYear = parseReleaseYear(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
 
                 if (editingId) {
@@ -238,7 +226,7 @@
                         media_type: selectedType, 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
-                        release_date: releaseDate !== null ? releaseDate : cur.release_date
+                        release_year: releaseYear !== 'TBA' ? releaseYear : cur.release_year
                     };
                     
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
@@ -250,7 +238,7 @@
                         series, 
                         cover_url: cover, 
                         genre: genre || 'Movie', 
-                        release_date: releaseDate, 
+                        release_year: releaseYear !== 'TBA' ? releaseYear : null, 
                         status: 'Archive'
                     }]);
                     if (error) throw error;
@@ -328,7 +316,7 @@
 
         function createActiveCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const releaseYear = parseReleaseYear(movie.release_date);
+            const releaseYear = parseReleaseYear(movie.release_year);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
 
             const activeBadgeStyle = hasSeries
@@ -369,7 +357,7 @@
 
         function createCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const releaseYear = parseReleaseYear(movie.release_date);
+            const releaseYear = parseReleaseYear(movie.release_year);
             const typePill = movie.media_type === 'TV Show' ? '📺 TV' : '🎬 Movie';
 
             const div = document.createElement('div');
@@ -459,7 +447,7 @@
             tIn.value = m.title; 
             if (m.cover_url) tIn.dataset.img = m.cover_url;
             if (m.genre) tIn.dataset.genre = m.genre;
-            if (m.release_date !== null && m.release_date !== undefined) tIn.dataset.release = m.release_date;
+            if (m.release_year !== null && m.release_year !== undefined) tIn.dataset.release = m.release_year;
 
             document.getElementById('formModeLabel').innerText = "Updating: " + m.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
@@ -535,16 +523,15 @@
                     const cover = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
                     const genre = isTV ? 'TV Show' : 'Movie';
                     const releaseStr = m.release_date || m.first_air_date || '';
-                    const release = releaseStr ? Math.floor(new Date(releaseStr).getTime() / 1000) : '';
-                    const yearLabel = releaseStr ? releaseStr.split('-')[0] : 'TBA';
+                    const releaseYear = releaseStr ? releaseStr.split('-')[0] : 'TBA';
                     
                     return `
-                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${release}&quot;)" 
+                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${releaseYear}&quot;)" 
                              class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
                             ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
                                 <p class="text-sm font-bold text-white">${m.title || m.name}</p>
-                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${yearLabel}</p>
+                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${releaseYear}</p>
                             </div>
                         </div>
                     `;
@@ -562,8 +549,7 @@
             document.getElementById('searchResults').classList.add('hidden'); 
             if (i) tIn.dataset.img = i;
             if (g) tIn.dataset.genre = g;
-            const parsedDate = parseReleaseDate(r);
-            if (parsedDate !== null) tIn.dataset.release = parsedDate; else delete tIn.dataset.release;
+            if (r) tIn.dataset.release = r; else delete tIn.dataset.release;
             
             toggleType(g === 'TV Show' ? 'TV Show' : 'Movie');
             document.getElementById('seriesInput').focus();
