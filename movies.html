@@ -218,6 +218,7 @@
                 const cover = tIn.dataset.img || '';
                 const genre = tIn.dataset.genre || '';
                 const releaseYear = parseReleaseYear(tIn.dataset.release);
+                const seasons = tIn.dataset.seasons ? parseInt(tIn.dataset.seasons) : null;
                 const series = sIn.value.trim() || null;
 
                 if (editingId) {
@@ -228,6 +229,7 @@
                         media_type: selectedType, 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
+                        seasons: seasons || cur.seasons,
                         release_year: releaseYear !== 'TBA' ? releaseYear : cur.release_year
                     };
                     
@@ -239,7 +241,8 @@
                         media_type: selectedType, 
                         series, 
                         cover_url: cover, 
-                        genre: genre || 'Movie', 
+                        genre: genre || (selectedType === 'TV Show' ? 'SHOW' : 'Movie'), 
+                        seasons: seasons,
                         release_year: releaseYear !== 'TBA' ? releaseYear : null, 
                         status: 'Archive'
                     }]);
@@ -264,6 +267,7 @@
             delete tIn.dataset.img; 
             delete tIn.dataset.genre; 
             delete tIn.dataset.release; 
+            delete tIn.dataset.seasons;
 
             document.getElementById('seriesInput').value = ''; 
             document.getElementById('searchResults').classList.add('hidden');
@@ -371,7 +375,8 @@
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
             
-            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
+            // TV Shows/Series use Red top-bar; Movies only use Amber if they belong to a series
+            const topBarColor = isTV ? 'bg-rose-500' : (hasSeries ? 'bg-amber-500' : 'bg-cyan-500');
             const badgeStyle = hasSeries 
                 ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
                 : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
@@ -398,7 +403,7 @@
                 </div>
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                     <div class="flex items-center justify-between gap-1">
-                        <span class="text-cyan-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${movie.genre || (isTV ? 'SHOW' : 'MOVIE')}</span>
+                        <div class="flex-1"></div>
                         <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
                             <option value="Archive" ${!['Watching', 'Watched', 'Trash'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
                             <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
@@ -454,6 +459,7 @@
             if (m.cover_url) tIn.dataset.img = m.cover_url;
             if (m.genre) tIn.dataset.genre = m.genre;
             if (m.release_year !== null && m.release_year !== undefined) tIn.dataset.release = m.release_year;
+            if (m.seasons) tIn.dataset.seasons = m.seasons;
 
             document.getElementById('formModeLabel').innerText = "Updating: " + m.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
@@ -530,9 +536,10 @@
                     const genre = isTV ? 'TV Show' : 'Movie';
                     const releaseStr = m.release_date || m.first_air_date || '';
                     const releaseYear = releaseStr ? releaseStr.split('-')[0] : 'TBA';
+                    const tmdbId = m.id || null;
                     
                     return `
-                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${releaseYear}&quot;)" 
+                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${releaseYear}&quot;, ${tmdbId}, ${isTV})" 
                              class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
                             ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
@@ -549,7 +556,7 @@
             }
         }
 
-        function selectMovie(n, i, g, r) { 
+        async function selectMovie(n, i, g, r, tmdbId, isTV) { 
             const tIn = document.getElementById('titleInput'); 
             tIn.value = n; 
             document.getElementById('searchResults').classList.add('hidden'); 
@@ -557,7 +564,24 @@
             if (g) tIn.dataset.genre = g;
             if (r) tIn.dataset.release = r; else delete tIn.dataset.release;
             
-            toggleType(g === 'TV Show' ? 'TV Show' : 'Movie');
+            toggleType(g === 'TV Show' || isTV ? 'TV Show' : 'Movie');
+
+            if (isTV && tmdbId) {
+                try {
+                    const res = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                        body: JSON.stringify({ tmdbId, type: 'tv' })
+                    });
+                    const details = await res.json();
+                    if (details && details.number_of_seasons) {
+                        tIn.dataset.seasons = details.number_of_seasons;
+                    }
+                } catch (e) {
+                    console.error("Could not fetch season details:", e);
+                }
+            }
+
             document.getElementById('seriesInput').focus();
         }
 
