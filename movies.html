@@ -12,11 +12,9 @@
         body { background-color: #0b0f19; color: #f1f5f9; }
         .movie-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .movie-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .movie-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .type-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
         .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 220px; color: white; }
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
@@ -92,7 +90,7 @@
                         
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
                             <div onclick="toggleType('Movie')" id="i-movie" class="type-box active" title="Movie"><span style="color:#06b6d4; font-size: 16px;">🎬</span></div>
-                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#a855f7; font-size: 16px;">📺</span></div>
+                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#ef4444; font-size: 16px;">📺</span></div>
                         </div>
                         
                         <div class="flex gap-3 text-white relative">
@@ -100,6 +98,8 @@
                                 <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Collection/Franchise Series (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
                                 <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
                             </div>
+                            <input id="seriesNumInput" type="number" step="0.1" placeholder="Part #" class="w-20 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold text-center">
+                            <input id="seasonsInput" type="number" placeholder="Season #" class="w-24 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold text-center">
                             <button onclick="submitForm()" id="submitBtn" class="bg-cyan-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-cyan-500 transition">Commit</button>
                         </div>
                     </div>
@@ -204,10 +204,34 @@
             return 'TBA';
         }
 
+        function getMediaStyle(mediaType, series) {
+            if (mediaType === 'TV Show') {
+                return {
+                    text: '📺 TV',
+                    topBar: 'bg-red-500',
+                    badgeStyle: 'bg-red-500/20 text-red-400 border-red-500/40'
+                };
+            }
+            if (series && series.trim() !== '') {
+                return {
+                    text: '🎬 MOVIE',
+                    topBar: 'bg-amber-500',
+                    badgeStyle: 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                };
+            }
+            return {
+                text: '🎬 MOVIE',
+                topBar: 'bg-sky-500',
+                badgeStyle: 'bg-sky-500/20 text-sky-400 border-sky-500/40'
+            };
+        }
+
         async function submitForm() {
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
             const sIn = document.getElementById('seriesInput');
+            const snIn = document.getElementById('seriesNumInput');
+            const seIn = document.getElementById('seasonsInput');
             
             if (!tIn.value.trim()) return;
             submitBtn.disabled = true;
@@ -217,12 +241,16 @@
                 const genre = tIn.dataset.genre || '';
                 const releaseYear = parseReleaseYear(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
+                const seriesNum = snIn.value ? parseFloat(snIn.value) : null;
+                const seasons = seIn.value ? parseInt(seIn.value) : null;
 
                 if (editingId) {
                     const cur = allMovies.find(m => m.id === editingId);
                     const payload = { 
                         title: tIn.value.trim(), 
                         series, 
+                        series_num: seriesNum,
+                        seasons,
                         media_type: selectedType, 
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
@@ -236,6 +264,8 @@
                         title: tIn.value.trim(), 
                         media_type: selectedType, 
                         series, 
+                        series_num: seriesNum,
+                        seasons,
                         cover_url: cover, 
                         genre: genre || 'Movie', 
                         release_year: releaseYear !== 'TBA' ? releaseYear : null, 
@@ -264,6 +294,8 @@
             delete tIn.dataset.release; 
 
             document.getElementById('seriesInput').value = ''; 
+            document.getElementById('seriesNumInput').value = ''; 
+            document.getElementById('seasonsInput').value = ''; 
             document.getElementById('searchResults').classList.add('hidden');
             document.getElementById('searchResults').innerHTML = '';
             document.getElementById('seriesResults').classList.add('hidden');
@@ -289,7 +321,19 @@
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
+            const sortedList = [...allMovies].sort((a, b) => {
+                const seriesA = a.series || '';
+                const seriesB = b.series || '';
+                
+                if (seriesA && seriesB && seriesA.toLowerCase() === seriesB.toLowerCase()) {
+                    if (a.series_num != null && b.series_num != null) {
+                        return a.series_num - b.series_num;
+                    }
+                    if (a.series_num != null) return -1;
+                    if (b.series_num != null) return 1;
+                }
+                return a.title.localeCompare(b.title);
+            });
 
             if (currentViewMode === 'queue') {
                 const activeMovies = sortedList.filter(m => m.status === 'Watching');
@@ -317,11 +361,7 @@
         function createActiveCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
             const releaseYear = parseReleaseYear(movie.release_year);
-            const typePill = movie.media_type === 'TV Show' ? '📺 TV SHOW' : '🎬 MOVIE';
-
-            const activeBadgeStyle = hasSeries
-                ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-                : 'text-cyan-400 bg-cyan-950/40 border-cyan-800/40';
+            const mediaStyle = getMediaStyle(movie.media_type, movie.series);
 
             const div = document.createElement('div');
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
@@ -330,7 +370,7 @@
                 <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
+                        ${hasSeries ? `<span class="text-[9px] font-bold ${mediaStyle.badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series} ${movie.series_num ? `#${movie.series_num}` : ''}</span>` : `<span class="text-[9px] font-bold ${mediaStyle.badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
                         
                         <div class="relative group/menu">
                             <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
@@ -346,9 +386,11 @@
                         </div>
                     </div>
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
-                    <span class="text-xs text-slate-400">${releaseYear}</span>
                     <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[9px] bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded uppercase font-semibold">${typePill}</span>
+                        <span class="text-xs text-slate-400">${releaseYear}</span>
+                        <span class="text-slate-600">•</span>
+                        <span class="text-[9px] font-bold ${mediaStyle.badgeStyle} px-1.5 py-0.5 rounded border uppercase">${mediaStyle.text}</span>
+                        ${movie.seasons ? `<span class="text-slate-600">•</span><span class="text-xs text-red-400 font-extrabold">S${movie.seasons}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -358,35 +400,36 @@
         function createCard(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
             const releaseYear = parseReleaseYear(movie.release_year);
-            const typePill = movie.media_type === 'TV Show' ? '📺 TV' : '🎬 Movie';
+            const mediaStyle = getMediaStyle(movie.media_type, movie.series);
+
+            const isUnreleased = releaseYear !== 'TBA' && parseInt(releaseYear) > new Date().getFullYear();
+            const posterClass = isUnreleased ? "grayscale opacity-60" : "";
 
             const div = document.createElement('div');
             div.dataset.id = movie.id; 
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
-            
-            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
-            const badgeStyle = hasSeries 
-                ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
-                : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
 
             div.innerHTML = `
                 <div>
-                    <div class="h-1.5 w-full ${topBarColor}"></div>
+                    <div class="h-1.5 w-full ${mediaStyle.topBar}"></div>
                     <div class="p-2.5 pb-1 flex flex-col items-center">
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
-                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
+                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="${posterClass}">
                         </div>
                         <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
+                            ${hasSeries ? `<span class="inline-block text-[9px] ${mediaStyle.badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series} ${movie.series_num ? `<strong class="text-amber-400 ml-1">#${movie.series_num}</strong>` : ''}</span>` : `<span class="inline-block text-[9px] ${mediaStyle.badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
                         </div>
                         <div class="flex justify-between items-start gap-1.5 w-full">
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
                             <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
-                        <div class="flex flex-wrap gap-1 mt-2 w-full">
-                            <span class="type-badge shadow-sm">${typePill}</span>
+                        
+                        <div class="flex items-center gap-1.5 text-xs mt-1 w-full text-left">
+                            <span class="text-slate-400 font-semibold">${releaseYear}</span>
+                            <span class="text-slate-600">•</span>
+                            <span class="text-[9px] font-bold ${mediaStyle.badgeStyle} px-1.5 py-0.5 rounded border uppercase">${mediaStyle.text}</span>
+                            ${movie.seasons ? `<span class="text-slate-600">•</span><span class="text-red-400 font-extrabold text-[11px]">S${movie.seasons}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -455,6 +498,8 @@
             
             toggleType(m.media_type || 'Movie');
             document.getElementById('seriesInput').value = m.series || ''; 
+            document.getElementById('seriesNumInput').value = m.series_num !== null && m.series_num !== undefined ? m.series_num : '';
+            document.getElementById('seasonsInput').value = m.seasons || '';
         }
 
         function exitEditMode() { resetForm(); toggleView(currentViewMode); }
@@ -524,9 +569,10 @@
                     const genre = isTV ? 'TV Show' : 'Movie';
                     const releaseStr = m.release_date || m.first_air_date || '';
                     const releaseYear = releaseStr ? releaseStr.split('-')[0] : 'TBA';
+                    const tmdbId = m.id;
                     
                     return `
-                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${releaseYear}&quot;)" 
+                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${releaseYear}&quot;, ${tmdbId}, ${isTV})" 
                              class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
                             ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
@@ -543,7 +589,7 @@
             }
         }
 
-        function selectMovie(n, i, g, r) { 
+        async function selectMovie(n, i, g, r, tmdbId, isTV) { 
             const tIn = document.getElementById('titleInput'); 
             tIn.value = n; 
             document.getElementById('searchResults').classList.add('hidden'); 
@@ -552,11 +598,28 @@
             if (r) tIn.dataset.release = r; else delete tIn.dataset.release;
             
             toggleType(g === 'TV Show' ? 'TV Show' : 'Movie');
+
+            if (isTV && tmdbId) {
+                try {
+                    const response = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                        body: JSON.stringify({ tvId: tmdbId })
+                    });
+                    const details = await response.json();
+                    if (details.number_of_seasons) {
+                        document.getElementById('seasonsInput').value = details.number_of_seasons;
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch season details:", err);
+                }
+            }
+
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'movies_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const mToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Archive', cover_url: cols[5]||'' }; }).filter(x => x); await supabaseClient.from('movies').insert(mToInsert); loadMovies(); }; r.readAsText(e.target.files[0]); });
+        function downloadTemplate() { const csv = "title,media_type,series,series_num,genre,status,cover_url\nInception,Movie,Nolan,,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'movies_template.csv'; a.click(); }
+        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const mToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, series_num: cols[3] ? parseFloat(cols[3]) : null, genre: cols[4]||'Movie', status: cols[5]||'Archive', cover_url: cols[6]||'' }; }).filter(x => x); await supabaseClient.from('movies').insert(mToInsert); loadMovies(); }; r.readAsText(e.target.files[0]); });
 
         initAuth();
     </script>
