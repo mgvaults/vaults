@@ -86,7 +86,7 @@ body {
   top: calc(100% + 8px);
   left: 0;
   display: flex;
-  flex-direction: column; /* Vertical alignment for items */
+  flex-direction: column;
   gap: 8px;
   background: #171b2e;
   border: 1px solid #282d47;
@@ -99,7 +99,6 @@ body {
   transition: all 0.2s ease;
 }
 
-/* Display dropdown on wrapper hover */
 .toolbox-wrapper:hover .toolbox-dropdown {
   opacity: 1;
   visibility: visible;
@@ -141,7 +140,6 @@ body {
   color: #525c7a;
 }
 
-/* Filter Input (Small Top-Right Filters) */
 .filter-input {
   background: #131728;
   border: 1px solid #212742;
@@ -157,7 +155,6 @@ body {
   border-color: #4f75ff;
 }
 
-/* Platform Badges Bar (Includes PlayStation) */
 .platform-selector {
   display: flex;
   align-items: center;
@@ -207,7 +204,7 @@ body {
 }
 
 /* ==========================================================================
-   4. GRID LAYOUTS & MEDIA CARDS (Books, Movies, Games)
+   4. GRID LAYOUTS & MEDIA CARDS
    ========================================================================== */
 .section-header-bar {
   display: flex;
@@ -216,7 +213,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* Main Grid Container for Books, Movies, and Backlog */
 .media-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -224,7 +220,6 @@ body {
   align-items: start;
 }
 
-/* Card Styling */
 .media-card {
   background: #131728;
   border: 1px solid #212742;
@@ -240,7 +235,6 @@ body {
   border-color: #3b456e;
 }
 
-/* Cover Image Constraint (Fixes giant overflowing book/movie covers) */
 .media-card-poster {
   width: 100%;
   aspect-ratio: 2 / 3;
@@ -268,7 +262,6 @@ body {
   font-weight: 600;
 }
 
-/* Card Action Toolbar */
 .card-actions {
   display: flex;
   align-items: center;
