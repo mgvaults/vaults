@@ -222,7 +222,9 @@
         }
 
         function isUnreleased(val) {
-            if (!val || val === 'TBA') return false;
+            // Treat missing or TBA dates explicitly as unreleased
+            if (!val || val === 'TBA' || val === 'null' || val === 'undefined') return true;
+            
             let releaseDate = null;
 
             if (typeof val === 'string' && val.includes('-')) {
