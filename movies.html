@@ -12,7 +12,7 @@
         body { background-color: #0b0f19; color: #f1f5f9; }
         .movie-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .movie-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .movie-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
+        .movie-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; transition: filter 0.3s ease; }
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -192,12 +192,13 @@
 
         function parseReleaseYear(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
-            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
-            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
             if (typeof val === 'string' && val.includes('-')) {
                 const yearPart = val.split('-')[0];
                 if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
             }
+            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
+            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
+            
             let num = Number(val);
             if (!isNaN(num) && num > 0) {
                 if (num > 32503680000) num = Math.floor(num / 1000);
@@ -205,6 +206,24 @@
                 if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
             }
             return 'TBA';
+        }
+
+        function isUnreleased(val) {
+            if (!val || val === 'TBA') return false;
+            let releaseDate = null;
+
+            if (typeof val === 'string' && val.includes('-')) {
+                releaseDate = new Date(val);
+            } else if (/^\d{4}$/.test(String(val).trim())) {
+                releaseDate = new Date(`${val.trim()}-12-31`);
+            }
+
+            if (releaseDate && !isNaN(releaseDate.getTime())) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return releaseDate > today;
+            }
+            return false;
         }
 
         async function submitForm() {
@@ -218,7 +237,7 @@
             try {
                 const cover = tIn.dataset.img || '';
                 const genre = tIn.dataset.genre || '';
-                const releaseYear = parseReleaseYear(tIn.dataset.release);
+                const rawRelease = tIn.dataset.release || null;
                 const seasons = tIn.dataset.seasons ? parseInt(tIn.dataset.seasons) : null;
                 const series = sIn.value.trim() || null;
 
@@ -231,7 +250,7 @@
                         cover_url: cover || cur.cover_url, 
                         genre: genre || cur.genre,
                         seasons: seasons || cur.seasons,
-                        release_year: releaseYear !== 'TBA' ? releaseYear : cur.release_year
+                        release_year: rawRelease || cur.release_year
                     };
                     
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
@@ -244,7 +263,7 @@
                         cover_url: cover, 
                         genre: genre || (selectedType === 'TV Show' ? 'SHOW' : 'Movie'), 
                         seasons: seasons,
-                        release_year: releaseYear !== 'TBA' ? releaseYear : null, 
+                        release_year: rawRelease, 
                         status: 'Archive'
                     }]);
                     if (error) throw error;
@@ -349,12 +368,14 @@
             const { hasSeries, isTV, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
             const releaseYear = parseReleaseYear(movie.release_year);
             const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
+            const unreleased = isUnreleased(movie.release_year);
+            const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
 
             const div = document.createElement('div');
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
             
             div.innerHTML = `
-                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
+                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900 ${imgFilterClass}" />
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                         ${hasSeries ? `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
@@ -373,7 +394,7 @@
                         </div>
                     </div>
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
-                    <span class="text-xs text-slate-400">${releaseYear}${seasonText}</span>
+                    <span class="text-xs text-slate-400">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</span>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="type-badge ${pillClass}">${typePillText}</span>
                     </div>
@@ -386,6 +407,8 @@
             const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
             const releaseYear = parseReleaseYear(movie.release_year);
             const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
+            const unreleased = isUnreleased(movie.release_year);
+            const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
 
             const div = document.createElement('div');
             div.dataset.id = movie.id; 
@@ -397,7 +420,7 @@
                     <div class="h-1.5 w-full ${topBarColor}"></div>
                     <div class="p-2.5 pb-1 flex flex-col items-center">
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
-                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}">
+                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="${imgFilterClass}">
                         </div>
                         <div class="mt-2 mb-1 w-full text-left">
                             ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
@@ -406,7 +429,7 @@
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
                             <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}${seasonText}</p>
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</p>
                     </div>
                 </div>
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
@@ -542,17 +565,17 @@
                     const title = (m.title || m.name || '').replace(/"/g, '&quot;');
                     const cover = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
                     const genre = isTV ? 'TV Show' : 'Movie';
-                    const releaseStr = m.release_date || m.first_air_date || '';
-                    const releaseYear = releaseStr ? releaseStr.split('-')[0] : 'TBA';
+                    const fullReleaseDate = m.release_date || m.first_air_date || '';
+                    const displayYear = fullReleaseDate ? fullReleaseDate.split('-')[0] : 'TBA';
                     const tmdbId = m.id || null;
                     
                     return `
-                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${releaseYear}&quot;, ${tmdbId}, ${isTV})" 
+                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${fullReleaseDate}&quot;, ${tmdbId}, ${isTV})" 
                              class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
                             ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
                             <div>
                                 <p class="text-sm font-bold text-white">${m.title || m.name}</p>
-                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${isTV ? 'SHOW' : 'MOVIE'} • ${releaseYear}</p>
+                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${isTV ? 'SHOW' : 'MOVIE'} • ${displayYear}</p>
                             </div>
                         </div>
                     `;
@@ -564,13 +587,13 @@
             }
         }
 
-        async function selectMovie(n, i, g, r, tmdbId, isTV) { 
+        async function selectMovie(n, i, g, fullReleaseDate, tmdbId, isTV) { 
             const tIn = document.getElementById('titleInput'); 
             tIn.value = n; 
             document.getElementById('searchResults').classList.add('hidden'); 
             if (i) tIn.dataset.img = i;
             if (g) tIn.dataset.genre = g;
-            if (r) tIn.dataset.release = r; else delete tIn.dataset.release;
+            if (fullReleaseDate) tIn.dataset.release = fullReleaseDate; else delete tIn.dataset.release;
             
             toggleType(g === 'TV Show' || isTV ? 'TV Show' : 'Movie');
 
