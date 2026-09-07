@@ -13,6 +13,7 @@
       --text-muted: #9ca3af;
       --accent-blue: #3b82f6;
       --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
     }
 
     body {
@@ -30,12 +31,18 @@
       margin-bottom: 2rem;
     }
 
-    .search-wrapper {
-      position: relative;
-      width: 300px;
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
     }
 
-    .search-input {
+    .search-wrapper {
+      position: relative;
+      width: 280px;
+    }
+
+    .input-field {
       width: 100%;
       padding: 0.6rem 1rem;
       background: var(--card-bg);
@@ -58,16 +65,32 @@
       z-index: 50;
       display: none;
       margin-top: 4px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
     }
 
     .search-item {
       padding: 0.6rem 1rem;
       cursor: pointer;
       border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
     }
 
     .search-item:hover {
       background: #1f2937;
+    }
+
+    .btn {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
     }
 
     .grid {
@@ -83,6 +106,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .card img {
@@ -111,12 +135,25 @@
       text-transform: uppercase;
     }
 
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
     .card h3 {
       font-size: 0.95rem;
-      margin: 0 0 0.5rem 0;
+      margin: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .edit-icon {
+      cursor: pointer;
+      color: var(--accent-amber);
+      font-size: 0.85rem;
     }
 
     .meta-row {
@@ -133,6 +170,7 @@
       padding: 1px 5px;
       border-radius: 3px;
       font-weight: bold;
+      text-transform: uppercase;
     }
 
     .badge-movie {
@@ -160,6 +198,40 @@
 
     .footer-type {
       color: var(--accent-blue);
+      text-transform: uppercase;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      border-radius: 8px;
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
   </style>
 </head>
@@ -167,104 +239,93 @@
 
   <div class="header-container">
     <h2>VAULT COLLECTION</h2>
-    <div class="search-wrapper">
-      <input type="text" id="searchInput" class="search-input" placeholder="Filter collection..." oninput="handleSearch(this.value)">
-      <div id="searchResults" class="search-results-dropdown"></div>
+    <div class="header-actions">
+      <div class="search-wrapper">
+        <input type="text" id="filterInput" class="input-field" placeholder="Filter collection..." onkeyup="filterCollection()">
+      </div>
+      <button class="btn" onclick="openAddModal()">+ Add Media</button>
     </div>
   </div>
 
   <div class="grid" id="movieGrid"></div>
 
+  <!-- Add/Edit Modal -->
+  <div id="mediaModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Add New Media</h3>
+      
+      <div class="search-wrapper" style="width: 100%;">
+        <input type="text" id="tmdbSearchInput" class="input-field" placeholder="Search TMDB for details..." oninput="handleTmdbSearch(this.value)">
+        <div id="searchResults" class="search-results-dropdown"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="formTitle" class="input-field">
+      </div>
+
+      <div class="form-group">
+        <label>Media Type</label>
+        <select id="formType" class="input-field" onchange="toggleSeasonInput()">
+          <option value="MOVIE">MOVIE</option>
+          <option value="SHOW">SHOW</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="seasonGroup" style="display: none;">
+        <label>Season #</label>
+        <input type="number" id="formSeasons" class="input-field" value="1">
+      </div>
+
+      <div class="form-group">
+        <label>Release Year</label>
+        <input type="text" id="formYear" class="input-field">
+      </div>
+
+      <div class="form-group">
+        <label>Collection / Group</label>
+        <input type="text" id="formCollection" class="input-field" placeholder="e.g. MCU, Standalone">
+      </div>
+
+      <div class="form-group">
+        <label>Poster URL</label>
+        <input type="text" id="formPoster" class="input-field">
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem;">
+        <button class="btn" style="background: var(--border-color);" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="commitMedia()">Commit</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Configuration
     const SB_URL = "YOUR_SUPABASE_URL";
     const SB_KEY = "YOUR_SUPABASE_ANON_KEY";
 
+    let collectionData = [];
     let debounceTimer;
 
-    function handleSearch(query) {
-      clearTimeout(debounceTimer);
-      if (!query.trim()) {
-        document.getElementById('searchResults').style.display = 'none';
-        return;
-      }
-      debounceTimer = setTimeout(() => searchMovies(query), 300);
+    // Fetch and render initial library
+    async function loadCollection() {
+      // Replace with your actual Supabase fetch logic if applicable
+      // e.g., const res = await fetch(`${SB_URL}/rest/v1/movies`, { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } });
+      // collectionData = await res.json();
+      renderGrid(collectionData);
     }
 
-    async function searchMovies(query) {
-      try {
-        const res = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SB_KEY}`,
-            'apikey': SB_KEY
-          },
-          body: JSON.stringify({ query: query })
-        });
-
-        const data = await res.json();
-        displaySearchResults(data.results || []);
-      } catch (err) {
-        console.error("Search failed with error:", err);
-      }
-    }
-
-    function displaySearchResults(results) {
-      const container = document.getElementById('searchResults');
-      if (!container) return;
-
-      if (!results || results.length === 0) {
-        container.innerHTML = '<div class="search-item">No results found</div>';
-        container.style.display = 'block';
-        return;
-      }
-
-      container.innerHTML = results.map(item => {
-        const title = item.title || item.name;
-        const year = (item.release_date || item.first_air_date || '').split('-')[0];
-        const mediaType = item.media_type === 'tv' ? 'SHOW' : 'MOVIE';
-
-        return `
-          <div class="search-item" onclick="selectMovie(${item.id}, '${item.media_type}')">
-            <strong>${title}</strong> (${year || 'N/A'}) - <em>${mediaType}</em>
-          </div>
-        `;
-      }).join('');
-
-      container.style.display = 'block';
-    }
-
-    async function selectMovie(id, mediaType) {
-      document.getElementById('searchResults').style.display = 'none';
-      
-      let seasons = 1;
-      if (mediaType === 'tv') {
-        try {
-          const res = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${SB_KEY}`,
-              'apikey': SB_KEY
-            },
-            body: JSON.stringify({ tvId: id })
-          });
-          const data = await res.json();
-          seasons = data.number_of_seasons || 1;
-        } catch (err) {
-          console.error("Failed to fetch season details:", err);
-        }
-      }
-
-      alert(`Selected ID: ${id} | Type: ${mediaType} | Seasons: ${seasons}`);
+    function renderGrid(items) {
+      const grid = document.getElementById('movieGrid');
+      grid.innerHTML = items.map(item => renderCard(item)).join('');
     }
 
     function renderCard(item) {
-      const isTV = item.media_type === 'tv' || item.type === 'SHOW' || item.seasons > 0;
+      const isTV = item.type === 'SHOW' || item.type === 'TV' || item.seasons > 0;
       
       let seasonLabel = '';
       if (isTV && item.seasons) {
-        seasonLabel = item.seasons > 1 ? ` • ${item.seasons} Seasons` : ` • S${item.seasons}`;
+        seasonLabel = item.seasons > 1 ? ` • ${item.seasons} SEASONS` : ` • S${item.seasons}`;
       }
 
       return `
@@ -272,7 +333,10 @@
           <img src="${item.poster_url || 'https://via.placeholder.com/180x260'}" alt="${item.title}" />
           <div class="card-body">
             <span class="tag">${item.collection_name || 'STANDALONE'}</span>
-            <h3>${item.title}</h3>
+            <div class="card-title-row">
+              <h3>${item.title}</h3>
+              <span class="edit-icon" onclick="editCard('${item.id}')">✏️</span>
+            </div>
             
             <div class="meta-row">
               <span>${item.release_year || 'N/A'}</span>
@@ -289,6 +353,143 @@
         </div>
       `;
     }
+
+    function filterCollection() {
+      const query = document.getElementById('filterInput').value.toLowerCase();
+      const filtered = collectionData.filter(item => 
+        item.title.toLowerCase().includes(query) || 
+        (item.collection_name && item.collection_name.toLowerCase().includes(query))
+      );
+      renderGrid(filtered);
+    }
+
+    // TMDB Search Logic via Supabase Edge Function
+    function handleTmdbSearch(query) {
+      clearTimeout(debounceTimer);
+      if (!query.trim()) {
+        document.getElementById('searchResults').style.display = 'none';
+        return;
+      }
+      debounceTimer = setTimeout(() => searchTMDB(query), 300);
+    }
+
+    async function searchTMDB(query) {
+      try {
+        const res = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SB_KEY}`,
+            'apikey': SB_KEY
+          },
+          body: JSON.stringify({ query: query })
+        });
+
+        const data = await res.json();
+        displaySearchResults(data.results || []);
+      } catch (err) {
+        console.error("Search failed:", err);
+      }
+    }
+
+    function displaySearchResults(results) {
+      const container = document.getElementById('searchResults');
+      if (!results || results.length === 0) {
+        container.innerHTML = '<div class="search-item">No results found</div>';
+        container.style.display = 'block';
+        return;
+      }
+
+      container.innerHTML = results.map(item => {
+        const title = item.title || item.name;
+        const year = (item.release_date || item.first_air_date || '').split('-')[0];
+        const mediaType = item.media_type === 'tv' ? 'SHOW' : 'MOVIE';
+
+        return `
+          <div class="search-item" onclick="selectTmdbItem(${item.id}, '${item.media_type}', '${escapeHtml(title)}', '${year}', '${item.poster_path}')">
+            <strong>${title}</strong> (${year || 'N/A'}) - <em>${mediaType}</em>
+          </div>
+        `;
+      }).join('');
+
+      container.style.display = 'block';
+    }
+
+    async function selectTmdbItem(id, mediaType, title, year, posterPath) {
+      document.getElementById('searchResults').style.display = 'none';
+      document.getElementById('formTitle').value = title;
+      document.getElementById('formYear').value = year || '';
+      document.getElementById('formPoster').value = posterPath ? `https://image.tmdb.org/tGlobal/p/w500${posterPath}` : '';
+
+      const isShow = mediaType === 'tv';
+      document.getElementById('formType').value = isShow ? 'SHOW' : 'MOVIE';
+      toggleSeasonInput();
+
+      if (isShow) {
+        try {
+          const res = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SB_KEY}`,
+              'apikey': SB_KEY
+            },
+            body: JSON.stringify({ tvId: id })
+          });
+          const data = await res.json();
+          document.getElementById('formSeasons').value = data.number_of_seasons || 1;
+        } catch (err) {
+          console.error("Failed to fetch season count:", err);
+        }
+      }
+    }
+
+    // Modal Helpers
+    function openAddModal() {
+      document.getElementById('modalTitle').innerText = "Add New Media";
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formType').value = 'MOVIE';
+      document.getElementById('formYear').value = '';
+      document.getElementById('formCollection').value = '';
+      document.getElementById('formPoster').value = '';
+      document.getElementById('formSeasons').value = '1';
+      toggleSeasonInput();
+      document.getElementById('mediaModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('mediaModal').style.display = 'none';
+      document.getElementById('searchResults').style.display = 'none';
+    }
+
+    function toggleSeasonInput() {
+      const type = document.getElementById('formType').value;
+      document.getElementById('seasonGroup').style.display = type === 'SHOW' ? 'flex' : 'none';
+    }
+
+    function commitMedia() {
+      const newItem = {
+        id: Date.now().toString(),
+        title: document.getElementById('formTitle').value,
+        type: document.getElementById('formType').value,
+        release_year: document.getElementById('formYear').value,
+        collection_name: document.getElementById('formCollection').value,
+        poster_url: document.getElementById('formPoster').value,
+        seasons: document.getElementById('formType').value === 'SHOW' ? parseInt(document.getElementById('formSeasons').value) : null,
+        status: 'Archive'
+      };
+
+      collectionData.unshift(newItem);
+      renderGrid(collectionData);
+      closeModal();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // Initialize
+    loadCollection();
   </script>
 </body>
 </html>
