@@ -56,11 +56,12 @@
                 </div>
                 <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Movies Vault</h1>
                 <div class="flex items-center gap-2">
-                    <div class="relative group">
-                        <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
-                        <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
-                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
-                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
+                    <div id="toolboxContainer" class="relative">
+                        <button onclick="toggleToolbox(event)" title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div id="toolboxMenu" class="hidden flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button onclick="repairMetadata()" title="Repair Metadata & Season Info" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">🔧</button>
+                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">📥</button>
                         </div>
                     </div>
                     <button onclick="toggleView('archive')" title="Watched Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
@@ -68,6 +69,11 @@
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
+
+            <div id="repairStatus" class="hidden mb-6 p-4 bg-cyan-950/60 border border-cyan-500/40 rounded-2xl text-cyan-200 text-xs font-bold flex items-center justify-between">
+                <span id="repairStatusText">Repairing metadata...</span>
+                <span id="repairCount" class="bg-cyan-900/80 px-2.5 py-1 rounded-lg border border-cyan-500/30">0 / 0</span>
+            </div>
 
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
                 <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
@@ -184,6 +190,13 @@
             } 
         }
 
+        function toggleToolbox(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('toolboxMenu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        }
+
         function toggleType(t) { 
             selectedType = t;
             document.getElementById('i-movie').classList.toggle('active', t === 'Movie');
@@ -224,6 +237,76 @@
                 return releaseDate > today;
             }
             return false;
+        }
+
+        async function repairMetadata() {
+            const menu = document.getElementById('toolboxMenu');
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+
+            const statusContainer = document.getElementById('repairStatus');
+            const statusText = document.getElementById('repairStatusText');
+            const countText = document.getElementById('repairCount');
+
+            statusContainer.classList.remove('hidden');
+            let updatedCount = 0;
+            const total = allMovies.length;
+
+            for (let i = 0; i < total; i++) {
+                const movie = allMovies[i];
+                countText.innerText = `${i + 1} / ${total}`;
+                statusText.innerText = `Checking metadata for "${movie.title}"...`;
+
+                const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW';
+
+                try {
+                    const searchRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                        body: JSON.stringify({ query: movie.title })
+                    });
+                    const searchData = await searchRes.json();
+                    const results = searchData.results || searchData || [];
+
+                    if (Array.isArray(results) && results.length > 0) {
+                        const match = results.find(r => (isTV ? (r.media_type === 'tv' || r.name) : (r.media_type === 'movie' || r.title))) || results[0];
+                        
+                        const newCover = match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : movie.cover_url;
+                        const newRelease = match.release_date || match.first_air_date || movie.release_year;
+                        let newSeasons = movie.seasons;
+
+                        if (isTV && match.id) {
+                            try {
+                                const detailRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                                    body: JSON.stringify({ tmdbId: match.id, type: 'tv' })
+                                });
+                                const details = await detailRes.json();
+                                if (details && details.number_of_seasons) {
+                                    newSeasons = details.number_of_seasons;
+                                }
+                            } catch (e) { console.error("Detail error:", e); }
+                        }
+
+                        if (newCover !== movie.cover_url || newRelease !== movie.release_year || newSeasons !== movie.seasons) {
+                            await supabaseClient.from('movies').update({
+                                cover_url: newCover,
+                                release_year: newRelease,
+                                seasons: newSeasons
+                            }).eq('id', movie.id);
+                            updatedCount++;
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Repair failed for ${movie.title}:`, err);
+                }
+            }
+
+            statusText.innerText = `Metadata Repair Finished! Updated ${updatedCount} items.`;
+            countText.innerText = `${total} / ${total}`;
+            setTimeout(() => { statusContainer.classList.add('hidden'); }, 4000);
+            await loadMovies();
         }
 
         async function submitForm() {
@@ -531,6 +614,10 @@
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { document.getElementById('seriesResults').classList.add('hidden'); }
             if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults') && !e.target.closest('button')) { document.getElementById('searchResults').classList.add('hidden'); }
+            if (!e.target.closest('#toolboxContainer')) {
+                const menu = document.getElementById('toolboxMenu');
+                if (menu) { menu.classList.add('hidden'); menu.classList.remove('flex'); }
+            }
         });
 
         function triggerSearch() {
