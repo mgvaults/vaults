@@ -16,9 +16,10 @@
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .type-badge { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
+        .type-badge { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; uppercase; display: inline-block; }
         .badge-tv { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
-        .badge-movie { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid #0891b2; }
+        .badge-movie-series { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+        .badge-movie-standalone { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid #0891b2; }
         .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 220px; color: white; }
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
@@ -94,7 +95,7 @@
                         
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
                             <div onclick="toggleType('Movie')" id="i-movie" class="type-box active" title="Movie"><span style="color:#06b6d4; font-size: 16px;">🎬</span></div>
-                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#a855f7; font-size: 16px;">📺</span></div>
+                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#ef4444; font-size: 16px;">📺</span></div>
                         </div>
                         
                         <div class="flex gap-3 text-white relative">
@@ -320,16 +321,34 @@
             }
         }
 
-        function createActiveCard(movie) {
+        function getCardConfig(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const releaseYear = parseReleaseYear(movie.release_year);
             const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW' || movie.seasons > 0;
-            const seasonLabel = (isTV && movie.seasons) ? (movie.seasons > 1 ? ` • ${movie.seasons} SEASONS` : ` • S${movie.seasons}`) : '';
-            const typePill = isTV ? `📺 SHOW${seasonLabel}` : '🎬 MOVIE';
+            
+            let topBarColor = 'bg-cyan-500';
+            let badgeStyle = 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
+            let pillClass = 'badge-movie-standalone';
+            let typePillText = 'MOVIE';
 
-            const activeBadgeStyle = hasSeries
-                ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-                : 'text-cyan-400 bg-cyan-950/40 border-cyan-800/40';
+            if (isTV) {
+                topBarColor = 'bg-rose-500';
+                badgeStyle = 'bg-rose-600/20 text-rose-400 border-rose-500/30';
+                pillClass = 'badge-tv';
+                typePillText = 'SHOW';
+            } else if (hasSeries) {
+                topBarColor = 'bg-amber-500';
+                badgeStyle = 'bg-amber-600/20 text-amber-400 border-amber-500/30';
+                pillClass = 'badge-movie-series';
+                typePillText = 'MOVIE';
+            }
+
+            return { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText };
+        }
+
+        function createActiveCard(movie) {
+            const { hasSeries, isTV, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            const releaseYear = parseReleaseYear(movie.release_year);
+            const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
 
             const div = document.createElement('div');
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
@@ -338,7 +357,7 @@
                 <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
+                        ${hasSeries ? `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
                         
                         <div class="relative group/menu">
                             <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
@@ -354,9 +373,9 @@
                         </div>
                     </div>
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
-                    <span class="text-xs text-slate-400">${releaseYear}</span>
+                    <span class="text-xs text-slate-400">${releaseYear}${seasonText}</span>
                     <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[9px] bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded uppercase font-semibold">${typePill}</span>
+                        <span class="type-badge ${pillClass}">${typePillText}</span>
                     </div>
                 </div>
             `;
@@ -364,22 +383,14 @@
         }
 
         function createCard(movie) {
-            const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
+            const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
             const releaseYear = parseReleaseYear(movie.release_year);
-            const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW' || movie.seasons > 0;
-            const seasonLabel = (isTV && movie.seasons) ? (movie.seasons > 1 ? ` • ${movie.seasons} SEASONS` : ` • S${movie.seasons}`) : '';
-            const typePill = isTV ? `SHOW${seasonLabel}` : 'MOVIE';
+            const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
 
             const div = document.createElement('div');
             div.dataset.id = movie.id; 
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
-            
-            // TV Shows/Series use Red top-bar; Movies only use Amber if they belong to a series
-            const topBarColor = isTV ? 'bg-rose-500' : (hasSeries ? 'bg-amber-500' : 'bg-cyan-500');
-            const badgeStyle = hasSeries 
-                ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' 
-                : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
 
             div.innerHTML = `
                 <div>
@@ -395,15 +406,12 @@
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
                             <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
-                        <div class="flex flex-wrap gap-1 mt-2 w-full">
-                            <span class="type-badge ${isTV ? 'badge-tv' : 'badge-movie'} shadow-sm">${typePill}</span>
-                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}${seasonText}</p>
                     </div>
                 </div>
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                     <div class="flex items-center justify-between gap-1">
-                        <div class="flex-1"></div>
+                        <span class="type-badge ${pillClass}">${typePillText}</span>
                         <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
                             <option value="Archive" ${!['Watching', 'Watched', 'Trash'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
                             <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
