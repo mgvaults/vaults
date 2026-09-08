@@ -1,38 +1,143 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vault - Dashboard</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 2rem; }
-    nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 2rem; }
-    .user-info { display: flex; align-items: center; gap: 1rem; }
-    .user-info img { width: 36px; height: 36px; border-radius: 50%; }
-    .btn-logout { background: #ef4444; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-    .nav-card { background: #1e293b; padding: 2rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; border: 1px solid #334155; transition: transform 0.2s; }
-    .nav-card:hover { transform: translateY(-4px); border-color: #38bdf8; }
-  </style>
+  <title>The Vault - Dashboard</title>
+  <link rel="icon" href="data:,">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body { background-color: #0b0f19; color: #f1f5f9; }
+    
+    .dashboard-card {
+      background-color: #1e293b;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Color Specific Card Treatments */
+    .card-games { border-top: 4px solid #3b82f6; }
+    .card-games:hover { border-color: #60a5fa; box-shadow: 0 0 25px rgba(59, 130, 246, 0.25); }
+    .card-games .icon-bg { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+    .card-books { border-top: 4px solid #f59e0b; }
+    .card-books:hover { border-color: #fbbf24; box-shadow: 0 0 25px rgba(245, 158, 11, 0.25); }
+    .card-books .icon-bg { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+    .card-movies { border-top: 4px solid #ef4444; }
+    .card-movies:hover { border-color: #f87171; box-shadow: 0 0 25px rgba(239, 68, 68, 0.25); }
+    .card-movies .icon-bg { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    .card-stats { border-top: 4px solid #10b981; }
+    .card-stats:hover { border-color: #34d399; box-shadow: 0 0 25px rgba(16, 185, 129, 0.25); }
+    .card-stats .icon-bg { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); }
+  </style>
 </head>
-<body>
+<body class="min-h-screen p-4 sm:p-8 font-sans overflow-x-hidden flex flex-col justify-between">
 
-  <nav>
-    <h2>Media Library</h2>
-    <div class="user-info">
-      <img id="avatar" src="" alt="User Avatar" style="display:none;" />
-      <span id="user-email">Loading...</span>
-      <button id="logout-btn" class="btn-logout">Logout</button>
-    </div>
-  </nav>
+  <div class="max-w-7xl mx-auto w-full">
+    
+    <!-- Top Navigation Header -->
+    <header class="flex justify-between items-center py-4 mb-10 border-b border-slate-800">
+      <div>
+        <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Vault Portal</h1>
+        <p class="text-xs text-slate-400 font-bold tracking-widest uppercase mt-0.5">Central Media Dashboard</p>
+      </div>
 
-  <main class="grid">
-    <a href="games.html" class="nav-card">🎮 Games Page</a>
-    <a href="books.html" class="nav-card">📚 Books Page</a>
-    <a href="movies.html" class="nav-card">🎬 Movies Page</a>
-  </main>
+      <div class="flex items-center gap-4 bg-slate-800/80 p-2 px-4 rounded-2xl border border-slate-700">
+        <img id="avatar" src="https://via.placeholder.com/36" alt="Avatar" class="w-9 h-9 rounded-xl border border-slate-600 object-cover" style="display:none;" />
+        <span id="user-email" class="text-xs font-bold text-slate-300">Loading...</span>
+        <button id="logout-btn" class="btn-logout bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 px-3 py-1.5 rounded-xl font-bold text-xs transition">Logout</button>
+      </div>
+    </header>
+
+    <!-- Visual Cards Grid -->
+    <main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Games Card -->
+      <a href="games.html" class="dashboard-card card-games p-6 flex flex-col justify-between group">
+        <div>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              🎮
+            </div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30">Vault</span>
+          </div>
+          <h2 class="text-2xl font-black text-white group-hover:text-blue-400 transition-colors">Games</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">Track video game collections, active playthroughs, and backlog completion.</p>
+        </div>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-blue-400 uppercase tracking-wider">
+          <span>Enter Vault</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
+        </div>
+      </a>
+
+      <!-- Books Card -->
+      <a href="books.html" class="dashboard-card card-books p-6 flex flex-col justify-between group">
+        <div>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              📚
+            </div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">Vault</span>
+          </div>
+          <h2 class="text-2xl font-black text-white group-hover:text-amber-400 transition-colors">Books</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">Manage reading lists, current reads, series, and completed literature.</p>
+        </div>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-amber-400 uppercase tracking-wider">
+          <span>Enter Vault</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
+        </div>
+      </a>
+
+      <!-- Movies Card -->
+      <a href="movies.html" class="dashboard-card card-movies p-6 flex flex-col justify-between group">
+        <div>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              🎬
+            </div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30">Vault</span>
+          </div>
+          <h2 class="text-2xl font-black text-white group-hover:text-rose-400 transition-colors">Movies & Shows</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">Catalog films, television series, watchlists, and unreleased titles.</p>
+        </div>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-rose-400 uppercase tracking-wider">
+          <span>Enter Vault</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
+        </div>
+      </a>
+
+      <!-- Vault Stats Card -->
+      <a href="stats.html" class="dashboard-card card-stats p-6 flex flex-col justify-between group">
+        <div>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              📊
+            </div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Analytics</span>
+          </div>
+          <h2 class="text-2xl font-black text-white group-hover:text-emerald-400 transition-colors">Vault Stats</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">View yearly breakdowns, total completed items, and cross-media metrics.</p>
+        </div>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-emerald-400 uppercase tracking-wider">
+          <span>View Analytics</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
+        </div>
+      </a>
+
+    </main>
+  </div>
 
   <script src="auth.js"></script>
 </body>
