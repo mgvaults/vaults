@@ -3,183 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Media Vault - Dashboard</title>
+  <title>The Vault - Dashboard</title>
+  <link rel="icon" href="data:,">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              books: '#f97316',   // Orange
-              movies: '#ef4444',  // Red
-              games: '#38bdf8',   // Sky Blue
-              stats: '#22c55e',   // Green
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
   <style>
-    body { background-color: #0f172a; color: #f8fafc; }
-    .card-glow:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-    .sky-glow:hover { box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.25); }
-    .red-glow:hover { box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.25); }
-    .orange-glow:hover { box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.25); }
-    .green-glow:hover { box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.25); }
+    body { background-color: #0b0f19; color: #f1f5f9; }
+    
+    .dashboard-card {
+      background-color: #1e293b;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Color Specific Card Treatments */
+    .card-games { border-top: 4px solid #3b82f6; }
+    .card-games:hover { border-color: #60a5fa; box-shadow: 0 0 25px rgba(59, 130, 246, 0.25); }
+    .card-games .icon-bg { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+    .card-books { border-top: 4px solid #f59e0b; }
+    .card-books:hover { border-color: #fbbf24; box-shadow: 0 0 25px rgba(245, 158, 11, 0.25); }
+    .card-books .icon-bg { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+    .card-movies { border-top: 4px solid #ef4444; }
+    .card-movies:hover { border-color: #f87171; box-shadow: 0 0 25px rgba(239, 68, 68, 0.25); }
+    .card-movies .icon-bg { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    .card-stats { border-top: 4px solid #10b981; }
+    .card-stats:hover { border-color: #34d399; box-shadow: 0 0 25px rgba(16, 185, 129, 0.25); }
+    .card-stats .icon-bg { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans antialiased">
+<body class="min-h-screen p-4 sm:p-8 font-sans overflow-x-hidden flex flex-col justify-between">
 
-  <!-- Top Navigation Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Left Side Menu: Standardized Page Order -->
-      <nav class="flex items-center space-x-2">
-        <a href="dashboard_2.html" title="Home" class="p-2.5 rounded-lg text-slate-100 bg-slate-800 hover:bg-slate-700 transition">
-          <i class="fa-solid fa-house text-lg"></i>
-        </a>
-        <a href="games.html" title="Games Vault" class="p-2.5 rounded-lg text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition">
-          <i class="fa-solid fa-gamepad text-lg"></i>
-        </a>
-        <a href="movies.html" title="Movies & Shows Vault" class="p-2.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition">
-          <i class="fa-solid fa-film text-lg"></i>
-        </a>
-        <a href="books.html" title="Books Vault" class="p-2.5 rounded-lg text-slate-400 hover:text-orange-400 hover:bg-slate-800 transition">
-          <i class="fa-solid fa-book text-lg"></i>
-        </a>
-      </nav>
-
-      <!-- Right Side Menu: Standardized Utilities & Navigation -->
-      <div class="flex items-center space-x-2">
-        <a href="archive.html" title="Archive / Trophy Room" class="p-2.5 rounded-lg text-slate-400 hover:text-yellow-400 hover:bg-slate-800 transition">
-          <i class="fa-solid fa-trophy text-lg"></i>
-        </a>
-        <a href="stats.html" title="Vault Stats" class="p-2.5 rounded-lg text-slate-400 hover:text-green-400 hover:bg-slate-800 transition">
-          <i class="fa-solid fa-chart-pie text-lg"></i>
-        </a>
-
-        <!-- Toolbox Dropdown Menu -->
-        <div class="relative group">
-          <button title="Toolbox" class="p-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition">
-            <i class="fa-solid fa-toolbox text-lg"></i>
-          </button>
-          <div class="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-            <div class="py-1">
-              <a href="#" id="exportData" class="flex items-center px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">
-                <i class="fa-solid fa-download mr-3 w-4"></i> Export Backup
-              </a>
-              <a href="#" id="importData" class="flex items-center px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">
-                <i class="fa-solid fa-upload mr-3 w-4"></i> Import Data
-              </a>
-              <div class="border-t border-slate-700 my-1"></div>
-              <a href="trash.html" class="flex items-center px-4 py-2 text-sm text-red-400 hover:bg-slate-700 hover:text-red-300">
-                <i class="fa-solid fa-trash mr-3 w-4"></i> Trash Bin
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <button title="Lock Vault" class="p-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition">
-          <i class="fa-solid fa-lock text-lg"></i>
-        </button>
+  <div class="max-w-7xl mx-auto w-full">
+    
+    <!-- Top Navigation Header -->
+    <header class="flex justify-between items-center py-4 mb-10 border-b border-slate-800">
+      <div>
+        <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Vault Portal</h1>
+        <p class="text-xs text-slate-400 font-bold tracking-widest uppercase mt-0.5">Central Media Dashboard</p>
       </div>
 
-    </div>
-  </header>
+      <div class="flex items-center gap-4 bg-slate-800/80 p-2 px-4 rounded-2xl border border-slate-700">
+        <img id="avatar" src="https://via.placeholder.com/36" alt="Avatar" class="w-9 h-9 rounded-xl border border-slate-600 object-cover" style="display:none;" />
+        <span id="user-email" class="text-xs font-bold text-slate-300">Loading...</span>
+        <button id="logout-btn" class="btn-logout bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 px-3 py-1.5 rounded-xl font-bold text-xs transition">Logout</button>
+      </div>
+    </header>
 
-  <!-- Main Content Area -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight text-slate-100">Media Vault Dashboard</h1>
-      <p class="text-slate-400 mt-1">Select a vault to manage your collection or review overall stats.</p>
-    </div>
-
-    <!-- Main Grid Layout (Order: Games, Movies, Books, Stats) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-      <!-- 1. GAMES CARD (Sky Blue) -->
-      <a href="games.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-xl sky-glow hover:border-sky-500/50 transition-all duration-300 flex flex-col justify-between">
+    <!-- Visual Cards Grid -->
+    <main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Games Card -->
+      <a href="games.html" class="dashboard-card card-games p-6 flex flex-col justify-between group">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-sky-500/10 rounded-lg text-sky-400 group-hover:bg-sky-500 group-hover:text-slate-950 transition-colors">
-              <i class="fa-solid fa-gamepad text-2xl"></i>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              🎮
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">
-              Games
-            </span>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30">Vault</span>
           </div>
-          <h2 class="text-xl font-bold text-slate-100 group-hover:text-sky-400 transition-colors">Games Vault</h2>
-          <p class="text-slate-400 text-sm mt-2">Track backlog, sessions, completed series, and standalone titles.</p>
+          <h2 class="text-2xl font-black text-white group-hover:text-blue-400 transition-colors">Games</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">Track video game collections, active playthroughs, and backlog completion.</p>
         </div>
-        <div class="mt-6 flex items-center text-sm font-medium text-sky-400 group-hover:translate-x-1 transition-transform">
-          Open Vault <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-blue-400 uppercase tracking-wider">
+          <span>Enter Vault</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
         </div>
       </a>
 
-      <!-- 2. MOVIES & SHOWS CARD (Red) -->
-      <a href="movies.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-xl red-glow hover:border-red-500/50 transition-all duration-300 flex flex-col justify-between">
+      <!-- Books Card -->
+      <a href="books.html" class="dashboard-card card-books p-6 flex flex-col justify-between group">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-red-500/10 rounded-lg text-red-400 group-hover:bg-red-500 group-hover:text-slate-950 transition-colors">
-              <i class="fa-solid fa-film text-2xl"></i>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              📚
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-              Cinema
-            </span>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">Vault</span>
           </div>
-          <h2 class="text-xl font-bold text-slate-100 group-hover:text-red-400 transition-colors">Movies & Shows</h2>
-          <p class="text-slate-400 text-sm mt-2">Manage watchlist, active show viewing, and feature films.</p>
+          <h2 class="text-2xl font-black text-white group-hover:text-amber-400 transition-colors">Books</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">Manage reading lists, current reads, series, and completed literature.</p>
         </div>
-        <div class="mt-6 flex items-center text-sm font-medium text-red-400 group-hover:translate-x-1 transition-transform">
-          Open Vault <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-amber-400 uppercase tracking-wider">
+          <span>Enter Vault</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
         </div>
       </a>
 
-      <!-- 3. BOOKS CARD (Orange) -->
-      <a href="books.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-xl orange-glow hover:border-orange-500/50 transition-all duration-300 flex flex-col justify-between">
+      <!-- Movies Card -->
+      <a href="movies.html" class="dashboard-card card-movies p-6 flex flex-col justify-between group">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-orange-500/10 rounded-lg text-orange-400 group-hover:bg-orange-500 group-hover:text-slate-950 transition-colors">
-              <i class="fa-solid fa-book text-2xl"></i>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              🎬
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">
-              Books
-            </span>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30">Vault</span>
           </div>
-          <h2 class="text-xl font-bold text-slate-100 group-hover:text-orange-400 transition-colors">Books Vault</h2>
-          <p class="text-slate-400 text-sm mt-2">Log reading progress, author series, standalone novels, and wishlist.</p>
+          <h2 class="text-2xl font-black text-white group-hover:text-rose-400 transition-colors">Movies & Shows</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">Catalog films, television series, watchlists, and unreleased titles.</p>
         </div>
-        <div class="mt-6 flex items-center text-sm font-medium text-orange-400 group-hover:translate-x-1 transition-transform">
-          Open Vault <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-rose-400 uppercase tracking-wider">
+          <span>Enter Vault</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
         </div>
       </a>
 
-      <!-- 4. VAULT STATS CARD (Green) -->
-      <a href="stats.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-xl green-glow hover:border-green-500/50 transition-all duration-300 flex flex-col justify-between">
+      <!-- Vault Stats Card -->
+      <a href="stats.html" class="dashboard-card card-stats p-6 flex flex-col justify-between group">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-green-500/10 rounded-lg text-green-400 group-hover:bg-green-500 group-hover:text-slate-950 transition-colors">
-              <i class="fa-solid fa-chart-pie text-2xl"></i>
+          <div class="flex justify-between items-start mb-6">
+            <div class="icon-bg w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner transition-transform group-hover:scale-110">
+              📊
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
-              Analytics
-            </span>
+            <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Analytics</span>
           </div>
-          <h2 class="text-xl font-bold text-slate-100 group-hover:text-green-400 transition-colors">Vault Stats</h2>
-          <p class="text-slate-400 text-sm mt-2">View total completion metrics, cross-vault trends, and historical logs.</p>
+          <h2 class="text-2xl font-black text-white group-hover:text-emerald-400 transition-colors">Vault Stats</h2>
+          <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">View yearly breakdowns, total completed items, and cross-media metrics.</p>
         </div>
-        <div class="mt-6 flex items-center text-sm font-medium text-green-400 group-hover:translate-x-1 transition-transform">
-          View Metrics <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+        <div class="mt-8 flex items-center justify-between text-xs font-bold text-emerald-400 uppercase tracking-wider">
+          <span>View Analytics</span>
+          <span class="transition-transform group-hover:translate-x-1">→</span>
         </div>
       </a>
 
-    </div>
-  </main>
+    </main>
+  </div>
 
+  <script src="auth.js"></script>
 </body>
 </html>
