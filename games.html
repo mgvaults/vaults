@@ -12,10 +12,10 @@
         extend: {
           colors: {
             brand: {
-              books: '#f97316',   // Orange
-              movies: '#ef4444',  // Red
-              games: '#38bdf8',   // Sky Blue
-              stats: '#22c55e',   // Green
+              books: '#f97316',
+              movies: '#ef4444',
+              games: '#38bdf8',
+              stats: '#22c55e',
             }
           }
         }
@@ -25,25 +25,17 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     body { background-color: #0b0f19; color: #f8fafc; }
-    
-    /* Card Accent Top Borders */
     .border-t-series { border-top: 4px solid #f97316; }
     .border-t-standalone { border-top: 4px solid #3b82f6; }
-    
-    /* Custom Scrollbar for smooth UI */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #0b0f19; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans antialiased text-slate-200">
 
-  <!-- Top Navigation Header -->
+  <!-- Navigation Header -->
   <header class="bg-[#0f1523] border-b border-slate-800/80 sticky top-0 z-50">
     <div class="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
       
-      <!-- Left Side Menu: Home + Active Page (Games) Positioned Next to Home -->
+      <!-- Navigation Links -->
       <nav class="flex items-center space-x-2">
         <a href="dashboard_2.html" title="Home" class="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-slate-100 flex items-center justify-center transition">
           <i class="fa-solid fa-house text-base"></i>
@@ -59,12 +51,11 @@
         </a>
       </nav>
 
-      <!-- Center Title Header -->
       <div class="flex items-center space-x-2">
         <h1 class="text-xl font-black uppercase tracking-wider text-sky-400">Games Vault</h1>
       </div>
 
-      <!-- Right Side Utilities -->
+      <!-- Utilities -->
       <div class="flex items-center space-x-2">
         <a href="#" title="Wishlist" class="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
           <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
@@ -75,28 +66,11 @@
         <a href="stats.html" title="Vault Stats" class="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-green-400 flex items-center justify-center transition">
           <i class="fa-solid fa-chart-pie text-base"></i>
         </a>
-
-        <!-- Toolbox Dropdown Menu -->
         <div class="relative group">
           <button title="Toolbox" class="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
             <i class="fa-solid fa-toolbox text-base"></i>
           </button>
-          <div class="absolute right-0 mt-2 w-48 bg-[#13192b] border border-slate-700 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
-            <div class="py-1">
-              <a href="#" id="exportData" class="flex items-center px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-sky-400">
-                <i class="fa-solid fa-download mr-3 text-sm"></i> Export Data
-              </a>
-              <a href="#" id="importData" class="flex items-center px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-sky-400">
-                <i class="fa-solid fa-upload mr-3 text-sm"></i> Import Data
-              </a>
-              <div class="border-t border-slate-800 my-1"></div>
-              <a href="trash.html" class="flex items-center px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-slate-800 hover:text-red-300">
-                <i class="fa-solid fa-trash mr-3 text-sm"></i> Trash Bin
-              </a>
-            </div>
-          </div>
         </div>
-
         <button title="Lock Vault" class="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 flex items-center justify-center transition">
           <i class="fa-solid fa-lock text-base"></i>
         </button>
@@ -105,42 +79,39 @@
     </div>
   </header>
 
-  <!-- Main Content Layout -->
   <main class="flex-1 max-w-[1600px] w-full mx-auto px-6 py-6 space-y-6">
 
-    <!-- Top Row: Active Session (Left) & Add/Search Panel (Right) -->
+    <!-- Top Section -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-      <!-- Active Session Section (4 Cols) -->
+      <!-- Active Session -->
       <div class="lg:col-span-4 bg-[#111625] border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between">
         <div>
           <h2 class="text-xs font-bold uppercase tracking-wider text-sky-400 mb-4">Active Session</h2>
           
           <div class="space-y-3">
-            <!-- Active Game Item 1 -->
             <div class="bg-[#171d2e] border border-slate-700/50 rounded-xl p-3 flex gap-3 relative group">
-              <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=120&q=80" alt="StarCraft II" class="w-16 h-20 object-cover rounded-lg border border-slate-700/60">
+              <img src="path_to_starcraft2_image.jpg" alt="StarCraft II" class="w-16 h-20 object-cover rounded-lg border border-slate-700/60 bg-slate-800">
               <div class="flex-1 min-w-0">
                 <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30">Standalone</span>
                 <h3 class="text-sm font-bold text-slate-100 truncate mt-1">StarCraft II: Campaign Collection</h3>
                 <p class="text-xs text-slate-400">2024</p>
                 <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-900/40 text-blue-300 uppercase mt-1">BN</span>
               </div>
-              <button title="Edit Game" class="absolute top-3 right-3 text-orange-400 hover:text-orange-300 opacity-80 group-hover:opacity-100">
+              <button class="absolute top-3 right-3 text-orange-400 hover:text-orange-300">
                 <i class="fa-solid fa-pen text-xs"></i>
               </button>
             </div>
 
-            <!-- Active Game Item 2 -->
             <div class="bg-[#171d2e] border border-slate-700/50 rounded-xl p-3 flex gap-3 relative group">
-              <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=120&q=80" alt="Batman Arkham City" class="w-16 h-20 object-cover rounded-lg border border-slate-700/60">
+              <img src="path_to_batman_image.jpg" alt="Batman Arkham City" class="w-16 h-20 object-cover rounded-lg border border-slate-700/60 bg-slate-800">
               <div class="flex-1 min-w-0">
                 <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">Batman Arkham</span>
                 <h3 class="text-sm font-bold text-slate-100 truncate mt-1">Batman: Arkham City - Game of the Year Edition</h3>
                 <p class="text-xs text-slate-400">2012</p>
-                <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 uppercase mt-1">STEAM</span>
+                <span class="inline-block text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 uppercase mt-1">STEAM</span>
               </div>
-              <button title="Edit Game" class="absolute top-3 right-3 text-orange-400 hover:text-orange-300 opacity-80 group-hover:opacity-100">
+              <button class="absolute top-3 right-3 text-orange-400 hover:text-orange-300">
                 <i class="fa-solid fa-pen text-xs"></i>
               </button>
             </div>
@@ -148,222 +119,169 @@
         </div>
       </div>
 
-      <!-- Search & Input Form Panel (8 Cols) -->
+      <!-- Search Panel -->
       <div class="lg:col-span-8 bg-[#111625] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
         <div class="space-y-4">
           <label class="block text-xs font-bold uppercase tracking-wider text-sky-400">Search</label>
+          <input type="text" placeholder="Search for game title..." class="w-full bg-[#161c2d] border border-slate-700/60 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-400">
           
-          <!-- Title Search Input -->
-          <input type="text" placeholder="Search for game title..." class="w-full bg-[#161c2d] border border-slate-700/60 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400">
-          
-          <!-- Platform Filter Selectors -->
           <div class="flex flex-wrap items-center justify-center gap-2 py-2">
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-brands fa-steam text-lg"></i>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-solid fa-cube text-base"></i>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-solid fa-g text-base"></i>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <span class="font-bold text-xs">BN</span>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-brands fa-xbox text-lg"></i>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-solid fa-gamepad text-base"></i>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-brands fa-playstation text-lg"></i>
-            </button>
-            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:border-sky-400 text-slate-400 hover:text-sky-400 flex items-center justify-center transition">
-              <i class="fa-solid fa-amazon text-base"></i>
-            </button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-brands fa-steam text-lg"></i></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-solid fa-cube text-base"></i></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-solid fa-g text-base"></i></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><span class="font-bold text-xs">BN</span></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-brands fa-xbox text-lg"></i></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-solid fa-gamepad text-base"></i></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-brands fa-playstation text-lg"></i></button>
+            <button class="w-10 h-10 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-sky-400 flex items-center justify-center"><i class="fa-solid fa-amazon text-base"></i></button>
           </div>
 
-          <!-- Series Name Input & Commit Button -->
           <div class="flex gap-4">
-            <input type="text" placeholder="Chain Series Name (Optional)" class="flex-1 bg-[#161c2d] border border-slate-700/60 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 italic focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400">
-            <button class="px-8 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold tracking-wide rounded-xl uppercase transition shadow-lg shadow-sky-500/20">
-              Commit
-            </button>
+            <input type="text" placeholder="Chain Series Name (Optional)" class="flex-1 bg-[#161c2d] border border-slate-700/60 rounded-xl px-4 py-3 text-slate-100 italic focus:outline-none focus:border-sky-400">
+            <button class="px-8 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold tracking-wide rounded-xl uppercase transition">Commit</button>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- Bottom Row: Dual Column Grid (Next Focus & Backlog) -->
+    <!-- Dual Column Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
 
-      <!-- LEFT COLUMN: NEXT FOCUS -->
+      <!-- Left Column: Next Focus -->
       <div>
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Next Focus</h2>
-          <div class="relative w-40">
-            <input type="text" placeholder="Filter..." class="w-full bg-[#161c2d] border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-sky-400">
-          </div>
+          <input type="text" placeholder="Filter..." class="w-40 bg-[#161c2d] border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-300 focus:outline-none focus:border-sky-400">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          
-          <!-- Encodya Card -->
+          <!-- Card 1 -->
           <div class="bg-[#111625] border border-slate-800 rounded-xl overflow-hidden border-t-standalone flex flex-col justify-between">
-            <div class="relative aspect-[3/4] overflow-hidden group">
-              <img src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=400&q=80" alt="Encodya" class="w-full h-full object-cover">
-              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400 hover:text-orange-300 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
+            <div class="relative aspect-[3/4] bg-slate-800">
+              <img src="path_to_encodya.jpg" alt="Encodya" class="w-full h-full object-cover">
+              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400"><i class="fa-solid fa-pen text-xs"></i></button>
             </div>
             <div class="p-3">
-              <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30 mb-1">Standalone</span>
+              <span class="inline-block text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30 mb-1">Standalone</span>
               <h3 class="text-sm font-bold text-slate-100 truncate">Encodya</h3>
               <p class="text-[11px] text-slate-400">2021</p>
               <span class="inline-block text-[9px] font-bold px-1 py-0.5 rounded bg-slate-800 text-slate-300 uppercase mt-1">STEAM</span>
             </div>
-            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between gap-1">
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 uppercase">POINT-AND...</span>
-              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5 focus:outline-none">
+            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400">POINT-AND...</span>
+              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5">
                 <option selected>Up Next</option>
-                <option>Backlog</option>
-                <option>Playing</option>
               </select>
             </div>
           </div>
 
-          <!-- The Low Road Card -->
+          <!-- Card 2 -->
           <div class="bg-[#111625] border border-slate-800 rounded-xl overflow-hidden border-t-standalone flex flex-col justify-between">
-            <div class="relative aspect-[3/4] overflow-hidden group">
-              <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=80" alt="The Low Road" class="w-full h-full object-cover">
-              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400 hover:text-orange-300 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
+            <div class="relative aspect-[3/4] bg-slate-800">
+              <img src="path_to_lowroad.jpg" alt="The Low Road" class="w-full h-full object-cover">
+              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400"><i class="fa-solid fa-pen text-xs"></i></button>
             </div>
             <div class="p-3">
-              <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30 mb-1">Standalone</span>
+              <span class="inline-block text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/30 mb-1">Standalone</span>
               <h3 class="text-sm font-bold text-slate-100 truncate">The Low Road</h3>
               <p class="text-[11px] text-slate-400">2017</p>
               <span class="inline-block text-[9px] font-bold px-1 py-0.5 rounded bg-slate-800 text-slate-300 uppercase mt-1">STEAM</span>
             </div>
-            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between gap-1">
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 uppercase">POINT-AND...</span>
-              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5 focus:outline-none">
+            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400">POINT-AND...</span>
+              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5">
                 <option selected>Up Next</option>
-                <option>Backlog</option>
-                <option>Playing</option>
               </select>
             </div>
           </div>
 
-          <!-- Mass Effect Legendary Edition Card -->
+          <!-- Card 3 -->
           <div class="bg-[#111625] border border-slate-800 rounded-xl overflow-hidden border-t-series flex flex-col justify-between">
-            <div class="relative aspect-[3/4] overflow-hidden group">
-              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Mass Effect" class="w-full h-full object-cover">
-              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400 hover:text-orange-300 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
+            <div class="relative aspect-[3/4] bg-slate-800">
+              <img src="path_to_masseffect.jpg" alt="Mass Effect" class="w-full h-full object-cover">
+              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400"><i class="fa-solid fa-pen text-xs"></i></button>
             </div>
             <div class="p-3">
-              <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Mass Effect</span>
+              <span class="inline-block text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Mass Effect</span>
               <h3 class="text-sm font-bold text-slate-100 truncate">Mass Effect Legendary Edition</h3>
               <p class="text-[11px] text-slate-400">2021</p>
               <span class="inline-block text-[9px] font-bold px-1 py-0.5 rounded bg-blue-900/40 text-blue-300 uppercase mt-1">PS</span>
             </div>
-            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between gap-1">
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 uppercase">SHOOTER</span>
-              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5 focus:outline-none">
+            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400">SHOOTER</span>
+              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5">
                 <option selected>Up Next</option>
-                <option>Backlog</option>
-                <option>Playing</option>
               </select>
             </div>
           </div>
-
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: BACKLOG & COLLECTION -->
+      <!-- Right Column: Backlog & Collection -->
       <div>
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Backlog & Collection</h2>
-          <div class="relative w-40">
-            <input type="text" placeholder="Filter..." class="w-full bg-[#161c2d] border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-sky-400">
-          </div>
+          <input type="text" placeholder="Filter..." class="w-40 bg-[#161c2d] border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-300 focus:outline-none focus:border-sky-400">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          
-          <!-- Borderlands Card -->
+          <!-- Card 4 -->
           <div class="bg-[#111625] border border-slate-800 rounded-xl overflow-hidden border-t-series flex flex-col justify-between">
-            <div class="relative aspect-[3/4] overflow-hidden group">
-              <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=400&q=80" alt="Borderlands" class="w-full h-full object-cover">
-              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400 hover:text-orange-300 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
+            <div class="relative aspect-[3/4] bg-slate-800">
+              <img src="path_to_borderlands.jpg" alt="Borderlands" class="w-full h-full object-cover">
+              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400"><i class="fa-solid fa-pen text-xs"></i></button>
             </div>
             <div class="p-3">
-              <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Borderlands</span>
+              <span class="inline-block text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Borderlands</span>
               <h3 class="text-sm font-bold text-slate-100 truncate">Borderlands: The Handsome...</h3>
               <p class="text-[11px] text-slate-400">2015</p>
               <span class="inline-block text-[9px] font-bold px-1 py-0.5 rounded bg-blue-900/40 text-blue-300 uppercase mt-1">PS</span>
             </div>
-            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between gap-1">
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 uppercase">SHOOTER</span>
-              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5 focus:outline-none">
+            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400">SHOOTER</span>
+              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5">
                 <option selected>Backlog</option>
-                <option>Up Next</option>
-                <option>Playing</option>
               </select>
             </div>
           </div>
 
-          <!-- Deus Ex GOTY Card -->
+          <!-- Card 5 -->
           <div class="bg-[#111625] border border-slate-800 rounded-xl overflow-hidden border-t-series flex flex-col justify-between">
-            <div class="relative aspect-[3/4] overflow-hidden group">
-              <img src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=400&q=80" alt="Deus Ex GOTY" class="w-full h-full object-cover">
-              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400 hover:text-orange-300 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
+            <div class="relative aspect-[3/4] bg-slate-800">
+              <img src="path_to_deusex.jpg" alt="Deus Ex GOTY" class="w-full h-full object-cover">
+              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400"><i class="fa-solid fa-pen text-xs"></i></button>
             </div>
             <div class="p-3">
-              <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Deus Ex</span>
-              <h3 class="text-sm font-bold text-slate-100 truncate">Deus Ex: Game of the Year Edition</h3>
+              <span class="inline-block text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Deus Ex</span>
+              <h3 class="text-sm font-bold text-slate-100 truncate">Deus Ex: Game of the Year...</h3>
               <p class="text-[11px] text-slate-400">2001</p>
               <span class="inline-block text-[9px] font-bold px-1 py-0.5 rounded bg-purple-900/40 text-purple-300 uppercase mt-1">GOG</span>
             </div>
-            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between gap-1">
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 uppercase">SHOOTER</span>
-              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5 focus:outline-none">
+            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400">SHOOTER</span>
+              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5">
                 <option selected>Backlog</option>
-                <option>Up Next</option>
-                <option>Playing</option>
               </select>
             </div>
           </div>
 
-          <!-- Deus Ex Invisible War Card -->
+          <!-- Card 6 -->
           <div class="bg-[#111625] border border-slate-800 rounded-xl overflow-hidden border-t-series flex flex-col justify-between">
-            <div class="relative aspect-[3/4] overflow-hidden group">
-              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80" alt="Deus Ex Invisible War" class="w-full h-full object-cover">
-              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400 hover:text-orange-300 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-xs"></i>
-              </button>
+            <div class="relative aspect-[3/4] bg-slate-800">
+              <img src="path_to_deusex2.jpg" alt="Deus Ex Invisible War" class="w-full h-full object-cover">
+              <button class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-slate-900/80 text-orange-400"><i class="fa-solid fa-pen text-xs"></i></button>
             </div>
             <div class="p-3">
-              <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Deus Ex</span>
+              <span class="inline-block text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 mb-1">Deus Ex</span>
               <h3 class="text-sm font-bold text-slate-100 truncate">Deus Ex: Invisible War</h3>
               <p class="text-[11px] text-slate-400">2003</p>
               <span class="inline-block text-[9px] font-bold px-1 py-0.5 rounded bg-purple-900/40 text-purple-300 uppercase mt-1">GOG</span>
             </div>
-            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between gap-1">
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 uppercase">SHOOTER</span>
-              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5 focus:outline-none">
+            <div class="p-2.5 bg-[#0d121f] border-t border-slate-800/60 flex items-center justify-between">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-400">SHOOTER</span>
+              <select class="bg-slate-800 border border-slate-700 text-[10px] text-slate-300 rounded px-1.5 py-0.5">
                 <option selected>Backlog</option>
-                <option>Up Next</option>
-                <option>Playing</option>
               </select>
             </div>
           </div>
