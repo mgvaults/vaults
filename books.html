@@ -1,647 +1,426 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Vault - Books</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Book Quest Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        body { background-color: #0b0f19; color: #f1f5f9; }
-        .book-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
-        .book-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .book-poster-container { width: 100%; height: 260px; background-color: #0f172a; border-radius: 0.5rem; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .book-poster-container img { width: 100%; height: 100%; object-fit: cover; }
-        .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
-        .type-box.active { opacity: 1; transform: scale(1.08); border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.6); }
-        #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .type-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
-        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 200px; color: white; }
-        #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
-        #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
-        #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 10px; border: 2px solid #1e293b; }
+        .drag-ghost { opacity: 0.4; background: #334155 !important; }
+        .drag-chosen { border: 2px solid #3b82f6 !important; }
     </style>
 </head>
-<body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
-
-    <div id="authScreen">
-        <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
-            <div class="mb-2 text-amber-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
-            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-8">Authentication Required</p>
-            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 py-4 px-6 rounded-2xl font-black hover:bg-slate-100 transition flex items-center justify-center gap-3 uppercase tracking-wider text-sm shadow-lg">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1c-4.31 0-8.01 2.47-9.82 6.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                Sign in with Google
-            </button>
-        </div>
-    </div>
-
-    <div id="mainApp" style="display: none;">
-        <div class="max-w-7xl mx-auto">
-            <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
+    <div class="max-w-6xl mx-mx-auto space-y-6">
+        
+        <!-- Header Controls -->
+        <header class="flex flex-wrap justify-between items-center gap-4 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <div>
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-amber-400">Book Quest Hub</h1>
+                <p class="text-sm text-slate-400 mt-1" id="hubSubtitle">Track, prioritize, and conquer your reading backlog.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="file" id="csvFile" accept=".csv" class="hidden" onchange="importCSV(event)">
                 <div class="flex items-center gap-2">
-                   <button onclick="toggleView('queue')" title="Books Vault" class="bg-amber-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">📚</button>
-                   <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
-                   <button onclick="window.location.href='games.html'" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</button>
-                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
-                   <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
-                </div>
-                <h1 class="text-3xl font-black tracking-tighter text-amber-500 uppercase italic">Books Vault</h1>
-                <div class="flex items-center gap-2">
-                    <div class="relative group">
-                        <button class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
-                        <div class="hidden group-hover:flex flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
-                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
-                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
+                    <div id="toolboxContainer" class="relative">
+                        <button onclick="toggleToolbox(event)" title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div id="toolboxMenu" class="hidden flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">📥</button>
                         </div>
                     </div>
                     <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-amber-400">🪄</button>
                     <button onclick="toggleView('archive')" title="Finished Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
                     <button onclick="toggleView('trash')" title="Trash" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
                 </div>
-                <input type="file" id="csvFile" accept=".csv" class="hidden">
-            </header>
-
-            <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
-                <div id="activeSessionBox" class="lg:col-span-5 bg-amber-950/20 p-5 rounded-[2.5rem] border border-amber-500/20 shadow-inner flex flex-col justify-between">
-                    <h2 class="text-amber-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Reading 📖</h2>
-                    <div id="col-reading" class="flex-1 flex flex-col gap-3 justify-center"></div>
-                </div>
-                
-                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
-                    <div class="flex flex-col gap-3 relative">
-                        <div class="text-[10px] font-black text-amber-400 uppercase px-1 italic flex justify-between">
-                            <span id="formModeLabel">Search</span>
-                            <div class="flex gap-2">
-                                <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
-                                <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
-                            </div>
-                        </div>
-                        
-                        <input id="titleInput" type="text" oninput="searchBooks(this.value)" placeholder="Search for book title or ISBN..." class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
-                        <div id="searchResults" class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
-                        
-                        <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
-                            <div onclick="toggleType('Book')" id="i-book" class="type-box active" title="Book"><span style="color:#f59e0b; font-size: 16px;">📚</span></div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <input id="authorInput" type="text" placeholder="Author Name" class="bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
-                            <div class="relative">
-                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Series Name (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
-                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-3 text-white relative">
-                            <input id="seriesNumInput" type="number" step="0.1" placeholder="Book #" class="w-28 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
-                            <button onclick="submitForm()" id="submitBtn" class="flex-1 bg-amber-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-amber-500 transition">Commit</button>
-                        </div>
-                    </div>
-                </div>
             </div>
+        </header>
 
-            <div id="queueView">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Bookshelf Collection</h2>
-                    <div class="flex items-center gap-3">
-                        <select id="sortSelect" onchange="render()" class="col-filter">
-                            <option value="title">Sort: Title / Series</option>
-                            <option value="author">Sort: Author</option>
+        <!-- Main Form & Search -->
+        <div id="activeControls" class="grid md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                <h2 class="text-xl font-bold text-cyan-400 flex items-center gap-2"><span>➕</span> Add New Book</h2>
+                <form id="addBookForm" onsubmit="handleAddBook(event)" class="space-y-3">
+                    <div class="relative">
+                        <input type="text" id="titleInput" placeholder="Book Title *" required oninput="handleSearch(this.value)" autocomplete="off" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                        <div id="searchResults" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl max-h-48 overflow-y-auto z-50 shadow-2xl divide-y divide-slate-700"></div>
+                    </div>
+                    <input type="text" id="authorInput" placeholder="Author" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                    <div class="relative">
+                        <input type="text" id="seriesInput" placeholder="Series (Optional)" oninput="handleSeriesSearch(this.value)" autocomplete="off" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                        <div id="seriesResults" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl max-h-36 overflow-y-auto z-50 shadow-2xl divide-y divide-slate-700"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="seriesNumInput" placeholder="Book #" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+                        <select id="formatInput" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 text-slate-300">
+                            <option value="Physical">Physical</option>
+                            <option value="E-Book">E-Book</option>
+                            <option value="Audiobook">Audiobook</option>
                         </select>
-                        <input id="filterMain" type="text" oninput="render()" placeholder="Filter collection..." class="col-filter">
                     </div>
-                </div>
-                <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+                    <label class="flex items-center gap-2 p-2 bg-slate-800/50 rounded-xl border border-slate-700/50 cursor-pointer text-sm text-slate-300">
+                        <input type="checkbox" id="wishlistCheck" class="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-0">
+                        <span>Save to Wishlist Vault</span>
+                    </label>
+                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2.5 rounded-xl transition-all duration-200">Add to Backlog</button>
+                </form>
             </div>
 
-            <div id="altView" class="hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="w-44"></div>
-                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-emerald-400 text-center">Finished Archive 🏆</h2>
-                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter titles..." class="col-filter">
+            <!-- List Area -->
+            <div class="md:col-span-2 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                    <div class="flex gap-2">
+                        <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500 text-white">All</button>
+                        <button onclick="setFilter('Physical')" id="filterPhysical" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">Physical</button>
+                        <button onclick="setFilter('E-Book')" id="filterEBook" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">E-Book</button>
+                        <button onclick="setFilter('Audiobook')" id="filterAudiobook" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">Audiobook</button>
+                    </div>
+                    <div class="text-xs text-slate-500 font-mono" id="itemCount">0 Items</div>
                 </div>
-                <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-            </div>
 
-            <div id="wishlistView" class="hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="w-44"></div>
-                    <h2 class="font-black text-2xl uppercase tracking-widest italic text-amber-400 text-center">Book Wishlist 🪄</h2>
-                    <input id="filterWishlist" type="text" oninput="render()" placeholder="Filter wishlist..." class="col-filter">
-                </div>
-                <div id="col-wishlist" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+                <div id="bookList" class="space-y-3"></div>
             </div>
+        </div>
+
+        <!-- Archive/Wishlist/Trash Views Container -->
+        <div id="secondaryView" class="hidden space-y-4">
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <h2 id="secondaryTitle" class="text-xl font-bold text-emerald-400">Archive</h2>
+                <button onclick="toggleView('main')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm border border-slate-700">← Back to Hub</button>
+            </div>
+            <div id="secondaryList" class="space-y-3"></div>
         </div>
     </div>
 
     <script>
-        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let allBooks = [], editingId = null, currentViewMode = 'queue', searchDebounce = null;
+        let books = [];
+        let currentView = 'main'; // main, archive, wishlist, trash
+        let activeFilter = 'all';
+        let sortableInstance = null;
 
-        async function initAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showApp(); else showAuth();
-            supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (session) showApp(); else showAuth();
-            });
-        }
-
-        async function loginWithGoogle() {
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.href }
-            });
-            if (error) alert("OAuth error: " + error.message);
-        }
-
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            showAuth();
-        }
-
-        function showApp() {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            loadBooks();
-        }
-
-        function showAuth() {
-            document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-        }
-
-        async function loadBooks() { 
-            let { data, error } = await supabaseClient.from('books').select('*'); 
-            if (!error) { 
-                allBooks = data || []; 
-                render(); 
-            } 
-        }
-
-        function toggleType(t) { 
-            document.getElementById('i-book').classList.toggle('active', true);
-        }
-
-        function parseReleaseYear(val) {
-            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
-            if (typeof val === 'number' && val > 1000 && val < 3000) return val.toString();
-            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
-            if (typeof val === 'string' && val.includes('-')) {
-                const yearPart = val.split('-')[0];
-                if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
-            }
-            let num = Number(val);
-            if (!isNaN(num) && num > 0) {
-                if (num > 32503680000) num = Math.floor(num / 1000);
-                const dateObj = new Date(num * 1000);
-                if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
-            }
-            return 'TBA';
-        }
-
-        async function submitForm() {
-            const submitBtn = document.getElementById('submitBtn');
-            const tIn = document.getElementById('titleInput');
-            const aIn = document.getElementById('authorInput');
-            const sIn = document.getElementById('seriesInput');
-            const snIn = document.getElementById('seriesNumInput');
-            
-            if (!tIn.value.trim()) return;
-            submitBtn.disabled = true;
-
-            try {
-                const cover = tIn.dataset.img || '';
-                const genre = tIn.dataset.genre || '';
-                const releaseYear = tIn.dataset.release || '';
-                const series = sIn.value.trim() || null;
-                const seriesNum = snIn.value ? parseFloat(snIn.value) : null;
-                let defaultStatus = currentViewMode === 'wishlist' ? 'Wishlist' : 'To Read';
-
-                if (editingId) {
-                    const cur = allBooks.find(b => b.id === editingId);
-                    const payload = { 
-                        title: tIn.value.trim(), 
-                        author: aIn.value.trim() || 'Unknown',
-                        series, 
-                        series_num: seriesNum,
-                        cover_url: cover || cur.cover_url, 
-                        genre: genre || cur.genre,
-                        release_year: releaseYear || cur.release_year
-                    };
-                    
-                    const { error } = await supabaseClient.from('books').update(payload).eq('id', editingId);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabaseClient.from('books').insert([{ 
-                        title: tIn.value.trim(), 
-                        author: aIn.value.trim() || 'Unknown',
-                        series, 
-                        series_num: seriesNum,
-                        cover_url: cover, 
-                        genre: genre || 'Book', 
-                        release_year: releaseYear, 
-                        status: defaultStatus
-                    }]);
-                    if (error) throw error;
-                }
-
-                resetForm(); 
-                await loadBooks();
-
-            } catch (err) {
-                console.error("Save failed:", err);
-                alert(`Error saving book: ${err.message || 'Check database settings'}`);
-            } finally {
-                submitBtn.disabled = false;
+        async function fetchBooks() {
+            const { data, error } = await supabase.from('books').select('*').order('sort_order', { ascending: true });
+            if (!error && data) {
+                books = data;
+                render();
             }
         }
 
-        function resetForm() { 
-            editingId = null;
-            const tIn = document.getElementById('titleInput'); 
-            tIn.value = ''; 
-            delete tIn.dataset.img; 
-            delete tIn.dataset.genre; 
-            delete tIn.dataset.release; 
-
-            document.getElementById('authorInput').value = '';
-            document.getElementById('seriesInput').value = ''; 
-            document.getElementById('seriesNumInput').value = ''; 
-            document.getElementById('searchResults').classList.add('hidden');
-            document.getElementById('searchResults').innerHTML = '';
-            document.getElementById('seriesResults').classList.add('hidden');
-            document.getElementById('seriesResults').innerHTML = '';
-
-            document.getElementById('submitBtn').innerText = "Commit"; 
-            document.getElementById('formModeLabel').innerText = "Search"; 
-            document.getElementById('cancelEdit').classList.add('hidden'); 
-            document.getElementById('deleteSelectedBtn').classList.add('hidden');
-        }
-
-        function render() {
-            const fM = document.getElementById('filterMain').value.toLowerCase();
-            const fA = document.getElementById('filterAlt').value.toLowerCase();
-            const fW = document.getElementById('filterWishlist') ? document.getElementById('filterWishlist').value.toLowerCase() : '';
-            const sortBy = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'title';
-
-            const cols = { 
-                reading: document.getElementById('col-reading'), 
-                main: document.getElementById('col-main'),
-                alt: document.getElementById('col-alt'),
-                wishlist: document.getElementById('col-wishlist')
-            };
-            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
-
-            const sortedList = [...allBooks].sort((a, b) => {
-                const aAuthor = (a.author || '').toLowerCase();
-                const bAuthor = (b.author || '').toLowerCase();
-                const aSeries = (a.series || '').trim();
-                const bSeries = (b.series || '').trim();
-                const aNum = a.series_num !== null && a.series_num !== undefined ? Number(a.series_num) : 0;
-                const bNum = b.series_num !== null && b.series_num !== undefined ? Number(b.series_num) : 0;
-
-                if (sortBy === 'author') {
-                    if (aAuthor !== bAuthor) return aAuthor.localeCompare(bAuthor);
-                    if (aSeries && bSeries) {
-                        if (aSeries.toLowerCase() !== bSeries.toLowerCase()) return aSeries.localeCompare(bSeries);
-                        return aNum - bNum;
-                    }
-                    if (aSeries && !bSeries) return -1;
-                    if (!aSeries && bSeries) return 1;
-                    return a.title.localeCompare(b.title);
-                } else {
-                    if (aSeries && bSeries && aSeries.toLowerCase() === bSeries.toLowerCase()) {
-                        return aNum - bNum;
-                    }
-                    if (aSeries && bSeries) {
-                        const sCmp = aSeries.localeCompare(bSeries);
-                        if (sCmp !== 0) return sCmp;
-                        return aNum - bNum;
-                    }
-                    const aKey = aSeries || a.title;
-                    const bKey = bSeries || b.title;
-                    const keyCmp = aKey.localeCompare(bKey);
-                    if (keyCmp !== 0) return keyCmp;
-                    return aNum - bNum;
-                }
-            });
-
-            if (currentViewMode === 'queue') {
-                const activeBooks = [...allBooks].filter(b => b.status === 'Reading');
-                if (activeBooks.length > 0) {
-                    activeBooks.forEach(b => cols.reading.appendChild(createActiveCard(b)));
-                } else {
-                    cols.reading.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being read</p>`;
-                }
-                
-                sortedList.filter(b => !['Reading', 'Finished', 'Wishlist', 'Not Interested'].includes(b.status))
-                    .filter(b => b.title.toLowerCase().includes(fM) || (b.author && b.author.toLowerCase().includes(fM)) || (b.series && b.series.toLowerCase().includes(fM)))
-                    .forEach(b => cols.main.appendChild(createCard(b)));
-
-            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
-                const target = currentViewMode === 'archive' ? 'Finished' : 'Not Interested';
-                sortedList.filter(b => b.status === target)
-                    .filter(b => b.title.toLowerCase().includes(fA) || (b.author && b.author.toLowerCase().includes(fA)))
-                    .forEach(b => cols.alt.appendChild(createCard(b)));
-
-            } else if (currentViewMode === 'wishlist') {
-                sortedList.filter(b => b.status === 'Wishlist')
-                    .filter(b => b.title.toLowerCase().includes(fW) || (b.author && b.author.toLowerCase().includes(fW)))
-                    .forEach(b => cols.wishlist.appendChild(createCard(b)));
-            }
-        }
-
-        function createActiveCard(book) {
-            const hasSeries = Boolean(book.series && book.series.trim() !== '');
-            const releaseYear = parseReleaseYear(book.release_year);
-            const seriesLabel = hasSeries ? `${book.series}${book.series_num !== null && book.series_num !== undefined ? ' #' + book.series_num : ''}` : '';
-
-            const activeBadgeStyle = hasSeries
-                ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-                : 'text-sky-400 bg-sky-950/40 border-sky-800/40';
-
-            const div = document.createElement('div');
-            div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
-            
-            const coverSrc = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
-            
-            div.innerHTML = `
-                <div class="w-14 h-20 flex-shrink-0 bg-slate-900 rounded-md overflow-hidden flex items-center justify-center">
-                    <img src="${coverSrc}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';" alt="${book.title}" class="w-full h-full object-cover shadow-md" />
-                </div>
-                <div class="flex flex-col gap-1 flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${seriesLabel}</span>` : `<span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">📚 STANDALONE</span>`}
-                        
-                        <div class="relative group/menu">
-                            <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                </svg>
-                            </button>
-                            
-                            <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-amber-900/80 p-1.5 rounded-lg shadow-xl z-50">
-                                <button onclick="updateStatus(${book.id}, 'To Read')" class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Collection (📚)">📚</button>
-                                <button onclick="updateStatus(${book.id}, 'Finished')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Finished (🏆)">🏆</button>
-                            </div>
-                        </div>
-                    </div>
-                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${book.title}</h4>
-                    <span class="text-xs text-slate-400">${book.author || 'Unknown'} • ${releaseYear}</span>
-                    <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[9px] bg-amber-900/60 text-amber-300 px-1.5 py-0.5 rounded uppercase font-semibold">📖 READING</span>
-                    </div>
-                </div>
-            `;
-            return div;
-        }
-
-        function createCard(book) {
-            const hasSeries = Boolean(book.series && book.series.trim() !== '');
-            const releaseYear = parseReleaseYear(book.release_year);
-            const seriesLabel = hasSeries ? `${book.series}${book.series_num !== null && book.series_num !== undefined ? ' #' + book.series_num : ''}` : '';
-
-            const div = document.createElement('div');
-            div.dataset.id = book.id; 
-            div.dataset.series = book.series || '';
-            div.className = `book-card flex flex-col justify-between w-full`;
-            
-            const topBarColor = hasSeries ? 'bg-amber-500' : 'bg-sky-400';
-            const badgeStyle = hasSeries ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' : 'bg-sky-600/20 text-sky-400 border-sky-500/30';
-            const coverSrc = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
-
-            div.innerHTML = `
-                <div>
-                    <div class="h-1.5 w-full ${topBarColor}"></div>
-                    <div class="p-2.5 pb-1 flex flex-col items-center">
-                        <div class="book-poster-container shadow-inner">
-                            <img src="${coverSrc}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';" alt="${book.title}">
-                        </div>
-                        <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${seriesLabel}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">📚 Standalone</span>`}
-                        </div>
-                        <div class="flex justify-between items-start gap-1.5 w-full">
-                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${book.title}</h3>
-                            <button onclick='editL(${JSON.stringify(book).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
-                        </div>
-                        <p class="text-xs text-amber-400 font-bold mt-0.5 text-left w-full truncate">${book.author || 'Unknown'}</p>
-                        <p class="text-[11px] text-slate-400 text-left w-full">${releaseYear}</p>
-                        <div class="flex flex-wrap gap-1 mt-2 w-full">
-                            <span class="type-badge shadow-sm">BOOK</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <span class="text-amber-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${book.genre || 'Book'}</span>
-                        <select onchange="updateStatus(${book.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="To Read" ${book.status === 'To Read' ? 'selected' : ''}>To Read 📚</option>
-                            <option value="Reading" ${book.status === 'Reading' ? 'selected' : ''}>Reading 📖</option>
-                            <option value="Wishlist" ${book.status === 'Wishlist' ? 'selected' : ''}>Wishlist 🪄</option>
-                            <option value="Finished" ${book.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
-                            <option value="Not Interested" ${book.status === 'Not Interested' ? 'selected' : ''}>Trash 🗑️</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-            return div;
-        }
-
-        function toggleView(v) { 
-            currentViewMode = v;
-            const qv = document.getElementById('queueView');
-            const dt = document.getElementById('dashboardTop');
-            const as = document.getElementById('activeSessionBox');
-            const ia = document.getElementById('inputArea');
-            const av = document.getElementById('altView');
-            const wv = document.getElementById('wishlistView');
-
-            if(v === 'queue') {
-                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
-                av.style.display = 'none'; wv.style.display = 'none';
-            } else if(v === 'wishlist') {
-                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
-                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
-            } else {
-                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
-                document.getElementById('altTitle').innerText = v === 'archive' ? 'Finished Archive 🏆' : 'Book Scrap Yard 🗑️';
-                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
-            }
-            render();
-        }
-
-        function editL(b) { 
-            editingId = b.id; 
-            const dt = document.getElementById('dashboardTop');
-            const as = document.getElementById('activeSessionBox');
-            const ia = document.getElementById('inputArea');
-            dt.style.display = 'grid';
-            
-            if (currentViewMode !== 'queue') {
-                as.style.display = 'none';
-                ia.classList.remove('lg:col-span-7');
-                ia.classList.add('lg:col-span-12');
-            }
-
-            window.scrollTo({top:0, behavior:'smooth'}); 
-            
-            const tIn = document.getElementById('titleInput');
-            tIn.value = b.title; 
-            if (b.cover_url) tIn.dataset.img = b.cover_url;
-            if (b.genre) tIn.dataset.genre = b.genre;
-            if (b.release_year) tIn.dataset.release = b.release_year;
-
-            document.getElementById('formModeLabel').innerText = "Updating: " + b.title; 
-            document.getElementById('cancelEdit').classList.remove('hidden'); 
-            document.getElementById('deleteSelectedBtn').classList.remove('hidden');
-            
-            document.getElementById('authorInput').value = b.author || '';
-            document.getElementById('seriesInput').value = b.series || ''; 
-            document.getElementById('seriesNumInput').value = b.series_num || ''; 
-        }
-
-        function exitEditMode() { resetForm(); toggleView(currentViewMode); }
-
-        async function deleteSelectedFromForm() {
-            if (!editingId) return;
-            if (confirm("Are you sure you want to delete this book?")) {
-                await supabaseClient.from('books').delete().eq('id', editingId);
-                resetForm();
-                loadBooks();
-            }
-        }
-
-        async function updateStatus(id, s) { await supabaseClient.from('books').update({ status:s }).eq('id', id); loadBooks(); }
-
-        function filterSeriesDropdown(val) {
-            const sr = document.getElementById('seriesResults');
-            const existingSeries = Array.from(new Set(allBooks.map(b => b.series).filter(s => s && s.trim() !== '')));
-            const filtered = existingSeries.filter(s => s.toLowerCase().includes(val.toLowerCase().trim()));
-
-            if (filtered.length === 0) { sr.classList.add('hidden'); return; }
-            sr.innerHTML = filtered.map(s => `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`).join('');
-            sr.classList.remove('hidden');
-        }
-
-        function selectSeries(name) {
-            document.getElementById('seriesInput').value = name;
-            document.getElementById('seriesResults').classList.add('hidden');
+        function toggleToolbox(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('toolboxMenu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
         }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { document.getElementById('seriesResults').classList.add('hidden'); }
             if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { document.getElementById('searchResults').classList.add('hidden'); }
+            if (!e.target.closest('#toolboxContainer')) { 
+                const tb = document.getElementById('toolboxMenu'); 
+                if (tb) { tb.classList.add('hidden'); tb.classList.remove('flex'); } 
+            }
         });
 
-        function searchBooks(q) {
-            clearTimeout(searchDebounce);
-            searchDebounce = setTimeout(() => executeSearch(q), 300);
-        }
+        async function handleAddBook(e) {
+            e.preventDefault();
+            const title = document.getElementById('titleInput').value.trim();
+            const author = document.getElementById('authorInput').value.trim();
+            const series = document.getElementById('seriesInput').value.trim();
+            const series_num = parseFloat(document.getElementById('seriesNumInput').value) || null;
+            const format = document.getElementById('formatInput').value;
+            const isWishlist = document.getElementById('wishlistCheck').checked;
 
-        async function executeSearch(q) { 
-            const r = document.getElementById('searchResults'); 
-            const trimmedQuery = q ? q.trim() : '';
+            if (!title) return;
 
-            if (trimmedQuery.length < 2) { r.classList.add('hidden'); r.innerHTML = ''; return; } 
+            const minSort = books.length > 0 ? Math.min(...books.map(b => b.sort_order || 0)) : 0;
+            const newOrder = minSort - 1;
 
-            try {
-                let items = [];
-                
-                // Try Open Library first (No API key needed, no CORS issues)
-                try {
-                    const olRes = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(trimmedQuery)}&limit=7`);
-                    const olData = await olRes.json();
-                    if (olData.docs && olData.docs.length > 0) {
-                        items = olData.docs.map(doc => {
-                            const isbn = doc.isbn ? doc.isbn[0] : '';
-                            const coverUrl = doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : (isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg` : '');
-                            return {
-                                title: doc.title || '',
-                                author: doc.author_name ? doc.author_name.join(', ') : 'Unknown',
-                                coverUrl: coverUrl,
-                                genre: doc.subject ? doc.subject[0] : 'Book',
-                                releaseYear: doc.first_publish_year ? doc.first_publish_year.toString() : ''
-                            };
-                        });
-                    }
-                } catch (e) {
-                    console.warn("OpenLibrary search failed, falling back...", e);
-                }
+            const newBook = {
+                title, author, series, series_num, format,
+                status: isWishlist ? 'wishlist' : 'backlog',
+                sort_order: newOrder
+            };
 
-                // Fallback to Google Books unauthenticated endpoint if Open Library returned nothing
-                if (items.length === 0) {
-                    const gbRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(trimmedQuery)}`);
-                    const gbData = await gbRes.json();
-                    if (gbData.items && gbData.items.length > 0) {
-                        items = gbData.items.map(item => {
-                            const info = item.volumeInfo;
-                            const cover = info.imageLinks ? (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '').replace('http://', 'https://') : '';
-                            return {
-                                title: info.title || '',
-                                author: info.authors ? info.authors.join(', ') : 'Unknown',
-                                coverUrl: cover,
-                                genre: info.categories ? info.categories[0] : 'Book',
-                                releaseYear: info.publishedDate ? info.publishedDate.split('-')[0] : ''
-                            };
-                        });
-                    }
-                }
-
-                if (items.length === 0) { 
-                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; 
-                    r.classList.remove('hidden'); 
-                    return; 
-                }
-
-                r.innerHTML = items.map(item => {
-                    const safeTitle = (item.title || '').replace(/"/g, '&quot;');
-                    const safeAuthor = (item.author || 'Unknown').replace(/"/g, '&quot;');
-                    const safeGenre = (item.genre || 'Book').replace(/"/g, '&quot;');
-                    
-                    return `
-                        <div onclick="selectBook(&quot;${safeTitle}&quot;, &quot;${safeAuthor}&quot;, &quot;${item.coverUrl}&quot;, &quot;${safeGenre}&quot;, &quot;${item.releaseYear}&quot;)" 
-                             class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
-                            ${item.coverUrl ? `<img src="${item.coverUrl}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
-                            <div>
-                                <p class="text-sm font-bold text-white">${item.title}</p>
-                                <p class="text-xs text-amber-400 font-bold uppercase mt-0.5">${item.author} • ${item.releaseYear || 'TBA'}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join(''); 
-                r.classList.remove('hidden');
-
-            } catch (err) {
-                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Search error: ${err.message}</div>`;
-                r.classList.remove('hidden');
+            const { data, error } = await supabase.from('books').insert([newBook]).select();
+            if (!error && data) {
+                books.unshift(data[0]);
+                document.getElementById('addBookForm').reset();
+                render();
             }
         }
 
-        function selectBook(t, a, c, g, r) { 
-            const tIn = document.getElementById('titleInput'); 
-            tIn.value = t; 
-            document.getElementById('searchResults').classList.add('hidden'); 
-            if (c) tIn.dataset.img = c;
-            if (g) tIn.dataset.genre = g;
-            if (r) tIn.dataset.release = r;
-            
-            document.getElementById('authorInput').value = a;
-            document.getElementById('seriesInput').focus();
+        async function updateStatus(id, newStatus) {
+            const { error } = await supabase.from('books').update({ status: newStatus }).eq('id', id);
+            if (!error) {
+                const book = books.find(b => b.id === id);
+                if (book) book.status = newStatus;
+                render();
+            }
         }
 
-        function downloadTemplate() { const csv = "title,author,series,series_num,genre,status,cover_url\nDune,Frank Herbert,Dune Chronicles,1,Sci-Fi,To Read,https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'books_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const bToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], author: cols[1]||'Unknown', series: cols[2]||null, series_num: cols[3]?parseFloat(cols[3]):null, genre: cols[4]||'Book', status: cols[5]||'To Read', cover_url: cols[6]||'' }; }).filter(x => x); await supabaseClient.from('books').insert(bToInsert); loadBooks(); }; r.readAsText(e.target.files[0]); });
+        async function deletePermanently(id) {
+            const { error } = await supabase.from('books').delete().eq('id', id);
+            if (!error) {
+                books = books.filter(b => b.id !== id);
+                render();
+            }
+        }
 
-        initAuth();
+        function setFilter(filter) {
+            activeFilter = filter;
+            ['all', 'Physical', 'E-Book', 'Audiobook'].forEach(f => {
+                const btn = document.getElementById(`filter${f.replace('-', '')}`);
+                if (btn) {
+                    btn.className = f === activeFilter 
+                        ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500 text-white' 
+                        : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+                }
+            });
+            render();
+        }
+
+        function toggleView(view) {
+            currentView = view;
+            const activeControls = document.getElementById('activeControls');
+            const secondaryView = document.getElementById('secondaryView');
+            const secondaryTitle = document.getElementById('secondaryTitle');
+
+            if (view === 'main') {
+                activeControls.classList.remove('hidden');
+                secondaryView.classList.add('hidden');
+            } else {
+                activeControls.classList.add('hidden');
+                secondaryView.classList.remove('hidden');
+                if (view === 'archive') {
+                    secondaryTitle.textContent = 'Finished Archive 🏆';
+                    secondaryTitle.className = 'text-xl font-bold text-emerald-400';
+                } else if (view === 'wishlist') {
+                    secondaryTitle.textContent = 'Wishlist Vault 🪄';
+                    secondaryTitle.className = 'text-xl font-bold text-amber-400';
+                } else if (view === 'trash') {
+                    secondaryTitle.textContent = 'Trash 🗑️';
+                    secondaryTitle.className = 'text-xl font-bold text-rose-400';
+                }
+            }
+            render();
+        }
+
+        function render() {
+            if (currentView === 'main') {
+                const listEl = document.getElementById('bookList');
+                listEl.innerHTML = '';
+
+                let filtered = books.filter(b => b.status === 'backlog');
+                if (activeFilter !== 'all') {
+                    filtered = filtered.filter(b => b.format === activeFilter);
+                }
+
+                document.getElementById('itemCount').textContent = `${filtered.length} Items`;
+
+                filtered.forEach(book => {
+                    const card = createCard(book);
+                    listEl.appendChild(card);
+                });
+
+                initSortable();
+            } else {
+                const listEl = document.getElementById('secondaryList');
+                listEl.innerHTML = '';
+
+                const filtered = books.filter(b => b.status === currentView);
+                filtered.forEach(book => {
+                    const card = createCard(book);
+                    listEl.appendChild(card);
+                });
+            }
+        }
+
+        function createCard(book) {
+            const card = document.createElement('div');
+            card.dataset.id = book.id;
+            card.className = 'bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between gap-4 group hover:border-slate-700 transition-all';
+
+            const seriesText = book.series ? `${book.series} #${book.series_num || ''}` : '';
+            
+            card.innerHTML = `
+                <div class="flex items-center gap-3">
+                    ${currentView === 'main' ? '<span class="cursor-grab text-slate-600 hover:text-slate-400">⣿</span>' : ''}
+                    <div>
+                        <div class="font-semibold text-slate-100">${book.title}</div>
+                        <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span>${book.author || 'Unknown Author'}</span>
+                            ${seriesText ? `<span class="bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded text-cyan-400">${seriesText}</span>` : ''}
+                            <span class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/50">${book.format}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    ${getCardActions(book)}
+                </div>
+            `;
+            return card;
+        }
+
+        function getCardActions(book) {
+            if (currentView === 'main') {
+                return `
+                    <button onclick="updateStatus(${book.id}, 'archive')" title="Archive" class="p-1.5 hover:bg-emerald-900/30 text-emerald-500 rounded-lg">🏆</button>
+                    <button onclick="updateStatus(${book.id}, 'trash')" title="Move to Trash" class="p-1.5 hover:bg-rose-900/30 text-rose-500 rounded-lg">🗑️</button>
+                `;
+            } else if (currentView === 'trash') {
+                return `
+                    <button onclick="updateStatus(${book.id}, 'backlog')" title="Restore" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400">↩️</button>
+                    <button onclick="deletePermanently(${book.id})" title="Delete Forever" class="p-1.5 hover:bg-rose-900/30 text-rose-500 rounded-lg">❌</button>
+                `;
+            } else {
+                return `
+                    <button onclick="updateStatus(${book.id}, 'backlog')" title="Move to Backlog" class="p-1.5 hover:bg-cyan-900/30 text-cyan-400 rounded-lg">➕</button>
+                    <button onclick="updateStatus(${book.id}, 'trash')" title="Move to Trash" class="p-1.5 hover:bg-rose-900/30 text-rose-500 rounded-lg">🗑️</button>
+                `;
+            }
+        }
+
+        function initSortable() {
+            const listEl = document.getElementById('bookList');
+            if (sortableInstance) sortableInstance.destroy();
+
+            sortableInstance = new Sortable(listEl, {
+                animation: 150,
+                ghostClass: 'drag-ghost',
+                chosenClass: 'drag-chosen',
+                onEnd: async function () {
+                    const itemEls = listEl.querySelectorAll('[data-id]');
+                    const updates = [];
+                    itemEls.forEach((el, index) => {
+                        const id = parseInt(el.dataset.id);
+                        const book = books.find(b => b.id === id);
+                        if (book) {
+                            book.sort_order = index;
+                            updates.push(supabase.from('books').update({ sort_order: index }).eq('id', id));
+                        }
+                    });
+                    await Promise.all(updates);
+                }
+            });
+        }
+
+        // Open Library API Search
+        async function handleSearch(query) {
+            const resultsEl = document.getElementById('searchResults');
+            if (query.length < 3) {
+                resultsEl.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`);
+                const data = await res.json();
+                
+                resultsEl.innerHTML = '';
+                if (data.docs && data.docs.length > 0) {
+                    data.docs.forEach(doc => {
+                        const div = document.createElement('div');
+                        div.className = 'p-2 hover:bg-slate-700 cursor-pointer text-xs';
+                        div.textContent = `${doc.title} ${doc.author_name ? 'by ' + doc.author_name[0] : ''}`;
+                        div.onclick = () => {
+                            document.getElementById('titleInput').value = doc.title;
+                            if (doc.author_name) document.getElementById('authorInput').value = doc.author_name[0];
+                            resultsEl.classList.add('hidden');
+                        };
+                        resultsEl.appendChild(div);
+                    });
+                    resultsEl.classList.remove('hidden');
+                } else {
+                    resultsEl.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function handleSeriesSearch(query) {
+            const resultsEl = document.getElementById('seriesResults');
+            if (!query) {
+                resultsEl.classList.add('hidden');
+                return;
+            }
+
+            const seriesList = [...new Set(books.map(b => b.series).filter(Boolean))];
+            const matches = seriesList.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+
+            resultsEl.innerHTML = '';
+            if (matches.length > 0) {
+                matches.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'p-2 hover:bg-slate-700 cursor-pointer text-xs';
+                    div.textContent = s;
+                    div.onclick = () => {
+                        document.getElementById('seriesInput').value = s;
+                        resultsEl.classList.add('hidden');
+                    };
+                    resultsEl.appendChild(div);
+                });
+                resultsEl.classList.remove('hidden');
+            } else {
+                resultsEl.classList.add('hidden');
+            }
+        }
+
+        function downloadTemplate() {
+            const csvContent = "data:text/csv;charset=utf-8,Title,Author,Series,SeriesNum,Format,Status\nThe Hobbit,J.R.R. Tolkien,Middle-earth,1,Physical,backlog\n";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "books_template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function importCSV(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const lines = event.target.result.split('\n');
+                const newBooks = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const [title, author, series, series_num, format, status] = line.split(',');
+                    if (title) {
+                        newBooks.push({
+                            title: title.trim(),
+                            author: author ? author.trim() : '',
+                            series: series ? series.trim() : '',
+                            series_num: series_num ? parseFloat(series_num) : null,
+                            format: format ? format.trim() : 'Physical',
+                            status: status ? status.trim() : 'backlog',
+                            sort_order: i
+                        });
+                    }
+                }
+
+                if (newBooks.length > 0) {
+                    const { data, error } = await supabase.from('books').insert(newBooks).select();
+                    if (!error) {
+                        fetchBooks();
+                    }
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        fetchBooks();
     </script>
 </body>
 </html>
