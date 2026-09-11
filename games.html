@@ -86,18 +86,18 @@
                 </div>
                 
                 <!-- Search & Entry Form -->
-                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
-                    <div class="flex flex-col gap-3 relative">
-                        <div class="text-[10px] font-black text-indigo-400 uppercase px-1 italic flex justify-between">
-                            <span id="formModeLabel">Search</span>
-                            <div class="flex gap-2">
-                                <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
-                                <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
-                            </div>
+                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-5 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 id="formModeLabel" class="text-indigo-400 font-black text-xs uppercase tracking-widest italic justify-start">Search</h2>
+                        <div class="flex gap-2">
+                            <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
+                            <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
                         </div>
-                        
+                    </div>
+
+                    <div class="flex flex-col gap-3 relative flex-1 justify-center">
                         <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
-                        <div id="searchResults" class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
+                        <div id="searchResults" class="hidden absolute top-[60px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
                         
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
                             <div onclick="toggleP('steam')" id="i-steam" class="plat-box" title="Steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"></div>
