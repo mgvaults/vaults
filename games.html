@@ -55,12 +55,11 @@
                    <button onclick="toggleView('queue')" title="Games Vault" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🎮</button>
                    <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
                    <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
-                   <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
                 
                 <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Games Vault</h1>
                 
-                <!-- Right Menu: Wishlist, Trophy (Archive), Stats, Toolbox (with Trash inside) -->
+                <!-- Right Menu: Wishlist, Trophy (Archive), Stats, Toolbox -->
                 <div class="flex items-center gap-2">
                     <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
                     <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
@@ -72,7 +71,7 @@
                             <button id="repairBtn" onclick="repairSortOrder()" title="Repair All" class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white">🔧</button>
                             <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
-                            <button onclick="toggleView('trash')" title="Trash" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-rose-600">🗑️</button>
+                            <button onclick="logout()" title="Sign Out" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">🔒</button>
                         </div>
                     </div>
                 </div>
@@ -142,7 +141,7 @@
                 </div>
             </div>
 
-            <!-- Archive / Trash Grid View -->
+            <!-- Archive Grid View -->
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
@@ -380,9 +379,8 @@
                     .filter(g => g.title.toLowerCase().includes(fB) || (g.series && g.series.toLowerCase().includes(fB)))
                     .forEach(g => cols.backlog.appendChild(createCard(g)));
 
-            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
-                const target = currentViewMode === 'archive' ? 'Finished' : 'Not Interested';
-                allGames.filter(g => g.status === target)
+            } else if (currentViewMode === 'archive') {
+                allGames.filter(g => g.status === 'Finished')
                     .filter(g => g.title.toLowerCase().includes(fA) || (g.series && g.series.toLowerCase().includes(fA)))
                     .forEach(g => cols.alt.appendChild(createCard(g)));
 
@@ -506,7 +504,6 @@
                             <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
                             <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
                             <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
-                            <option value="Not Interested" ${game.status === 'Not Interested' ? 'selected' : ''}>Trash 🗑️</option>
                         </select>
                     </div>
                 </div>
@@ -531,8 +528,8 @@
                 qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
             } else {
                 dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
-                document.getElementById('altTitle').innerText = v === 'archive' ? 'Archive' : 'The Scrap Yard';
-                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
+                document.getElementById('altTitle').innerText = 'Archive';
+                document.getElementById('altTitle').style.color = '#34d399';
             }
             render();
         }
