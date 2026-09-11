@@ -37,20 +37,32 @@
         <div class="max-w-7xl mx-auto">
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
-                   <button title="Vault Statistics" class="bg-cyan-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">📊</button>
                    <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
-                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
                    <button onclick="window.location.href='games.html'" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</button>
+                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
                    <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
-                   <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
                 <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Vault Stats</h1>
                 <div class="flex items-center gap-2">
+                    <button title="Vault Statistics" class="bg-cyan-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">📊</button>
+                    <div class="relative" id="toolboxContainer">
+                        <button onclick="toggleToolboxMenu(event)" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div id="toolboxDropdown" class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button onclick="logout(); closeToolboxMenu();" title="Sign Out" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">🔒</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Filters Section -->
+            <div class="mb-8">
+                <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em] mb-3">Filters</h2>
+                <div class="flex items-center gap-3">
                     <select id="yearFilter" onchange="renderStats()" class="col-filter py-2 px-4 text-xs font-bold text-cyan-400">
                         <option value="ALL">All Time</option>
                     </select>
                 </div>
-            </header>
+            </div>
 
             <!-- Overall Combined Summary -->
             <div class="mb-10">
@@ -137,6 +149,23 @@
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let completedMovies = [], completedGames = [], completedBooks = [];
+
+        function toggleToolboxMenu(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('toolboxDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('flex');
+        }
+
+        function closeToolboxMenu() {
+            const dropdown = document.getElementById('toolboxDropdown');
+            dropdown.classList.add('hidden');
+            dropdown.classList.remove('flex');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#toolboxContainer')) { closeToolboxMenu(); }
+        });
 
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
