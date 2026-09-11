@@ -52,20 +52,19 @@
                    <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
                    <button onclick="window.location.href='games.html'" title="Games Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎮</button>
                    <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
-                   <button onclick="logout()" title="Sign Out" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🔒</button>
                 </div>
                 <h1 class="text-3xl font-black tracking-tighter text-cyan-500 uppercase italic">Movies Vault</h1>
                 <div class="flex items-center gap-2">
                     <div id="toolboxContainer" class="relative">
                         <button onclick="toggleToolbox(event)" title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
-                        <div id="toolboxMenu" class="hidden flex-col gap-2 absolute left-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                        <div id="toolboxMenu" class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
                             <button onclick="repairMetadata()" title="Repair Metadata & Season Info" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">🔧</button>
                             <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">💾</button>
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">📥</button>
+                            <button onclick="logout()" title="Sign Out" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">🔒</button>
                         </div>
                     </div>
                     <button onclick="toggleView('archive')" title="Watched Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
-                    <button onclick="toggleView('trash')" title="Trash Heap" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-rose-600">🗑️</button>
                 </div>
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
@@ -130,15 +129,6 @@
                     <input id="filterAlt" type="text" oninput="render()" placeholder="Filter titles..." class="col-filter">
                 </div>
                 <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-            </div>
-
-            <div id="trashView" class="hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="w-44"></div>
-                    <h2 class="font-black text-2xl uppercase tracking-widest italic text-rose-400 text-center">Trash Heap 🗑️</h2>
-                    <input id="filterTrash" type="text" oninput="render()" placeholder="Filter trash..." class="col-filter">
-                </div>
-                <div id="col-trash" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
         </div>
     </div>
@@ -390,13 +380,11 @@
         function render() {
             const fM = document.getElementById('filterMain').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
-            const fT = document.getElementById('filterTrash').value.toLowerCase();
 
             const cols = { 
                 watching: document.getElementById('col-watching'), 
                 main: document.getElementById('col-main'),
-                alt: document.getElementById('col-alt'),
-                trash: document.getElementById('col-trash')
+                alt: document.getElementById('col-alt')
             };
             Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
@@ -410,7 +398,7 @@
                     cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
                 }
                 
-                sortedList.filter(m => !['Watching', 'Watched', 'Trash'].includes(m.status))
+                sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
                     .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
                     .forEach(m => cols.main.appendChild(createCard(m)));
 
@@ -418,10 +406,6 @@
                 sortedList.filter(m => m.status === 'Watched')
                     .filter(m => m.title.toLowerCase().includes(fA) || (m.series && m.series.toLowerCase().includes(fA)))
                     .forEach(m => cols.alt.appendChild(createCard(m)));
-            } else if (currentViewMode === 'trash') {
-                sortedList.filter(m => m.status === 'Trash')
-                    .filter(m => m.title.toLowerCase().includes(fT) || (m.series && m.series.toLowerCase().includes(fT)))
-                    .forEach(m => cols.trash.appendChild(createCard(m)));
             }
         }
 
@@ -521,10 +505,9 @@
                     <div class="flex items-center justify-between gap-1">
                         <span class="type-badge ${pillClass}">${typePillText}</span>
                         <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Archive" ${!['Watching', 'Watched', 'Trash'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
+                            <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
                             <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
                             <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
-                            <option value="Trash" ${movie.status === 'Trash' ? 'selected' : ''}>Trash 🗑️</option>
                         </select>
                     </div>
                 </div>
@@ -539,18 +522,15 @@
             const as = document.getElementById('activeSessionBox');
             const ia = document.getElementById('inputArea');
             const av = document.getElementById('altView');
-            const tv = document.getElementById('trashView');
 
             qv.style.display = 'none';
             av.style.display = 'none';
-            tv.style.display = 'none';
 
             if(v === 'queue') {
                 dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
             } else {
                 dt.style.display = 'none';
                 if(v === 'archive') av.style.display = 'block';
-                else if(v === 'trash') tv.style.display = 'block';
             }
             render();
         }
