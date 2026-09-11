@@ -60,7 +60,6 @@
                         <div id="toolboxDropdown" class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
                             <button onclick="downloadTemplate(); closeToolboxMenu();" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
                             <button onclick="document.getElementById('csvFile').click(); closeToolboxMenu();" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
-                            <button onclick="toggleView('trash'); closeToolboxMenu();" title="Trash" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-rose-600">🗑️</button>
                             <button onclick="logout(); closeToolboxMenu();" title="Sign Out" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">🔒</button>
                         </div>
                     </div>
@@ -361,9 +360,8 @@
                     .filter(b => b.title.toLowerCase().includes(fM) || (b.author && b.author.toLowerCase().includes(fM)) || (b.series && b.series.toLowerCase().includes(fM)))
                     .forEach(b => cols.main.appendChild(createCard(b)));
 
-            } else if (currentViewMode === 'archive' || currentViewMode === 'trash') {
-                const target = currentViewMode === 'archive' ? 'Finished' : 'Not Interested';
-                sortedList.filter(b => b.status === target)
+            } else if (currentViewMode === 'archive') {
+                sortedList.filter(b => b.status === 'Finished')
                     .filter(b => b.title.toLowerCase().includes(fA) || (b.author && b.author.toLowerCase().includes(fA)))
                     .forEach(b => cols.alt.appendChild(createCard(b)));
 
@@ -462,7 +460,6 @@
                             <option value="Reading" ${book.status === 'Reading' ? 'selected' : ''}>Reading 📖</option>
                             <option value="Wishlist" ${book.status === 'Wishlist' ? 'selected' : ''}>Wishlist 🪄</option>
                             <option value="Finished" ${book.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
-                            <option value="Not Interested" ${book.status === 'Not Interested' ? 'selected' : ''}>Trash 🗑️</option>
                         </select>
                     </div>
                 </div>
@@ -487,8 +484,8 @@
                 qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
             } else {
                 dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
-                document.getElementById('altTitle').innerText = v === 'archive' ? 'Finished Archive 🏆' : 'Book Scrap Yard 🗑️';
-                document.getElementById('altTitle').style.color = v === 'archive' ? '#34d399' : '#f43f5e';
+                document.getElementById('altTitle').innerText = 'Finished Archive 🏆';
+                document.getElementById('altTitle').style.color = '#34d399';
             }
             render();
         }
