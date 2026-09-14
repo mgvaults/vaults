@@ -24,6 +24,32 @@
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
         #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; border: 2px solid #1e293b; }
+
+        /* Genre icons */
+        .genre-icons {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .genre-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            font-size: 15px;
+            line-height: 1;
+            cursor: help;
+            border-radius: 5px;
+            transition: transform 0.15s, background-color 0.15s;
+        }
+
+        .genre-icon:hover {
+            transform: scale(1.2);
+            background-color: rgba(255,255,255,0.08);
+        }
     </style>
 </head>
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
@@ -193,6 +219,57 @@
             playstation: {n:'PS', c:'#003791'}, 
             amazon: {n:'Luna', c:'#ff9900'} 
         };
+
+        /* ============================================================
+           GENRE ICON SYSTEM
+           The database still uses the existing "genre" column.
+           Multiple IGDB genres are stored as:
+           "Shooter, Strategy, Tactical"
+           ============================================================ */
+
+        const GENRE_ICONS = {
+            'Adventure': { icon: '🗺️', label: 'Adventure' },
+            'Tactical': { icon: '⚔️', label: 'Tactical' },
+            'Strategy': { icon: '♟️', label: 'Strategy' },
+            'Turn-based strategy (TBS)': { icon: '♟️', label: 'Turn-Based Strategy' },
+            'Shooter': { icon: '🔫', label: 'Shooter' },
+            'Role-playing (RPG)': { icon: '⚔️', label: 'RPG' },
+            'Point-and-click': { icon: '🖱️', label: 'Point-and-Click' },
+            'Simulator': { icon: '🎛️', label: 'Simulator' },
+            'Platform': { icon: '🏃', label: 'Platform' },
+            'Racing': { icon: '🏎️', label: 'Racing' },
+            'Fighting': { icon: '👊', label: 'Fighting' },
+            'Puzzle': { icon: '🧩', label: 'Puzzle' },
+            'Horror': { icon: '👻', label: 'Horror' },
+            'Stealth': { icon: '🥷', label: 'Stealth' },
+            'Sport': { icon: '🏆', label: 'Sports' },
+            'Arcade': { icon: '🕹️', label: 'Arcade' },
+            'Music': { icon: '🎵', label: 'Music' },
+            'MMO': { icon: '🌐', label: 'MMO' }
+        };
+
+        function renderGenreIcons(genreString) {
+            if (!genreString) return '';
+
+            const genres = genreString
+                .split(',')
+                .map(g => g.trim())
+                .filter(Boolean);
+
+            return genres.map(genre => {
+                const match = GENRE_ICONS[genre];
+
+                if (!match) return '';
+
+                return `
+                    <span
+                        class="genre-icon"
+                        title="${match.label}"
+                        aria-label="${match.label}"
+                    >${match.icon}</span>
+                `;
+            }).join('');
+        }
 
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -466,6 +543,8 @@
                 return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
             }).join(' ');
 
+            const genreIcons = renderGenreIcons(game.genre);
+
             const div = document.createElement('div');
             div.dataset.id = game.id; 
             div.dataset.series = game.series || '';
@@ -490,9 +569,15 @@
                         <div class="flex flex-wrap gap-1 mt-2 w-full">${platB}</div>
                     </div>
                 </div>
+
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                     <div class="flex items-center justify-between gap-1">
-                        <span class="${hasSeries ? 'text-amber-400' : 'text-cyan-400'} font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${game.genre || 'Game'}</span>
+
+                        <!-- Genre Icons -->
+                        <div class="genre-icons flex-1" title="${game.genre || 'Game'}">
+                            ${genreIcons || `<span class="text-slate-500 text-xs" title="${game.genre || 'Game'}">•</span>`}
+                        </div>
+
                         <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
                             <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
                             <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
@@ -608,7 +693,10 @@
             }
         }
 
-        async function updateStatus(id, s) { await supabaseClient.from('games').update({ status:s }).eq('id', id); loadGames(); }
+        async function updateStatus(id, s) { 
+            await supabaseClient.from('games').update({ status:s }).eq('id', id); 
+            loadGames(); 
+        }
         
         function initSortable() { 
             ['col-next', 'col-backlog'].forEach(id => { 
@@ -646,49 +734,99 @@
         }
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { document.getElementById('seriesResults').classList.add('hidden'); }
-            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { document.getElementById('searchResults').classList.add('hidden'); }
+            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { 
+                document.getElementById('seriesResults').classList.add('hidden'); 
+            }
+
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { 
+                document.getElementById('searchResults').classList.add('hidden'); 
+            }
+
             if (!e.target.closest('#toolboxContainer')) {
                 const menu = document.getElementById('toolboxMenu');
-                if (menu) { menu.classList.add('hidden'); menu.classList.remove('flex'); }
+                if (menu) { 
+                    menu.classList.add('hidden'); 
+                    menu.classList.remove('flex'); 
+                }
             }
         });
+
+        /* ============================================================
+           IGDB GAME SEARCH
+           Now captures ALL genres returned by IGDB.
+           ============================================================ */
 
         async function searchGames(q) { 
             const r = document.getElementById('searchResults'); 
             const trimmedQuery = q ? q.trim() : '';
 
-            if (trimmedQuery.length < 2) { r.classList.add('hidden'); r.innerHTML = ''; return; } 
+            if (trimmedQuery.length < 2) { 
+                r.classList.add('hidden'); 
+                r.innerHTML = ''; 
+                return; 
+            } 
 
             try {
                 const response = await fetch(`${SB_URL}/functions/v1/igdb-search`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'apikey': SB_KEY 
+                    },
                     body: JSON.stringify({ query: trimmedQuery })
                 });
 
                 const results = await response.json();
-                if (!results || results.length === 0) { r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; r.classList.remove('hidden'); return; }
+
+                if (!results || results.length === 0) { 
+                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; 
+                    r.classList.remove('hidden'); 
+                    return; 
+                }
 
                 r.innerHTML = results.map(g => {
                     const title = (g.name || '').replace(/"/g, '&quot;');
-                    const cover = g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` : '';
-                    const genre = (g.genres && g.genres[0]) ? (g.genres[0].name).replace(/"/g, '&quot;') : 'Game';
-                    const release = g.first_release_date !== undefined ? g.first_release_date : '';
-                    const yearLabel = release ? new Date(release * 1000).getFullYear() : 'TBA';
+                    const cover = g.cover?.image_id 
+                        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` 
+                        : '';
+
+                    /*
+                     * IMPORTANT:
+                     * Previously this only used g.genres[0].
+                     * Now we retain every genre returned by IGDB.
+                     */
+                    const genre = (g.genres && g.genres.length)
+                        ? g.genres.map(x => x.name).join(', ')
+                        : 'Game';
+
+                    const safeGenre = genre.replace(/"/g, '&quot;');
+
+                    const release = g.first_release_date !== undefined 
+                        ? g.first_release_date 
+                        : '';
+
+                    const yearLabel = release 
+                        ? new Date(release * 1000).getFullYear() 
+                        : 'TBA';
                     
                     return `
-                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${release}&quot;)" 
+                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${safeGenre}&quot;, &quot;${release}&quot;)" 
                              class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
-                            ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
-                            <div>
-                                <p class="text-sm font-bold text-white">${g.name}</p>
+                            ${cover 
+                                ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` 
+                                : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'
+                            }
+
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-white truncate">${g.name}</p>
                                 <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${yearLabel}</p>
                             </div>
                         </div>
                     `;
                 }).join(''); 
+
                 r.classList.remove('hidden');
+
             } catch (err) {
                 r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
                 r.classList.remove('hidden');
@@ -698,16 +836,58 @@
         function selectGame(n, i, g, r) { 
             const tIn = document.getElementById('titleInput'); 
             tIn.value = n; 
+
             document.getElementById('searchResults').classList.add('hidden'); 
+
             if (i) tIn.dataset.img = i;
             if (g) tIn.dataset.genre = g;
+
             const parsedDate = parseReleaseDate(r);
-            if (parsedDate !== null) tIn.dataset.release = parsedDate; else delete tIn.dataset.release;
+
+            if (parsedDate !== null) {
+                tIn.dataset.release = parsedDate;
+            } else {
+                delete tIn.dataset.release;
+            }
+
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vault_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const gToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], platform: cols[1]||'PC', series: cols[2]||null, genre: cols[3]||'Action', status: cols[4]||'Backlog', cover_url: cols[5]||'', sort_order: 100 }; }).filter(x => x); await supabaseClient.from('games').insert(gToInsert); loadGames(); }; r.readAsText(e.target.files[0]); });
+        function downloadTemplate() { 
+            const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; 
+            const blob = new Blob([csv], { type: 'text/csv' }); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = 'vault_template.csv'; 
+            a.click(); 
+        }
+
+        document.getElementById('csvFile').addEventListener('change', function(e) { 
+            const r = new FileReader(); 
+
+            r.onload = async (ev) => { 
+                const rows = ev.target.result.split('\n').slice(1); 
+
+                const gToInsert = rows.map(r => { 
+                    const cols = r.split(',').map(x => x?.trim()); 
+
+                    if (cols[0]) return { 
+                        title: cols[0], 
+                        platform: cols[1]||'PC', 
+                        series: cols[2]||null, 
+                        genre: cols[3]||'Action', 
+                        status: cols[4]||'Backlog', 
+                        cover_url: cols[5]||'', 
+                        sort_order: 100 
+                    }; 
+                }).filter(x => x); 
+
+                await supabaseClient.from('games').insert(gToInsert); 
+                loadGames(); 
+            }; 
+
+            r.readAsText(e.target.files[0]); 
+        });
 
         initAuth();
     </script>
