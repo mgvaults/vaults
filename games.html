@@ -31,6 +31,7 @@
             align-items: center;
             gap: 5px;
             min-width: 0;
+            flex-wrap: wrap;
         }
 
         .genre-icon {
@@ -49,6 +50,19 @@
         .genre-icon:hover {
             transform: scale(1.2);
             background-color: rgba(255,255,255,0.08);
+        }
+
+        /* Platform display */
+        .platform-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        .platform-display .plat-badge {
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -204,10 +218,21 @@
 
     <script>
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
+        /*
+         * Put your existing Supabase anon key back here.
+         */
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-        let allGames = [], editingId = null, currentViewMode = 'queue', selectedPlatforms = [];
+
+        let allGames = [];
+        let editingId = null;
+        let currentViewMode = 'queue';
+        let selectedPlatforms = [];
+
+        /* Cache for the current IGDB search results.
+           This avoids putting multiple genres into an inline onclick attribute. */
+        let igdbSearchResults = [];
 
         const PLAT_MAP = { 
             steam: {n:'Steam', c:'#171a21'}, 
@@ -221,54 +246,234 @@
         };
 
         /* ============================================================
+           PLATFORM DISPLAY PRIORITY
+
+           All platforms owned by the user are displayed.
+           This only controls their order.
+
+           Highest priority first:
+           PlayStation
+           Xbox
+           Switch
+           Steam
+           BattleNet
+           GOG
+           Epic
+           Amazon Luna
+           ============================================================ */
+
+        const PLATFORM_PRIORITY = [
+            'playstation',
+            'xbox',
+            'switch',
+            'steam',
+            'battlenet',
+            'gog',
+            'epic',
+            'amazon'
+        ];
+
+        function sortPlatforms(platforms) {
+            return platforms
+                .map(p => p.trim().toLowerCase())
+                .filter(Boolean)
+                .sort((a, b) => {
+                    const aIndex = PLATFORM_PRIORITY.indexOf(a);
+                    const bIndex = PLATFORM_PRIORITY.indexOf(b);
+
+                    const aPriority = aIndex === -1 ? 999 : aIndex;
+                    const bPriority = bIndex === -1 ? 999 : bIndex;
+
+                    return aPriority - bPriority;
+                });
+        }
+
+        /* ============================================================
            GENRE ICON SYSTEM
-           The database still uses the existing "genre" column.
-           Multiple IGDB genres are stored as:
-           "Shooter, Strategy, Tactical"
+
+           Multiple genres are supported.
+
+           New records use "|" as the internal separator:
+           Shooter|Strategy|Tactical
+
+           Existing records using commas continue to work:
+           Shooter, Strategy, Tactical
+
+           Genres are always sorted according to GENRE_PRIORITY,
+           regardless of the order returned by IGDB.
            ============================================================ */
 
         const GENRE_ICONS = {
-            'Adventure': { icon: '🗺️', label: 'Adventure' },
             'Tactical': { icon: '⚔️', label: 'Tactical' },
+            'Shooter': { icon: '🔫', label: 'Shooter' },
+            'Puzzle': { icon: '🧩', label: 'Puzzle' },
+            'Real Time Strategy (RTS)': { icon: '♟️', label: 'Real Time Strategy (RTS)' },
             'Strategy': { icon: '♟️', label: 'Strategy' },
             'Turn-based strategy (TBS)': { icon: '♟️', label: 'Turn-Based Strategy' },
-            'Shooter': { icon: '🔫', label: 'Shooter' },
+            'Hack and slash/Beat \'em up': { icon: '🗡️', label: 'Hack and Slash / Beat \'em Up' },
+            'Action': { icon: '⚡', label: 'Action' },
+            'Adventure': { icon: '🗺️', label: 'Adventure' },
             'Role-playing (RPG)': { icon: '⚔️', label: 'RPG' },
-            'Point-and-click': { icon: '🖱️', label: 'Point-and-Click' },
-            'Simulator': { icon: '🎛️', label: 'Simulator' },
+            'Stealth': { icon: '🥷', label: 'Stealth' },
             'Platform': { icon: '🏃', label: 'Platform' },
             'Racing': { icon: '🏎️', label: 'Racing' },
             'Fighting': { icon: '👊', label: 'Fighting' },
-            'Puzzle': { icon: '🧩', label: 'Puzzle' },
             'Horror': { icon: '👻', label: 'Horror' },
-            'Stealth': { icon: '🥷', label: 'Stealth' },
+            'Simulator': { icon: '🎛️', label: 'Simulator' },
             'Sport': { icon: '🏆', label: 'Sports' },
-            'Arcade': { icon: '🕹️', label: 'Arcade' },
             'Music': { icon: '🎵', label: 'Music' },
-            'MMO': { icon: '🌐', label: 'MMO' }
+            'Arcade': { icon: '🕹️', label: 'Arcade' },
+            'Point-and-click': { icon: '🖱️', label: 'Point-and-Click' },
+            'MMO': { icon: '🌐', label: 'MMO' },
+            'Card & Board Game': { icon: '🃏', label: 'Card & Board Game' },
+            'Quiz/Trivia': { icon: '❓', label: 'Quiz/Trivia' },
+            'Pinball': { icon: '🎯', label: 'Pinball' },
+            'Visual Novel': { icon: '📖', label: 'Visual Novel' }
         };
 
-        function renderGenreIcons(genreString) {
-            if (!genreString) return '';
+        const GENRE_PRIORITY = [
+            'Tactical',
+            'Shooter',
+            'Puzzle',
+            'Real Time Strategy (RTS)',
+            'Strategy',
+            'Turn-based strategy (TBS)',
+            'Hack and slash/Beat \'em up',
+            'Action',
+            'Adventure',
+            'Role-playing (RPG)',
+            'Stealth',
+            'Platform',
+            'Racing',
+            'Fighting',
+            'Horror',
+            'Simulator',
+            'Sport',
+            'Music',
+            'Arcade',
+            'Point-and-click',
+            'MMO',
+            'Card & Board Game',
+            'Quiz/Trivia',
+            'Pinball',
+            'Visual Novel'
+        ];
 
-            const genres = genreString
-                .split(',')
+        function normaliseGenreName(genre) {
+            const value = (genre || '').trim();
+
+            const aliases = {
+                'Real-time strategy (RTS)': 'Real Time Strategy (RTS)',
+                'Real Time Strategy (RTS)': 'Real Time Strategy (RTS)',
+                'Turn-based strategy (TBS)': 'Turn-based strategy (TBS)',
+                'Role-Playing (RPG)': 'Role-playing (RPG)',
+                'RPG': 'Role-playing (RPG)',
+                'Hack and Slash/Beat \'Em Up': 'Hack and slash/Beat \'em up',
+                'Hack and Slash/Beat \'em Up': 'Hack and slash/Beat \'em up',
+                'Hack and slash / Beat \'em up': 'Hack and slash/Beat \'em up',
+                'Hack & Slash/Beat \'em Up': 'Hack and slash/Beat \'em up',
+                'Point and Click': 'Point-and-click',
+                'Sports': 'Sport'
+            };
+
+            return aliases[value] || value;
+        }
+
+        function splitGenres(genreString) {
+            if (!genreString) return [];
+
+            /*
+             * New records use "|" so commas remain safe for CSV.
+             * The comma fallback keeps existing records working.
+             */
+            const separator = genreString.includes('|') ? '|' : ',';
+
+            return genreString
+                .split(separator)
+                .map(g => normaliseGenreName(g))
                 .map(g => g.trim())
                 .filter(Boolean);
+        }
+
+        function sortGenres(genres) {
+            const uniqueGenres = [...new Set(
+                genres.map(g => normaliseGenreName(g)).filter(Boolean)
+            )];
+
+            return uniqueGenres.sort((a, b) => {
+                const aIndex = GENRE_PRIORITY.indexOf(a);
+                const bIndex = GENRE_PRIORITY.indexOf(b);
+
+                const aPriority = aIndex === -1 ? 999 : aIndex;
+                const bPriority = bIndex === -1 ? 999 : bIndex;
+
+                if (aPriority !== bPriority) {
+                    return aPriority - bPriority;
+                }
+
+                return a.localeCompare(b);
+            });
+        }
+
+        function getGenreIconData(genre) {
+            const normalised = normaliseGenreName(genre);
+
+            if (GENRE_ICONS[normalised]) {
+                return GENRE_ICONS[normalised];
+            }
+
+            /*
+             * Fallback matching for minor naming differences from IGDB.
+             */
+            const lower = normalised.toLowerCase();
+
+            if (lower.includes('real time strategy') || lower.includes('real-time strategy')) {
+                return GENRE_ICONS['Real Time Strategy (RTS)'];
+            }
+
+            if (lower.includes('hack and slash') || lower.includes('beat \'em up')) {
+                return GENRE_ICONS['Hack and slash/Beat \'em up'];
+            }
+
+            if (lower === 'rpg' || lower.includes('role-playing')) {
+                return GENRE_ICONS['Role-playing (RPG)'];
+            }
+
+            if (lower.includes('turn-based strategy')) {
+                return GENRE_ICONS['Turn-based strategy (TBS)'];
+            }
+
+            return {
+                icon: '🎮',
+                label: normalised
+            };
+        }
+
+        function renderGenreIcons(genreString) {
+            const genres = sortGenres(splitGenres(genreString));
+
+            if (genres.length === 0) return '';
 
             return genres.map(genre => {
-                const match = GENRE_ICONS[genre];
-
-                if (!match) return '';
+                const match = getGenreIconData(genre);
 
                 return `
                     <span
                         class="genre-icon"
-                        title="${match.label}"
-                        aria-label="${match.label}"
+                        title="${match.label.replace(/"/g, '&quot;')}"
+                        aria-label="${match.label.replace(/"/g, '&quot;')}"
                     >${match.icon}</span>
                 `;
             }).join('');
+        }
+
+        function getStoredGenreString(genres) {
+            const sorted = sortGenres(genres);
+            return sorted.join('|');
+        }
+
+        function getDisplayGenreString(genreString) {
+            return sortGenres(splitGenres(genreString)).join(', ');
         }
 
         async function initAuth() {
@@ -305,7 +510,11 @@
         }
 
         async function loadGames() { 
-            let { data, error } = await supabaseClient.from('games').select('*').order('sort_order', { ascending: true }); 
+            let { data, error } = await supabaseClient
+                .from('games')
+                .select('*')
+                .order('sort_order', { ascending: true }); 
+
             if (!error) { 
                 allGames = data || []; 
                 render(); 
@@ -320,16 +529,24 @@
         }
 
         function toggleP(p) { 
-            if (selectedPlatforms.includes(p)) selectedPlatforms = selectedPlatforms.filter(x => x !== p); 
-            else selectedPlatforms.push(p); 
+            if (selectedPlatforms.includes(p)) {
+                selectedPlatforms = selectedPlatforms.filter(x => x !== p); 
+            } else {
+                selectedPlatforms.push(p); 
+            }
+
             document.getElementById(`i-${p}`).classList.toggle('active'); 
         }
 
         function parseReleaseDate(val) {
             if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
+
             let num = Number(val);
+
             if (isNaN(num) || num <= 0) return null;
+
             if (num > 32503680000) num = Math.floor(num / 1000);
+
             return num;
         }
 
@@ -339,6 +556,7 @@
             const sIn = document.getElementById('seriesInput');
             
             if (!tIn.value.trim()) return;
+
             submitBtn.disabled = true;
 
             try {
@@ -350,6 +568,7 @@
 
                 if (editingId) {
                     const cur = allGames.find(g => g.id === editingId);
+
                     const payload = { 
                         title: tIn.value.trim(), 
                         series, 
@@ -361,28 +580,44 @@
                     
                     if (series && series !== cur.series) { 
                         const buddies = allGames.filter(g => g.series === series); 
-                        if (buddies.length > 0) payload.sort_order = Math.max(...buddies.map(g => g.sort_order)) + 1; 
+                        if (buddies.length > 0) {
+                            payload.sort_order = Math.max(...buddies.map(g => g.sort_order)) + 1; 
+                        }
                     }
                     
-                    const { error } = await supabaseClient.from('games').update(payload).eq('id', editingId);
+                    const { error } = await supabaseClient
+                        .from('games')
+                        .update(payload)
+                        .eq('id', editingId);
+
                     if (error) throw error;
+
                 } else {
-                    let next = allGames.length > 0 ? Math.max(...allGames.map(g => g.sort_order)) + 100 : 100;
+                    let next = allGames.length > 0 
+                        ? Math.max(...allGames.map(g => g.sort_order)) + 100 
+                        : 100;
+
                     if (series) { 
                         const buddies = allGames.filter(g => g.series === series); 
-                        if (buddies.length > 0) next = Math.max(...buddies.map(g => g.sort_order)) + 1; 
+
+                        if (buddies.length > 0) {
+                            next = Math.max(...buddies.map(g => g.sort_order)) + 1; 
+                        }
                     }
                     
-                    const { error } = await supabaseClient.from('games').insert([{ 
-                        title: tIn.value.trim(), 
-                        platform: selectedPlatforms.join(','), 
-                        series, 
-                        cover_url: cover, 
-                        genre: genre || 'Game', 
-                        release_date: releaseDate, 
-                        status: defaultStatus, 
-                        sort_order: next 
-                    }]);
+                    const { error } = await supabaseClient
+                        .from('games')
+                        .insert([{ 
+                            title: tIn.value.trim(), 
+                            platform: selectedPlatforms.join(','), 
+                            series, 
+                            cover_url: cover, 
+                            genre: genre || 'Game', 
+                            release_date: releaseDate, 
+                            status: defaultStatus, 
+                            sort_order: next 
+                        }]);
+
                     if (error) throw error;
                 }
 
@@ -399,8 +634,11 @@
 
         function resetForm() { 
             editingId = null;
+
             const tIn = document.getElementById('titleInput'); 
+
             tIn.value = ''; 
+
             delete tIn.dataset.img; 
             delete tIn.dataset.genre; 
             delete tIn.dataset.release; 
@@ -411,8 +649,12 @@
             document.getElementById('seriesResults').classList.add('hidden');
             document.getElementById('seriesResults').innerHTML = '';
 
+            igdbSearchResults = [];
+
             selectedPlatforms = []; 
+
             document.querySelectorAll('.plat-box').forEach(el => el.classList.remove('active')); 
+
             document.getElementById('submitBtn').innerText = "Commit"; 
             document.getElementById('formModeLabel').innerText = "Search"; 
             document.getElementById('cancelEdit').classList.add('hidden'); 
@@ -434,31 +676,50 @@
                 wishlistReleased: document.getElementById('col-wishlist-released'),
                 wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
             };
-            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
+
+            Object.values(cols).forEach(c => { 
+                if(c) c.innerHTML = ''; 
+            });
             
             const nextPri = { 'Up Next': 0, 'Started': 1 };
             const nowSec = Math.floor(Date.now() / 1000);
 
             if (currentViewMode === 'queue') {
                 const activeGames = allGames.filter(g => g.status === 'Playing');
+
                 if (activeGames.length > 0) {
                     activeGames.forEach(g => cols.playing.appendChild(createActiveCard(g)));
                 } else {
                     cols.playing.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">No active session</p>`;
                 }
                 
-                allGames.filter(g => ['Up Next', 'Started'].includes(g.status))
-                    .filter(g => g.title.toLowerCase().includes(fN) || (g.series && g.series.toLowerCase().includes(fN)))
-                    .sort((a,b) => nextPri[a.status] - nextPri[b.status] || a.sort_order - b.sort_order)
+                allGames
+                    .filter(g => ['Up Next', 'Started'].includes(g.status))
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fN) || 
+                        (g.series && g.series.toLowerCase().includes(fN))
+                    )
+                    .sort((a,b) => 
+                        nextPri[a.status] - nextPri[b.status] || 
+                        a.sort_order - b.sort_order
+                    )
                     .forEach(g => cols.next.appendChild(createCard(g)));
 
-                allGames.filter(g => ['Backlog', 'Game Pass', 'PS Plus', 'Switch Online', 'Downloaded'].includes(g.status))
-                    .filter(g => g.title.toLowerCase().includes(fB) || (g.series && g.series.toLowerCase().includes(fB)))
+                allGames
+                    .filter(g => ['Backlog', 'Game Pass', 'PS Plus', 'Switch Online', 'Downloaded'].includes(g.status))
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fB) || 
+                        (g.series && g.series.toLowerCase().includes(fB))
+                    )
                     .forEach(g => cols.backlog.appendChild(createCard(g)));
 
             } else if (currentViewMode === 'archive') {
-                allGames.filter(g => g.status === 'Finished')
-                    .filter(g => g.title.toLowerCase().includes(fA) || (g.series && g.series.toLowerCase().includes(fA)))
+                allGames
+                    .filter(g => g.status === 'Finished')
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fA) || 
+                        (g.series && g.series.toLowerCase().includes(fA))
+                    )
                     .forEach(g => cols.alt.appendChild(createCard(g)));
 
             } else if (currentViewMode === 'wishlist') {
@@ -467,27 +728,37 @@
                 const sortByReleaseDate = (a, b) => {
                     const dA = parseReleaseDate(a.release_date);
                     const dB = parseReleaseDate(b.release_date);
+
                     if (dA === null && dB === null) return 0;
                     if (dA === null) return 1;
                     if (dB === null) return -1;
+
                     return dA - dB;
                 };
 
-                wishlistGames.filter(g => {
-                    const rDate = parseReleaseDate(g.release_date);
-                    return rDate !== null && rDate <= nowSec;
-                })
-                .filter(g => g.title.toLowerCase().includes(fWR) || (g.series && g.series.toLowerCase().includes(fWR)))
-                .sort(sortByReleaseDate)
-                .forEach(g => cols.wishlistReleased.appendChild(createCard(g)));
+                wishlistGames
+                    .filter(g => {
+                        const rDate = parseReleaseDate(g.release_date);
+                        return rDate !== null && rDate <= nowSec;
+                    })
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fWR) || 
+                        (g.series && g.series.toLowerCase().includes(fWR))
+                    )
+                    .sort(sortByReleaseDate)
+                    .forEach(g => cols.wishlistReleased.appendChild(createCard(g)));
 
-                wishlistGames.filter(g => {
-                    const rDate = parseReleaseDate(g.release_date);
-                    return rDate === null || rDate > nowSec;
-                })
-                .filter(g => g.title.toLowerCase().includes(fWU) || (g.series && g.series.toLowerCase().includes(fWU)))
-                .sort(sortByReleaseDate)
-                .forEach(g => cols.wishlistUpcoming.appendChild(createCard(g)));
+                wishlistGames
+                    .filter(g => {
+                        const rDate = parseReleaseDate(g.release_date);
+                        return rDate === null || rDate > nowSec;
+                    })
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fWU) || 
+                        (g.series && g.series.toLowerCase().includes(fWU))
+                    )
+                    .sort(sortByReleaseDate)
+                    .forEach(g => cols.wishlistUpcoming.appendChild(createCard(g)));
             }
         }
 
@@ -496,25 +767,37 @@
             const hasSeries = Boolean(game.series && game.series.trim() !== '');
             const rDate = parseReleaseDate(game.release_date);
             const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : '';
-            
-            const platB = (game.platform || '').split(',').map(p => { 
-                const i = PLAT_MAP[p.trim()]; 
-                return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
+
+            const sortedPlatforms = sortPlatforms(
+                (game.platform || '').split(',')
+            );
+
+            const platB = sortedPlatforms.map(p => { 
+                const i = PLAT_MAP[p]; 
+                return i 
+                    ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` 
+                    : ''; 
             }).join(' ');
 
             const div = document.createElement('div');
+
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
             
             div.innerHTML = `
                 <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
+
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold text-orange-400 bg-orange-950/40 px-2 py-0.5 rounded border border-orange-800/40 truncate max-w-[140px]">⚡ ${game.series}</span>` : `<span class="text-[9px] font-bold text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/40 truncate">🎮 STANDALONE</span>`}
+                        ${hasSeries 
+                            ? `<span class="text-[9px] font-bold text-orange-400 bg-orange-950/40 px-2 py-0.5 rounded border border-orange-800/40 truncate max-w-[140px]">⚡ ${game.series}</span>` 
+                            : `<span class="text-[9px] font-bold text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/40 truncate">🎮 STANDALONE</span>`
+                        }
                         
                         <div class="relative group/menu">
                             <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-amber-400 transition-colors" title="Change Status">
                                 ✏️
                             </button>
+
                             <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-indigo-900/80 p-1.5 rounded-lg shadow-xl z-50">
                                 <button onclick="updateStatus(${game.id}, 'Finished')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Finished (🏆)">🏆</button>
                                 <button onclick="updateStatus(${game.id}, 'Up Next')" class="p-1.5 rounded hover:bg-sky-500/20 text-sky-400 transition-colors" title="Move to Next Focus (🎯)">🎯</button>
@@ -522,11 +805,17 @@
                             </div>
                         </div>
                     </div>
+
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${game.title}</h4>
+
                     <span class="text-xs text-slate-400">${releaseYear}</span>
-                    <div class="flex flex-wrap gap-1 mt-0.5">${platB}</div>
+
+                    <div class="flex flex-wrap gap-1 mt-0.5">
+                        ${platB}
+                    </div>
                 </div>
             `;
+
             return div;
         }
 
@@ -537,67 +826,100 @@
             const rDate = parseReleaseDate(game.release_date);
             const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
             const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
-            
-            const platB = (game.platform || '').split(',').map(p => { 
-                const i = PLAT_MAP[p.trim()]; 
-                return i ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` : ''; 
+
+            /*
+             * ALL owned platforms are retained.
+             * They are simply sorted according to the user's preferred
+             * display priority.
+             */
+            const sortedPlatforms = sortPlatforms(
+                (game.platform || '').split(',')
+            );
+
+            const platB = sortedPlatforms.map(p => { 
+                const i = PLAT_MAP[p]; 
+
+                return i 
+                    ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>` 
+                    : ''; 
             }).join(' ');
 
             const genreIcons = renderGenreIcons(game.genre);
 
             const div = document.createElement('div');
+
             div.dataset.id = game.id; 
             div.dataset.series = game.series || '';
+
             div.className = `game-card flex flex-col justify-between w-full ${isUnreleased ? 'unreleased-card' : ''}`;
             
             div.innerHTML = `
                 <div>
                     <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
+
                     <div class="p-2.5 pb-1 flex flex-col items-center">
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
                             <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}">
-                            ${isUnreleased ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` : ''}
+
+                            ${isUnreleased 
+                                ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` 
+                                : ''
+                            }
                         </div>
+
                         <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] bg-amber-600/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`}
+                            ${hasSeries 
+                                ? `<span class="inline-block text-[9px] bg-amber-600/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` 
+                                : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`
+                            }
                         </div>
+
                         <div class="flex justify-between items-start gap-1.5 w-full">
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${game.title}</h3>
+
                             <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' title="Edit Game" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
-                        <div class="flex flex-wrap gap-1 mt-2 w-full">${platB}</div>
-                    </div>
-                </div>
 
-                <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
-                    <div class="flex items-center justify-between gap-1">
+                        <!-- Release Year -->
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
 
                         <!-- Genre Icons -->
-                        <div class="genre-icons flex-1" title="${game.genre || 'Game'}">
-                            ${genreIcons || `<span class="text-slate-500 text-xs" title="${game.genre || 'Game'}">•</span>`}
+                        <div class="genre-icons w-full mt-1.5" aria-label="Genres">
+                            ${genreIcons || `<span class="text-slate-600 text-xs">•</span>`}
                         </div>
-
-                        <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
-                            <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
-                            <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
-                            <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
-                            <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
-                            <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
-                            <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
-                            <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
-                            <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
-                            <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
-                        </select>
                     </div>
                 </div>
+
+                <!-- Bottom metadata -->
+                <div class="px-2.5 pb-2 mt-1 flex items-center justify-between gap-2 text-xs border-t border-slate-800/80 pt-1.5">
+
+                    <!-- All Owned Platforms - sorted by priority -->
+                    <div class="platform-display flex-1 min-w-0">
+                        ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
+                    </div>
+
+                    <!-- Status -->
+                    <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0">
+                        <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                        <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                        <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                        <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                        <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                        <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                        <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                        <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                        <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                        <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
+                    </select>
+                </div>
             `;
+
             return div;
         }
 
         function toggleView(v) { 
             currentViewMode = v;
+
             const qv = document.getElementById('queueView');
             const dt = document.getElementById('dashboardTop');
             const as = document.getElementById('activeSessionBox');
@@ -606,24 +928,47 @@
             const wv = document.getElementById('wishlistView');
 
             if(v === 'queue') {
-                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
-                av.style.display = 'none'; wv.style.display = 'none';
+                dt.style.display = 'grid';
+                qv.style.display = 'block';
+                as.style.display = 'flex';
+
+                ia.classList.remove('lg:col-span-12');
+                ia.classList.add('lg:col-span-7');
+
+                av.style.display = 'none';
+                wv.style.display = 'none';
+
             } else if(v === 'wishlist') {
-                dt.style.display = 'grid'; as.style.display = 'none'; ia.classList.remove('lg:col-span-7'); ia.classList.add('lg:col-span-12');
-                qv.style.display = 'none'; av.style.display = 'none'; wv.style.display = 'block';
+                dt.style.display = 'grid';
+                as.style.display = 'none';
+
+                ia.classList.remove('lg:col-span-7');
+                ia.classList.add('lg:col-span-12');
+
+                qv.style.display = 'none';
+                av.style.display = 'none';
+                wv.style.display = 'block';
+
             } else {
-                dt.style.display = 'none'; qv.style.display = 'none'; wv.style.display = 'none'; av.style.display = 'block';
+                dt.style.display = 'none';
+                qv.style.display = 'none';
+                wv.style.display = 'none';
+                av.style.display = 'block';
+
                 document.getElementById('altTitle').innerText = 'Archive';
                 document.getElementById('altTitle').style.color = '#34d399';
             }
+
             render();
         }
 
         function editL(g) { 
             editingId = g.id; 
+
             const dt = document.getElementById('dashboardTop');
             const as = document.getElementById('activeSessionBox');
             const ia = document.getElementById('inputArea');
+
             dt.style.display = 'grid';
             
             if (currentViewMode !== 'queue') {
@@ -635,29 +980,48 @@
             window.scrollTo({top:0, behavior:'smooth'}); 
             
             const tIn = document.getElementById('titleInput');
+
             tIn.value = g.title; 
+
             if (g.cover_url) tIn.dataset.img = g.cover_url;
             if (g.genre) tIn.dataset.genre = g.genre;
-            if (g.release_date !== null && g.release_date !== undefined) tIn.dataset.release = g.release_date;
+            if (g.release_date !== null && g.release_date !== undefined) {
+                tIn.dataset.release = g.release_date;
+            }
 
             document.getElementById('formModeLabel').innerText = "Updating: " + g.title; 
             document.getElementById('cancelEdit').classList.remove('hidden'); 
             document.getElementById('deleteSelectedBtn').classList.remove('hidden');
             
-            selectedPlatforms = (g.platform || '').split(',').filter(x => x.trim()).map(x => x.trim()); 
+            selectedPlatforms = (g.platform || '')
+                .split(',')
+                .filter(x => x.trim())
+                .map(x => x.trim()); 
+
             document.querySelectorAll('.plat-box').forEach(el => { 
-                el.classList.toggle('active', selectedPlatforms.includes(el.id.replace('i-', ''))); 
+                el.classList.toggle(
+                    'active', 
+                    selectedPlatforms.includes(el.id.replace('i-', ''))
+                ); 
             }); 
             
             document.getElementById('seriesInput').value = g.series || ''; 
         }
 
-        function exitEditMode() { resetForm(); toggleView(currentViewMode); }
+        function exitEditMode() { 
+            resetForm(); 
+            toggleView(currentViewMode); 
+        }
 
         async function deleteSelectedFromForm() {
             if (!editingId) return;
+
             if (confirm("Are you sure you want to delete this game?")) {
-                await supabaseClient.from('games').delete().eq('id', editingId);
+                await supabaseClient
+                    .from('games')
+                    .delete()
+                    .eq('id', editingId);
+
                 resetForm();
                 loadGames();
             }
@@ -666,6 +1030,7 @@
         async function repairSortOrder() { 
             const b = document.getElementById('repairBtn'); 
             b.innerText = "⏳";
+
             try {
                 let list = [...allGames].sort((a,b) => a.sort_order - b.sort_order);
                 let finalOrder = []; 
@@ -673,45 +1038,73 @@
 
                 for (let g of list) {
                     if (processedSeries.has(g.series)) continue;
+
                     if (g.series) {
                         let buddies = list.filter(item => item.series === g.series);
                         finalOrder.push(...buddies); 
                         processedSeries.add(g.series);
+
                     } else { 
                         finalOrder.push(g); 
                     }
                 }
 
                 for (let i = 0; i < finalOrder.length; i++) { 
-                    await supabaseClient.from('games').update({ sort_order: (i + 1) * 100 }).eq('id', finalOrder[i].id); 
+                    await supabaseClient
+                        .from('games')
+                        .update({ sort_order: (i + 1) * 100 })
+                        .eq('id', finalOrder[i].id); 
                 }
+
                 alert("Vault rebuild complete!");
+
             } catch (err) {
                 alert(`Rebuild error: ${err.message}`);
+
             } finally {
-                b.innerText = "🔧"; loadGames(); 
+                b.innerText = "🔧"; 
+                loadGames(); 
             }
         }
 
         async function updateStatus(id, s) { 
-            await supabaseClient.from('games').update({ status:s }).eq('id', id); 
+            await supabaseClient
+                .from('games')
+                .update({ status:s })
+                .eq('id', id); 
+
             loadGames(); 
         }
         
         function initSortable() { 
             ['col-next', 'col-backlog'].forEach(id => { 
                 const el = document.getElementById(id);
+
                 if (!el) return;
+
                 new Sortable(el, { 
                     group: 'games', 
                     animation: 250, 
+
                     onEnd: async (evt) => { 
                         let targetS = 'Backlog'; 
-                        if(evt.to.id === 'col-next') targetS = 'Up Next'; 
-                        const items = Array.from(evt.to.children); 
-                        for(let i=0; i<items.length; i++) {
-                            await supabaseClient.from('games').update({ sort_order: (i + 1) * 100, status: targetS }).eq('id', items[i].dataset.id); 
+
+                        if(evt.to.id === 'col-next') {
+                            targetS = 'Up Next'; 
                         }
+
+                        const items = Array.from(evt.to.children); 
+
+                        for(let i = 0; i < items.length; i++) {
+                            await supabaseClient
+                                .from('games')
+                                .update({ 
+                                    sort_order: (i + 1) * 100, 
+                                    status: targetS 
+                                })
+                                .eq('id', items[i].dataset.id); 
+                        }
+
                         loadGames(); 
                     } 
                 }); 
@@ -720,11 +1113,28 @@
 
         function filterSeriesDropdown(val) {
             const sr = document.getElementById('seriesResults');
-            const existingSeries = Array.from(new Set(allGames.map(g => g.series).filter(s => s && s.trim() !== '')));
-            const filtered = existingSeries.filter(s => s.toLowerCase().includes(val.toLowerCase().trim()));
 
-            if (filtered.length === 0) { sr.classList.add('hidden'); return; }
-            sr.innerHTML = filtered.map(s => `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`).join('');
+            const existingSeries = Array.from(
+                new Set(
+                    allGames
+                        .map(g => g.series)
+                        .filter(s => s && s.trim() !== '')
+                )
+            );
+
+            const filtered = existingSeries.filter(
+                s => s.toLowerCase().includes(val.toLowerCase().trim())
+            );
+
+            if (filtered.length === 0) { 
+                sr.classList.add('hidden'); 
+                return; 
+            }
+
+            sr.innerHTML = filtered.map(s => 
+                `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`
+            ).join('');
+
             sr.classList.remove('hidden');
         }
 
@@ -744,6 +1154,7 @@
 
             if (!e.target.closest('#toolboxContainer')) {
                 const menu = document.getElementById('toolboxMenu');
+
                 if (menu) { 
                     menu.classList.add('hidden'); 
                     menu.classList.remove('flex'); 
@@ -753,7 +1164,14 @@
 
         /* ============================================================
            IGDB GAME SEARCH
-           Now captures ALL genres returned by IGDB.
+
+           Captures ALL genres returned by IGDB.
+
+           The genres are sorted according to our fixed priority before
+           being stored.
+
+           Search results are cached so selectGame() doesn't need to
+           pass large strings through an inline onclick attribute.
            ============================================================ */
 
         async function searchGames(q) { 
@@ -763,6 +1181,7 @@
             if (trimmedQuery.length < 2) { 
                 r.classList.add('hidden'); 
                 r.innerHTML = ''; 
+                igdbSearchResults = [];
                 return; 
             } 
 
@@ -779,47 +1198,69 @@
                 const results = await response.json();
 
                 if (!results || results.length === 0) { 
+                    igdbSearchResults = [];
+
                     r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; 
                     r.classList.remove('hidden'); 
+
                     return; 
                 }
 
-                r.innerHTML = results.map(g => {
-                    const title = (g.name || '').replace(/"/g, '&quot;');
+                /*
+                 * Build a clean cache of the IGDB results.
+                 * Every genre is retained.
+                 */
+                igdbSearchResults = results.map(g => {
+                    const genres = (g.genres && g.genres.length)
+                        ? g.genres
+                            .map(x => x.name)
+                            .filter(Boolean)
+                        : [];
+
+                    const sortedGenres = sortGenres(genres);
+
+                    const genreString = sortedGenres.length
+                        ? sortedGenres.join('|')
+                        : 'Game';
+
                     const cover = g.cover?.image_id 
                         ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` 
                         : '';
 
-                    /*
-                     * IMPORTANT:
-                     * Previously this only used g.genres[0].
-                     * Now we retain every genre returned by IGDB.
-                     */
-                    const genre = (g.genres && g.genres.length)
-                        ? g.genres.map(x => x.name).join(', ')
-                        : 'Game';
-
-                    const safeGenre = genre.replace(/"/g, '&quot;');
-
-                    const release = g.first_release_date !== undefined 
-                        ? g.first_release_date 
+                    const release = g.first_release_date !== undefined
+                        ? g.first_release_date
                         : '';
 
-                    const yearLabel = release 
-                        ? new Date(release * 1000).getFullYear() 
+                    return {
+                        title: g.name || '',
+                        cover,
+                        genre: genreString,
+                        displayGenre: sortedGenres.length
+                            ? sortedGenres.join(', ')
+                            : 'Game',
+                        release
+                    };
+                });
+
+                r.innerHTML = igdbSearchResults.map((g, index) => {
+                    const yearLabel = g.release 
+                        ? new Date(g.release * 1000).getFullYear() 
                         : 'TBA';
-                    
+
                     return `
-                        <div onclick="selectGame(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${safeGenre}&quot;, &quot;${release}&quot;)" 
+                        <div onclick="selectGame(${index})" 
                              class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
-                            ${cover 
-                                ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` 
+
+                            ${g.cover 
+                                ? `<img src="${g.cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` 
                                 : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'
                             }
 
                             <div class="min-w-0">
-                                <p class="text-sm font-bold text-white truncate">${g.name}</p>
-                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${genre} • ${yearLabel}</p>
+                                <p class="text-sm font-bold text-white truncate">${g.title}</p>
+                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">
+                                    ${g.displayGenre} • ${yearLabel}
+                                </p>
                             </div>
                         </div>
                     `;
@@ -828,21 +1269,37 @@
                 r.classList.remove('hidden');
 
             } catch (err) {
+                igdbSearchResults = [];
+
                 r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
                 r.classList.remove('hidden');
             }
         }
 
-        function selectGame(n, i, g, r) { 
+        function selectGame(index) {
+            const selected = igdbSearchResults[index];
+
+            if (!selected) return;
+
             const tIn = document.getElementById('titleInput'); 
-            tIn.value = n; 
+
+            tIn.value = selected.title; 
 
             document.getElementById('searchResults').classList.add('hidden'); 
 
-            if (i) tIn.dataset.img = i;
-            if (g) tIn.dataset.genre = g;
+            if (selected.cover) {
+                tIn.dataset.img = selected.cover;
+            } else {
+                delete tIn.dataset.img;
+            }
 
-            const parsedDate = parseReleaseDate(r);
+            if (selected.genre) {
+                tIn.dataset.genre = selected.genre;
+            } else {
+                delete tIn.dataset.genre;
+            }
+
+            const parsedDate = parseReleaseDate(selected.release);
 
             if (parsedDate !== null) {
                 tIn.dataset.release = parsedDate;
@@ -855,8 +1312,10 @@
 
         function downloadTemplate() { 
             const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; 
+
             const blob = new Blob([csv], { type: 'text/csv' }); 
             const a = document.createElement('a'); 
+
             a.href = URL.createObjectURL(blob); 
             a.download = 'vault_template.csv'; 
             a.click(); 
@@ -882,7 +1341,10 @@
                     }; 
                 }).filter(x => x); 
 
-                await supabaseClient.from('games').insert(gToInsert); 
+                await supabaseClient
+                    .from('games')
+                    .insert(gToInsert); 
+
                 loadGames(); 
             }; 
 
