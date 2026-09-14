@@ -473,14 +473,14 @@
             
             div.innerHTML = `
                 <div>
-                    <div class="h-1.5 w-full ${hasSeries ? 'bg-orange-500' : 'bg-indigo-500'}"></div>
+                    <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
                     <div class="p-2.5 pb-1 flex flex-col items-center">
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
                             <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}">
                             ${isUnreleased ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` : ''}
                         </div>
                         <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] bg-orange-600/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` : `<span class="inline-block text-[9px] bg-blue-600/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`}
+                            ${hasSeries ? `<span class="inline-block text-[9px] bg-amber-600/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`}
                         </div>
                         <div class="flex justify-between items-start gap-1.5 w-full">
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${game.title}</h3>
@@ -492,7 +492,7 @@
                 </div>
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                     <div class="flex items-center justify-between gap-1">
-                        <span class="text-indigo-400 font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${game.genre || 'Game'}</span>
+                        <span class="${hasSeries ? 'text-amber-400' : 'text-cyan-400'} font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">${game.genre || 'Game'}</span>
                         <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
                             <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
                             <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
