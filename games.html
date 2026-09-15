@@ -471,22 +471,22 @@
            ============================================================ */
 
         const GENRE_ICONS = {
-            'Tactical': { icon: '⚔️', label: 'Tactical' },
+            'Tactical': { icon: '🎯', label: 'Tactical' },
             'Shooter': { icon: '🔫', label: 'Shooter' },
             'Puzzle': { icon: '🧩', label: 'Puzzle' },
-            'Real Time Strategy (RTS)': { icon: '♟️', label: 'Real Time Strategy (RTS)' },
+            'Real Time Strategy (RTS)': { icon: '🧠', label: 'Real Time Strategy (RTS)' },
             'Strategy': { icon: '♟️', label: 'Strategy' },
-            'Turn-based strategy (TBS)': { icon: '♟️', label: 'Turn-Based Strategy' },
-            'Hack and slash/Beat \'em up': { icon: '🗡️', label: 'Hack and Slash / Beat \'em Up' },
+            'Turn-based strategy (TBS)': { icon: '🎲', label: 'Turn-Based Strategy' },
+            'Hack and slash/Beat \'em up': { icon: '🥊', label: 'Hack and Slash / Beat \'em Up' },
             'Action': { icon: '⚡', label: 'Action' },
             'Adventure': { icon: '🗺️', label: 'Adventure' },
-            'Role-playing (RPG)': { icon: '⚔️', label: 'RPG' },
+            'Role-playing (RPG)': { icon: '🛡️', label: 'RPG' },
             'Stealth': { icon: '🥷', label: 'Stealth' },
             'Platform': { icon: '🏃', label: 'Platform' },
             'Racing': { icon: '🏎️', label: 'Racing' },
             'Fighting': { icon: '👊', label: 'Fighting' },
             'Horror': { icon: '👻', label: 'Horror' },
-            'Simulator': { icon: '🎛️', label: 'Simulator' },
+            'Simulator': { icon: '🔧', label: 'Simulator' },
             'Sport': { icon: '🏆', label: 'Sports' },
             'Music': { icon: '🎵', label: 'Music' },
             'Arcade': { icon: '🕹️', label: 'Arcade' },
@@ -499,31 +499,32 @@
         };
 
         const GENRE_PRIORITY = [
+            'Point-and-click',
             'Tactical',
             'Shooter',
-            'Puzzle',
+            
             'Real Time Strategy (RTS)',
-            'Strategy',
             'Turn-based strategy (TBS)',
+            'Strategy',
             'Hack and slash/Beat \'em up',
             'Action',
             'Adventure',
+            'Puzzle',
             'Role-playing (RPG)',
             'Stealth',
             'Platform',
             'Racing',
             'Fighting',
             'Horror',
-            'Simulator',
             'Sport',
             'Music',
             'Arcade',
-            'Point-and-click',
             'MMO',
             'Card & Board Game',
             'Quiz/Trivia',
             'Pinball',
             'Visual Novel'
+             'Simulator',
         ];
 
         function normaliseGenreName(genre) {
