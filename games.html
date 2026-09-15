@@ -9,129 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <style>
-        body {
-            background-color: #0b0f19;
-            color: #f1f5f9;
-        }
+        body { background-color: #0b0f19; color: #f1f5f9; }
+        .game-card { background-color: #1e293b; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+        .game-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .game-card img { width: 100%; max-height: 280px; object-fit: contain; background-color: #0f172a; border-radius: 0.5rem; }
+        .column-height { min-height: 450px; border: 2px dashed rgba(255,255,255,0.05); border-radius: 24px; padding: 12px; }
+        .unreleased-card { filter: grayscale(1); opacity: 0.5; border: 1px dashed rgba(255,255,255,0.3) !important; }
+        .plat-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
+        .plat-box.active { opacity: 1; transform: scale(1.08); border-color: #6366f1; box-shadow: 0 0 15px rgba(99, 102, 241, 0.6); }
+        .plat-box img { width: 22px; height: 22px; object-fit: contain; }
+        #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .plat-badge { font-size: 9px; font-weight: 900; padding: 1px 5px; border-radius: 4px; color: white; text-transform: uppercase; background: #334155; display: inline-block; }
+        .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 180px; color: white; }
+        #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
+        #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        #searchResults::-webkit-scrollbar-thumb, #seriesResults::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; border: 2px solid #1e293b; }
 
-        .game-card {
-            background-color: #1e293b;
-            border-radius: 1rem;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-        }
-
-        .game-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        .game-card img {
-            width: 100%;
-            max-height: 280px;
-            object-fit: contain;
-            background-color: #0f172a;
-            border-radius: 0.5rem;
-        }
-
-        .column-height {
-            min-height: 450px;
-            border: 2px dashed rgba(255,255,255,0.05);
-            border-radius: 24px;
-            padding: 12px;
-        }
-
-        .unreleased-card {
-            filter: grayscale(1);
-            opacity: 0.5;
-            border: 1px dashed rgba(255,255,255,0.3) !important;
-        }
-
-        .plat-box {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #334155;
-            cursor: pointer;
-            transition: all 0.2s;
-            opacity: 0.25;
-            color: black;
-            font-weight: 900;
-        }
-
-        .plat-box.active {
-            opacity: 1;
-            transform: scale(1.08);
-            border-color: #6366f1;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
-        }
-
-        .plat-box img {
-            width: 22px;
-            height: 22px;
-            object-fit: contain;
-        }
-
-        #authScreen {
-            background-color: #0b0f19;
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .plat-badge {
-            font-size: 9px;
-            font-weight: 900;
-            padding: 1px 5px;
-            border-radius: 4px;
-            color: white;
-            text-transform: uppercase;
-            background: #334155;
-            display: inline-block;
-        }
-
-        .col-filter {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 99px;
-            padding: 4px 16px;
-            font-size: 11px;
-            outline: none;
-            width: 180px;
-            color: white;
-        }
-
-        #searchResults::-webkit-scrollbar,
-        #seriesResults::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #searchResults::-webkit-scrollbar-track,
-        #seriesResults::-webkit-scrollbar-track {
-            background: #1e293b;
-            border-radius: 10px;
-        }
-
-        #searchResults::-webkit-scrollbar-thumb,
-        #seriesResults::-webkit-scrollbar-thumb {
-            background: #4f46e5;
-            border-radius: 10px;
-            border: 2px solid #1e293b;
-        }
-
-        /* ============================================================
-           GENRE ICONS
-           ============================================================ */
-
+        /* Genre icons */
         .genre-icons {
             display: flex;
             align-items: center;
@@ -144,33 +38,21 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
+            font-size: 15px;
             line-height: 1;
             cursor: help;
             border-radius: 5px;
-            color: #cbd5e1;
-            transition:
-                transform 0.15s,
-                background-color 0.15s,
-                color 0.15s;
-        }
-
-        .genre-icon svg {
-            width: 18px;
-            height: 18px;
-            display: block;
-            overflow: visible;
+            transition: transform 0.15s, background-color 0.15s;
         }
 
         .genre-icon:hover {
-            transform: scale(1.22);
+            transform: scale(1.2);
             background-color: rgba(255,255,255,0.08);
-            color: #ffffff;
         }
 
         /* Platform display */
-
         .platform-display {
             display: flex;
             align-items: center;
@@ -182,41 +64,16 @@
         .platform-display .plat-badge {
             white-space: nowrap;
         }
-
-        /* SVG icon strokes */
-
-        .genre-svg {
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .genre-svg-fill {
-            fill: currentColor;
-            stroke: none;
-        }
     </style>
 </head>
-
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
     <!-- Google Auth Screen -->
     <div id="authScreen">
         <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
-            <div class="mb-2 text-indigo-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">
-                Vault
-            </div>
-
-            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-8">
-                Authentication Required
-            </p>
-
-            <button
-                onclick="loginWithGoogle()"
-                class="w-full bg-white text-slate-900 py-4 px-6 rounded-2xl font-black hover:bg-slate-100 transition flex items-center justify-center gap-3 uppercase tracking-wider text-sm shadow-lg"
-            >
+            <div class="mb-2 text-indigo-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-8">Authentication Required</p>
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 py-4 px-6 rounded-2xl font-black hover:bg-slate-100 transition flex items-center justify-center gap-3 uppercase tracking-wider text-sm shadow-lg">
                 <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
                     <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.18v3.15C3.15 21.32 7.23 24 12 24z"/>
@@ -231,364 +88,139 @@
     <!-- Main Application -->
     <div id="mainApp" style="display: none;">
         <div class="max-w-7xl mx-auto">
-
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
-
-                <!-- Left Menu -->
+                <!-- Left Menu: Home, Games, Movies, Books -->
                 <div class="flex items-center gap-2">
-                    <button
-                        onclick="window.location.href='index.html'"
-                        title="Home Vault"
-                        class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700"
-                    >🏠</button>
-
-                    <button
-                        onclick="toggleView('queue')"
-                        title="Games Vault"
-                        class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg"
-                    >🎮</button>
-
-                    <button
-                        onclick="window.location.href='movies.html'"
-                        title="Movies Vault"
-                        class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700"
-                    >🎬</button>
-
-                    <button
-                        onclick="window.location.href='books.html'"
-                        title="Books Vault"
-                        class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700"
-                    >📚</button>
+                   <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
+                   <button onclick="toggleView('queue')" title="Games Vault" class="bg-indigo-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">🎮</button>
+                   <button onclick="window.location.href='movies.html'" title="Movies Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🎬</button>
+                   <button onclick="window.location.href='books.html'" title="Books Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📚</button>
                 </div>
-
-                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">
-                    Games Vault
-                </h1>
-
-                <!-- Right Menu -->
+                
+                <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">Games Vault</h1>
+                
+                <!-- Right Menu: Wishlist, Trophy (Archive), Stats, Toolbox -->
                 <div class="flex items-center gap-2">
-
-                    <button
-                        onclick="toggleView('wishlist')"
-                        title="Wishlist Vault"
-                        class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400"
-                    >🪄</button>
-
-                    <button
-                        onclick="toggleView('archive')"
-                        title="Archive"
-                        class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600"
-                    >🏆</button>
-
-                    <button
-                        onclick="window.location.href='stats.html'"
-                        title="Stats"
-                        class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700"
-                    >📊</button>
-
+                    <button onclick="toggleView('wishlist')" title="Wishlist Vault" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-indigo-400">🪄</button>
+                    <button onclick="toggleView('archive')" title="Archive" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">🏆</button>
+                    <button onclick="window.location.href='stats.html'" title="Stats" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">📊</button>
+                    
                     <div id="toolboxContainer" class="relative">
-                        <button
-                            onclick="toggleToolbox(event)"
-                            title="Toolbox"
-                            class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700"
-                        >🧰</button>
-
-                        <div
-                            id="toolboxMenu"
-                            class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50"
-                        >
-                            <button
-                                id="repairBtn"
-                                onclick="repairSortOrder()"
-                                title="Repair All"
-                                class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white"
-                            >🔧</button>
-
-                            <button
-                                onclick="downloadTemplate()"
-                                title="CSV Template"
-                                class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600"
-                            >💾</button>
-
-                            <button
-                                onclick="document.getElementById('csvFile').click()"
-                                title="Import CSV"
-                                class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600"
-                            >📥</button>
-
-                            <button
-                                onclick="logout()"
-                                title="Sign Out"
-                                class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600"
-                            >🔒</button>
+                        <button onclick="toggleToolbox(event)" title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
+                        <div id="toolboxMenu" class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                            <button id="repairBtn" onclick="repairSortOrder()" title="Repair All" class="p-2 bg-amber-900/20 text-amber-500 border border-amber-900/50 rounded-lg text-xl hover:bg-amber-600 hover:text-white">🔧</button>
+                            <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">💾</button>
+                            <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">📥</button>
+                            <button onclick="logout()" title="Sign Out" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">🔒</button>
                         </div>
                     </div>
                 </div>
-
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
-
-                <!-- Active Session -->
-                <div
-                    id="activeSessionBox"
-                    class="lg:col-span-5 bg-indigo-950/20 p-5 rounded-[2.5rem] border border-indigo-500/20 shadow-inner flex flex-col justify-between"
-                >
-                    <h2 class="text-indigo-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">
-                        Active Session
-                    </h2>
-
+                <!-- Active Session (Horizontal Compact Style) -->
+                <div id="activeSessionBox" class="lg:col-span-5 bg-indigo-950/20 p-5 rounded-[2.5rem] border border-indigo-500/20 shadow-inner flex flex-col justify-between">
+                    <h2 class="text-indigo-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Active Session</h2>
                     <div id="col-playing" class="flex-1 flex flex-col gap-3 justify-center"></div>
                 </div>
-
+                
                 <!-- Search & Entry Form -->
-                <div
-                    id="inputArea"
-                    class="lg:col-span-7 bg-slate-800 p-5 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-between"
-                >
+                <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-5 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
-
-                        <h2
-                            id="formModeLabel"
-                            class="text-indigo-400 font-black text-xs uppercase tracking-widest italic justify-start"
-                        >
-                            Search
-                        </h2>
-
+                        <h2 id="formModeLabel" class="text-indigo-400 font-black text-xs uppercase tracking-widest italic justify-start">Search</h2>
                         <div class="flex gap-2">
-                            <button
-                                id="cancelEdit"
-                                onclick="exitEditMode()"
-                                class="hidden text-slate-400 hover:text-white text-xs font-bold"
-                            >Cancel</button>
-
-                            <button
-                                id="deleteSelectedBtn"
-                                onclick="deleteSelectedFromForm()"
-                                class="hidden text-red-400 hover:text-red-300 text-xs font-bold"
-                            >🗑️ Delete</button>
+                            <button id="cancelEdit" onclick="exitEditMode()" class="hidden text-slate-400 hover:text-white text-xs font-bold">Cancel</button>
+                            <button id="deleteSelectedBtn" onclick="deleteSelectedFromForm()" class="hidden text-red-400 hover:text-red-300 text-xs font-bold">🗑️ Delete</button>
                         </div>
                     </div>
 
                     <div class="flex flex-col gap-3 relative flex-1 justify-center">
-
-                        <input
-                            id="titleInput"
-                            type="text"
-                            oninput="searchGames(this.value)"
-                            placeholder="Search for game title..."
-                            class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm"
-                        >
-
-                        <div
-                            id="searchResults"
-                            class="hidden absolute top-[60px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"
-                        ></div>
-
+                        <input id="titleInput" type="text" oninput="searchGames(this.value)" placeholder="Search for game title..." class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
+                        <div id="searchResults" class="hidden absolute top-[60px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
+                        
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
-
-                            <div onclick="toggleP('steam')" id="i-steam" class="plat-box" title="Steam">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg">
-                            </div>
-
-                            <div onclick="toggleP('gog')" id="i-gog" class="plat-box" title="GOG">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg">
-                            </div>
-
-                            <div onclick="toggleP('epic')" id="i-epic" class="plat-box" title="Epic Games">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg">
-                            </div>
-
-                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box" title="BattleNet">
-                                <span style="color:#009eff; font-size:14px;">BN</span>
-                            </div>
-
-                            <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box" title="Xbox">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg">
-                            </div>
-
-                            <div onclick="toggleP('switch')" id="i-switch" class="plat-box" title="Nintendo Switch">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg">
-                            </div>
-
-                            <div onclick="toggleP('playstation')" id="i-playstation" class="plat-box" title="PlayStation">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg">
-                            </div>
-
-                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box" title="Amazon Luna">
-                                <span style="color:#ff9900; font-size:18px;">A</span>
-                            </div>
+                            <div onclick="toggleP('steam')" id="i-steam" class="plat-box" title="Steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"></div>
+                            <div onclick="toggleP('gog')" id="i-gog" class="plat-box" title="GOG"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/GOG.com_logo.svg"></div>
+                            <div onclick="toggleP('epic')" id="i-epic" class="plat-box" title="Epic Games"><img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg"></div>
+                            <div onclick="toggleP('battlenet')" id="i-battlenet" class="plat-box" title="BattleNet"><span style="color:#009eff; font-size: 14px;">BN</span></div>
+                            <div onclick="toggleP('xbox')" id="i-xbox" class="plat-box" title="Xbox"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg"></div>
+                            <div onclick="toggleP('switch')" id="i-switch" class="plat-box" title="Nintendo Switch"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Nintendo_Switch_Logo.svg"></div>
+                            <div onclick="toggleP('playstation')" id="i-playstation" class="plat-box" title="PlayStation"><img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg"></div>
+                            <div onclick="toggleP('amazon')" id="i-amazon" class="plat-box" title="Amazon Luna"><span style="color:#ff9900; font-size: 18px;">A</span></div>
                         </div>
-
+                        
                         <div class="flex gap-3 text-white relative">
-
                             <div class="flex-1 relative">
-                                <input
-                                    id="seriesInput"
-                                    type="text"
-                                    oninput="filterSeriesDropdown(this.value)"
-                                    onfocus="filterSeriesDropdown(this.value)"
-                                    placeholder="Chain Series Name (Optional)"
-                                    class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic"
-                                >
-
-                                <div
-                                    id="seriesResults"
-                                    class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"
-                                ></div>
+                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Chain Series Name (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
+                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
                             </div>
-
-                            <button
-                                onclick="submitForm()"
-                                id="submitBtn"
-                                class="bg-indigo-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-indigo-500 transition"
-                            >Commit</button>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-indigo-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-indigo-500 transition">Commit</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Queue View -->
+            <!-- Queue View Layout -->
             <div id="queueView">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
                     <div>
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">
-                                Next Focus
-                            </h2>
-
-                            <input
-                                id="filterNext"
-                                type="text"
-                                oninput="render()"
-                                placeholder="Filter..."
-                                class="col-filter"
-                            >
+                            <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Next Focus</h2>
+                            <input id="filterNext" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
                         </div>
-
-                        <div
-                            id="col-next"
-                            class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"
-                        ></div>
+                        <div id="col-next" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
                     </div>
-
                     <div>
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">
-                                Backlog & Collection
-                            </h2>
-
-                            <input
-                                id="filterBacklog"
-                                type="text"
-                                oninput="render()"
-                                placeholder="Filter..."
-                                class="col-filter"
-                            >
+                            <h2 class="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">Backlog & Collection</h2>
+                            <input id="filterBacklog" type="text" oninput="render()" placeholder="Filter..." class="col-filter">
                         </div>
-
-                        <div
-                            id="col-backlog"
-                            class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"
-                        ></div>
+                        <div id="col-backlog" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Archive Grid -->
+            <!-- Archive Grid View -->
             <div id="altView" class="hidden">
-
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
-
-                    <h2
-                        id="altTitle"
-                        class="font-black text-2xl uppercase tracking-widest italic text-white text-center"
-                    >Archive</h2>
-
-                    <input
-                        id="filterAlt"
-                        type="text"
-                        oninput="render()"
-                        placeholder="Filter games..."
-                        class="col-filter"
-                    >
+                    <h2 id="altTitle" class="font-black text-2xl uppercase tracking-widest italic text-white text-center">Archive</h2>
+                    <input id="filterAlt" type="text" oninput="render()" placeholder="Filter games..." class="col-filter">
                 </div>
-
-                <div
-                    id="col-alt"
-                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
-                ></div>
+                <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
-            <!-- Wishlist -->
+            <!-- Wishlist View -->
             <div id="wishlistView" class="hidden">
-
                 <div class="text-center mb-8">
-                    <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">
-                        The Wishlist Vault
-                    </h2>
+                    <h2 class="text-indigo-400 font-black text-3xl uppercase tracking-widest italic">The Wishlist Vault</h2>
                 </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
                     <div>
                         <div class="flex justify-between items-center mb-4">
-
-                            <h2 class="text-indigo-400 font-black text-xs uppercase tracking-[0.3em]">
-                                Released
-                            </h2>
-
-                            <input
-                                id="filterWishlistReleased"
-                                type="text"
-                                oninput="render()"
-                                placeholder="Filter released..."
-                                class="col-filter"
-                            >
+                            <h2 class="text-indigo-400 font-black text-xs uppercase tracking-[0.3em]">Released</h2>
+                            <input id="filterWishlistReleased" type="text" oninput="render()" placeholder="Filter released..." class="col-filter">
                         </div>
-
-                        <div
-                            id="col-wishlist-released"
-                            class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"
-                        ></div>
+                        <div id="col-wishlist-released" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
                     </div>
-
                     <div>
                         <div class="flex justify-between items-center mb-4">
-
-                            <h2 class="text-amber-400 font-black text-xs uppercase tracking-[0.3em]">
-                                Upcoming
-                            </h2>
-
-                            <input
-                                id="filterWishlistUpcoming"
-                                type="text"
-                                oninput="render()"
-                                placeholder="Filter upcoming..."
-                                class="col-filter"
-                            >
+                            <h2 class="text-amber-400 font-black text-xs uppercase tracking-[0.3em]">Upcoming</h2>
+                            <input id="filterWishlistUpcoming" type="text" oninput="render()" placeholder="Filter upcoming..." class="col-filter">
                         </div>
-
-                        <div
-                            id="col-wishlist-upcoming"
-                            class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"
-                        ></div>
+                        <div id="col-wishlist-upcoming" class="column-height grid grid-cols-2 sm:grid-cols-3 gap-4 align-start"></div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
 
         /*
-         * PUT YOUR EXISTING SUPABASE ANON KEY HERE.
+         * Put your existing Supabase anon key back here.
          */
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -598,26 +230,36 @@
         let currentViewMode = 'queue';
         let selectedPlatforms = [];
 
-        /*
-         * Cache for current IGDB search results.
-         * This prevents multi-genre strings being passed through
-         * inline onclick attributes.
-         */
+        /* Cache for the current IGDB search results.
+           This avoids putting multiple genres into an inline onclick attribute. */
         let igdbSearchResults = [];
 
-        const PLAT_MAP = {
-            steam: { n:'Steam', c:'#171a21' },
-            gog: { n:'GOG', c:'#86328a' },
-            epic: { n:'Epic', c:'#313131' },
-            battlenet: { n:'BN', c:'#009eff' },
-            xbox: { n:'Xbox', c:'#107c10' },
-            switch: { n:'Switch', c:'#e60012' },
-            playstation: { n:'PS', c:'#003791' },
-            amazon: { n:'Luna', c:'#ff9900' }
+        const PLAT_MAP = { 
+            steam: {n:'Steam', c:'#171a21'}, 
+            gog: {n:'GOG', c:'#86328a'}, 
+            epic: {n:'Epic', c:'#313131'}, 
+            battlenet: {n:'BN', c:'#009eff'}, 
+            xbox: {n:'Xbox', c:'#107c10'}, 
+            switch: {n:'Switch', c:'#e60012'}, 
+            playstation: {n:'PS', c:'#003791'}, 
+            amazon: {n:'Luna', c:'#ff9900'} 
         };
 
         /* ============================================================
            PLATFORM DISPLAY PRIORITY
+
+           All platforms owned by the user are displayed.
+           This only controls their order.
+
+           Highest priority first:
+           PlayStation
+           Xbox
+           Switch
+           Steam
+           BattleNet
+           GOG
+           Epic
+           Amazon Luna
            ============================================================ */
 
         const PLATFORM_PRIORITY = [
@@ -632,12 +274,10 @@
         ];
 
         function sortPlatforms(platforms) {
-
             return platforms
                 .map(p => p.trim().toLowerCase())
                 .filter(Boolean)
                 .sort((a, b) => {
-
                     const aIndex = PLATFORM_PRIORITY.indexOf(a);
                     const bIndex = PLATFORM_PRIORITY.indexOf(b);
 
@@ -649,478 +289,59 @@
         }
 
         /* ============================================================
-           CUSTOM SVG GENRE ICONS
+           GENRE ICON SYSTEM
 
-           All icons are inline SVG strings.
-           No external image files are required.
+           Multiple genres are supported.
+
+           New records use "|" as the internal separator:
+           Shooter|Strategy|Tactical
+
+           Existing records using commas continue to work:
+           Shooter, Strategy, Tactical
+
+           Genres are always sorted according to GENRE_PRIORITY,
+           regardless of the order returned by IGDB.
            ============================================================ */
 
         const GENRE_ICONS = {
-
-            /* --------------------------------------------------------
-               TACTICAL
-               Target/crosshair with a tactical marker.
-               -------------------------------------------------------- */
-            'Tactical': {
-                label: 'Tactical',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="7.5"></circle>
-                        <circle cx="12" cy="12" r="2.5"></circle>
-                        <path d="M12 2v4"></path>
-                        <path d="M12 18v4"></path>
-                        <path d="M2 12h4"></path>
-                        <path d="M18 12h4"></path>
-                        <path d="M17.2 6.8l-2 2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               SHOOTER
-               Crosshair with projectile.
-               -------------------------------------------------------- */
-            'Shooter': {
-                label: 'Shooter',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="10" cy="10" r="6"></circle>
-                        <circle cx="10" cy="10" r="2"></circle>
-                        <path d="M10 1.5v3"></path>
-                        <path d="M10 15.5v3"></path>
-                        <path d="M1.5 10h3"></path>
-                        <path d="M15.5 10h3"></path>
-                        <path d="M16 16l6 6"></path>
-                        <path d="M18.5 18.5l2-2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               POINT & CLICK
-               Cursor interacting with a target.
-               -------------------------------------------------------- */
-            'Point-and-click': {
-                label: 'Point-and-Click',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M5 2l11 10-5 .5 3 7-2.8 1.2-3-7-3.2 3.2z"></path>
-                        <circle cx="19" cy="5" r="2.5"></circle>
-                        <path d="M19 1v1"></path>
-                        <path d="M19 8v1"></path>
-                        <path d="M15 5h-1"></path>
-                        <path d="M23 5h-1"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               PUZZLE
-               Four interlocking pieces.
-               -------------------------------------------------------- */
-            'Puzzle': {
-                label: 'Puzzle',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 3h7v3a2 2 0 1 0 4 0V3h7v7h-3a2 2 0 1 0 0 4h3v7h-7v-3a2 2 0 1 0-4 0v3H3v-7h3a2 2 0 1 0 0-4H3z"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               ADVENTURE
-               Compass.
-               -------------------------------------------------------- */
-            'Adventure': {
-                label: 'Adventure',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9"></circle>
-                        <path d="M15.5 8.5l-2.5 5-5 2.5 2.5-5z"></path>
-                        <path d="M12 3v2"></path>
-                        <path d="M12 19v2"></path>
-                        <path d="M3 12h2"></path>
-                        <path d="M19 12h2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               RPG
-               Character/profile + progression bars.
-               No sword, so it doesn't overlap Adventure.
-               -------------------------------------------------------- */
-            'Role-playing (RPG)': {
-                label: 'RPG',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="9" cy="7" r="3"></circle>
-                        <path d="M3.5 20c.5-4 2.4-6 5.5-6s5 2 5.5 6"></path>
-                        <path d="M15 7h6"></path>
-                        <path d="M15 11h6"></path>
-                        <path d="M15 15h4"></path>
-                        <circle cx="15" cy="7" r=".7" class="genre-svg-fill"></circle>
-                        <circle cx="15" cy="11" r=".7" class="genre-svg-fill"></circle>
-                        <circle cx="15" cy="15" r=".7" class="genre-svg-fill"></circle>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               RTS
-               Brain with integrated lightning bolt.
-               -------------------------------------------------------- */
-            'Real Time Strategy (RTS)': {
-                label: 'Real Time Strategy (RTS)',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M8 5.5c-2.4 0-4 1.8-4 4 0 1 .4 1.9 1 2.5-.8.7-1.2 1.7-1.2 2.8 0 2.1 1.6 3.7 3.7 3.7.8 0 1.5-.2 2.1-.6.7.4 1.5.6 2.4.6 2.3 0 4.1-1.6 4.1-3.8 0-.7-.2-1.4-.6-2 .9-.7 1.5-1.8 1.5-3 0-2.2-1.7-4-4-4-.9 0-1.8.3-2.5.9-.7-.7-1.5-1.1-2.5-1.1z"></path>
-                        <path d="M12.5 6.5l-1.8 5h2.1l-1.1 5 4-6.2h-2.3l1.3-3.8z" class="genre-svg-fill"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               STRATEGY
-               Chessboard and opposing pieces.
-               -------------------------------------------------------- */
-            'Strategy': {
-                label: 'Strategy',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="3" y="3" width="18" height="18" rx="1"></rect>
-                        <path d="M7.5 3v18"></path>
-                        <path d="M12 3v18"></path>
-                        <path d="M16.5 3v18"></path>
-                        <path d="M3 7.5h18"></path>
-                        <path d="M3 12h18"></path>
-                        <path d="M3 16.5h18"></path>
-                        <circle cx="7.5" cy="7.5" r="1.3" class="genre-svg-fill"></circle>
-                        <circle cx="16.5" cy="16.5" r="1.3" class="genre-svg-fill"></circle>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               TURN-BASED STRATEGY
-               Dice + circular turn arrow.
-               -------------------------------------------------------- */
-            'Turn-based strategy (TBS)': {
-                label: 'Turn-Based Strategy',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="4" y="5" width="12" height="12" rx="2" transform="rotate(-10 10 11)"></rect>
-                        <circle cx="8" cy="9" r="1" class="genre-svg-fill"></circle>
-                        <circle cx="12" cy="13" r="1" class="genre-svg-fill"></circle>
-                        <path d="M17 17a6 6 0 1 0 1.5-9"></path>
-                        <path d="M18.5 5.5v4h-4"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               HACK & SLASH / BEAT 'EM UP
-               Two fists/impact rather than a sword.
-               -------------------------------------------------------- */
-            'Hack and slash/Beat \'em up': {
-                label: 'Hack and Slash / Beat \'em Up',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 7.5l3.5 1.2 2.8 3.8-2.1 2.2-3.4-2.1z"></path>
-                        <path d="M21 7.5l-3.5 1.2-2.8 3.8 2.1 2.2 3.4-2.1z"></path>
-                        <path d="M8.5 12.5l2.2 1.8 2.8-1.8"></path>
-                        <path d="M8.5 15.5l2.2-1.2"></path>
-                        <path d="M15.5 15.5l-2.2-1.2"></path>
-                        <path d="M12 4v3"></path>
-                        <path d="M9.5 5l1.5 2"></path>
-                        <path d="M14.5 5l-1.5 2"></path>
-                        <path d="M12 18v2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               ACTION
-               Speed/impact.
-               -------------------------------------------------------- */
-            'Action': {
-                label: 'Action',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M13 2l-7 11h5l-1 9 7-12h-5z"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               STEALTH
-               Eye hidden by shadow.
-               -------------------------------------------------------- */
-            'Stealth': {
-                label: 'Stealth',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"></path>
-                        <circle cx="12" cy="12" r="2.5"></circle>
-                        <path d="M4 20L20 4"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               PLATFORM
-               Character jumping over platforms.
-               -------------------------------------------------------- */
-            'Platform': {
-                label: 'Platform',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="5" r="2"></circle>
-                        <path d="M10.5 7l-1 4 2 2 2-2-1-4"></path>
-                        <path d="M11 13l-3 4"></path>
-                        <path d="M13 13l3 4"></path>
-                        <path d="M4 20h6"></path>
-                        <path d="M14 20h6"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               RACING
-               Steering wheel.
-               -------------------------------------------------------- */
-            'Racing': {
-                label: 'Racing',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9"></circle>
-                        <circle cx="12" cy="12" r="2"></circle>
-                        <path d="M5 9c2 .5 4 1 7 1s5-.5 7-1"></path>
-                        <path d="M12 10v8"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               FIGHTING
-               Two opposing figures/fists.
-               -------------------------------------------------------- */
-            'Fighting': {
-                label: 'Fighting',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="7" cy="6" r="2"></circle>
-                        <circle cx="17" cy="6" r="2"></circle>
-                        <path d="M4 20l2-8 3 2 3-3"></path>
-                        <path d="M20 20l-2-8-3 2-3-3"></path>
-                        <path d="M9 12h6"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               HORROR
-               Stylised skull.
-               -------------------------------------------------------- */
-            'Horror': {
-                label: 'Horror',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 3a7 7 0 0 0-7 7c0 3 1.4 5.2 3.5 6.5V20h7v-3.5C17.6 15.2 19 13 19 10a7 7 0 0 0-7-7z"></path>
-                        <circle cx="9" cy="10" r="1.3" class="genre-svg-fill"></circle>
-                        <circle cx="15" cy="10" r="1.3" class="genre-svg-fill"></circle>
-                        <path d="M10 14h4"></path>
-                        <path d="M10 20v2"></path>
-                        <path d="M14 20v2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               SIMULATOR
-               Crossed tools.
-               -------------------------------------------------------- */
-            'Simulator': {
-                label: 'Simulator',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M5 4l3 3"></path>
-                        <path d="M3.5 5.5l5 5"></path>
-                        <path d="M8.5 10.5l-3 3 2 2 3-3"></path>
-                        <path d="M13 14l6-6"></path>
-                        <path d="M15 6l3-3 3 3-3 3"></path>
-                        <path d="M12 12l3 3"></path>
-                        <path d="M13 17l-3 3-3-3 3-3"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               SPORT
-               Ball + movement.
-               -------------------------------------------------------- */
-            'Sport': {
-                label: 'Sports',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="8"></circle>
-                        <path d="M12 4v4"></path>
-                        <path d="M5 8l4 2"></path>
-                        <path d="M19 8l-4 2"></path>
-                        <path d="M8 18l2-4"></path>
-                        <path d="M16 18l-2-4"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               MUSIC
-               Note + waveform.
-               -------------------------------------------------------- */
-            'Music': {
-                label: 'Music',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M9 17V5l10-2v12"></path>
-                        <circle cx="6" cy="18" r="3"></circle>
-                        <circle cx="16" cy="16" r="3"></circle>
-                        <path d="M3 11h2l1.5-3 2 6 2-4 2 2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               ARCADE
-               Arcade cabinet.
-               -------------------------------------------------------- */
-            'Arcade': {
-                label: 'Arcade',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M5 4h14l2 4v12H3V8z"></path>
-                        <rect x="6" y="7" width="12" height="6" rx="1"></rect>
-                        <circle cx="9" cy="16" r="1.2"></circle>
-                        <circle cx="15" cy="16" r="1.2"></circle>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               MMO
-               Connected players/network.
-               -------------------------------------------------------- */
-            'MMO': {
-                label: 'MMO',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="5" r="2"></circle>
-                        <circle cx="5" cy="15" r="2"></circle>
-                        <circle cx="19" cy="15" r="2"></circle>
-                        <path d="M10.5 6.5L6.5 13"></path>
-                        <path d="M13.5 6.5l4 6.5"></path>
-                        <path d="M7 15h10"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               CARD & BOARD
-               Card.
-               -------------------------------------------------------- */
-            'Card & Board Game': {
-                label: 'Card & Board Game',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="6" y="3" width="10" height="15" rx="1.5" transform="rotate(-10 6 3)"></rect>
-                        <rect x="9" y="6" width="10" height="15" rx="1.5" transform="rotate(10 9 6)"></rect>
-                        <path d="M14 10l1 2 2 .3-1.5 1.5.4 2.2-1.9-1-1.9 1 .4-2.2-1.5-1.5 2-.3z"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               QUIZ
-               Question mark.
-               -------------------------------------------------------- */
-            'Quiz/Trivia': {
-                label: 'Quiz / Trivia',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9"></circle>
-                        <path d="M9.5 9a2.7 2.7 0 1 1 4.7 1.8c-1.1 1.1-2.2 1.3-2.2 3"></path>
-                        <circle cx="12" cy="17.5" r=".7" class="genre-svg-fill"></circle>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               PINBALL
-               Pinball machine.
-               -------------------------------------------------------- */
-            'Pinball': {
-                label: 'Pinball',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M7 3h10l2 18H5z"></path>
-                        <circle cx="12" cy="9" r="2"></circle>
-                        <path d="M8 15l3-2 2 2 3-2"></path>
-                        <path d="M8 19l3-2 2 2 3-2"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               VISUAL NOVEL
-               Open book + dialogue.
-               -------------------------------------------------------- */
-            'Visual Novel': {
-                label: 'Visual Novel',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 5c3-1 6-.5 9 2v13c-3-2-6-2.5-9-1z"></path>
-                        <path d="M21 5c-3-1-6-.5-9 2v13c3-2 6-2.5 9-1z"></path>
-                        <path d="M15 4h5"></path>
-                        <path d="M17 2v4"></path>
-                    </svg>
-                `
-            },
-
-            /* --------------------------------------------------------
-               INDIE
-               Faceted diamond/game gem.
-               -------------------------------------------------------- */
-            'Indie': {
-                label: 'Indie',
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 3l7 5-2 10-5 3-5-3L5 8z"></path>
-                        <path d="M5 8h14"></path>
-                        <path d="M9 8l3 13 3-13"></path>
-                        <path d="M8 5l1 3"></path>
-                        <path d="M16 5l-1 3"></path>
-                    </svg>
-                `
-            }
+            'Tactical': { icon: '⚔️', label: 'Tactical' },
+            'Shooter': { icon: '🔫', label: 'Shooter' },
+            'Puzzle': { icon: '🧩', label: 'Puzzle' },
+            'Real Time Strategy (RTS)': { icon: '♟️', label: 'Real Time Strategy (RTS)' },
+            'Strategy': { icon: '♟️', label: 'Strategy' },
+            'Turn-based strategy (TBS)': { icon: '♟️', label: 'Turn-Based Strategy' },
+            'Hack and slash/Beat \'em up': { icon: '🗡️', label: 'Hack and Slash / Beat \'em Up' },
+            'Action': { icon: '⚡', label: 'Action' },
+            'Adventure': { icon: '🗺️', label: 'Adventure' },
+            'Role-playing (RPG)': { icon: '⚔️', label: 'RPG' },
+            'Stealth': { icon: '🥷', label: 'Stealth' },
+            'Platform': { icon: '🏃', label: 'Platform' },
+            'Racing': { icon: '🏎️', label: 'Racing' },
+            'Fighting': { icon: '👊', label: 'Fighting' },
+            'Horror': { icon: '👻', label: 'Horror' },
+            'Simulator': { icon: '🎛️', label: 'Simulator' },
+            'Sport': { icon: '🏆', label: 'Sports' },
+            'Music': { icon: '🎵', label: 'Music' },
+            'Arcade': { icon: '🕹️', label: 'Arcade' },
+            'Point-and-click': { icon: '🖱️', label: 'Point-and-Click' },
+            'MMO': { icon: '🌐', label: 'MMO' },
+            'Card & Board Game': { icon: '🃏', label: 'Card & Board Game' },
+            'Quiz/Trivia': { icon: '❓', label: 'Quiz/Trivia' },
+            'Pinball': { icon: '🎯', label: 'Pinball' },
+            'Visual Novel': { icon: '📖', label: 'Visual Novel' }
         };
-
-        /* ============================================================
-           GENRE PRIORITY
-
-           This determines the visual order of multiple genre icons.
-           ============================================================ */
 
         const GENRE_PRIORITY = [
             'Tactical',
             'Shooter',
-            'Point-and-click',
             'Puzzle',
-            'Adventure',
-            'Role-playing (RPG)',
             'Real Time Strategy (RTS)',
             'Strategy',
             'Turn-based strategy (TBS)',
             'Hack and slash/Beat \'em up',
             'Action',
+            'Adventure',
+            'Role-playing (RPG)',
             'Stealth',
             'Platform',
             'Racing',
@@ -1130,7 +351,7 @@
             'Sport',
             'Music',
             'Arcade',
-            'Indie',
+            'Point-and-click',
             'MMO',
             'Card & Board Game',
             'Quiz/Trivia',
@@ -1138,72 +359,32 @@
             'Visual Novel'
         ];
 
-        /* ============================================================
-           GENRE NORMALISATION
-           ============================================================ */
-
         function normaliseGenreName(genre) {
-
             const value = (genre || '').trim();
 
             const aliases = {
-
-                'Real-time strategy (RTS)':
-                    'Real Time Strategy (RTS)',
-
-                'Real Time Strategy (RTS)':
-                    'Real Time Strategy (RTS)',
-
-                'RTS':
-                    'Real Time Strategy (RTS)',
-
-                'Turn-based strategy (TBS)':
-                    'Turn-based strategy (TBS)',
-
-                'Turn-based Strategy (TBS)':
-                    'Turn-based strategy (TBS)',
-
-                'TBS':
-                    'Turn-based strategy (TBS)',
-
-                'Role-Playing (RPG)':
-                    'Role-playing (RPG)',
-
-                'RPG':
-                    'Role-playing (RPG)',
-
-                'Hack and Slash/Beat \'Em Up':
-                    'Hack and slash/Beat \'em up',
-
-                'Hack and Slash/Beat \'em up':
-                    'Hack and slash/Beat \'em up',
-
-                'Hack and slash / Beat \'em up':
-                    'Hack and slash/Beat \'em up',
-
-                'Hack & Slash/Beat \'em Up':
-                    'Hack and slash/Beat \'em up',
-
-                'Point and Click':
-                    'Point-and-click',
-
-                'Point-and-Click':
-                    'Point-and-click',
-
-                'Sports':
-                    'Sport'
+                'Real-time strategy (RTS)': 'Real Time Strategy (RTS)',
+                'Real Time Strategy (RTS)': 'Real Time Strategy (RTS)',
+                'Turn-based strategy (TBS)': 'Turn-based strategy (TBS)',
+                'Role-Playing (RPG)': 'Role-playing (RPG)',
+                'RPG': 'Role-playing (RPG)',
+                'Hack and Slash/Beat \'Em Up': 'Hack and slash/Beat \'em up',
+                'Hack and Slash/Beat \'em Up': 'Hack and slash/Beat \'em up',
+                'Hack and slash / Beat \'em up': 'Hack and slash/Beat \'em up',
+                'Hack & Slash/Beat \'em Up': 'Hack and slash/Beat \'em up',
+                'Point and Click': 'Point-and-click',
+                'Sports': 'Sport'
             };
 
             return aliases[value] || value;
         }
 
         function splitGenres(genreString) {
-
             if (!genreString) return [];
 
             /*
-             * New records use |.
-             * Existing records using commas remain supported.
+             * New records use "|" so commas remain safe for CSV.
+             * The comma fallback keeps existing records working.
              */
             const separator = genreString.includes('|') ? '|' : ',';
 
@@ -1215,17 +396,11 @@
         }
 
         function sortGenres(genres) {
-
-            const uniqueGenres = [
-                ...new Set(
-                    genres
-                        .map(g => normaliseGenreName(g))
-                        .filter(Boolean)
-                )
-            ];
+            const uniqueGenres = [...new Set(
+                genres.map(g => normaliseGenreName(g)).filter(Boolean)
+            )];
 
             return uniqueGenres.sort((a, b) => {
-
                 const aIndex = GENRE_PRIORITY.indexOf(a);
                 const bIndex = GENRE_PRIORITY.indexOf(b);
 
@@ -1241,33 +416,26 @@
         }
 
         function getGenreIconData(genre) {
-
             const normalised = normaliseGenreName(genre);
 
             if (GENRE_ICONS[normalised]) {
                 return GENRE_ICONS[normalised];
             }
 
+            /*
+             * Fallback matching for minor naming differences from IGDB.
+             */
             const lower = normalised.toLowerCase();
 
-            if (
-                lower.includes('real time strategy') ||
-                lower.includes('real-time strategy')
-            ) {
+            if (lower.includes('real time strategy') || lower.includes('real-time strategy')) {
                 return GENRE_ICONS['Real Time Strategy (RTS)'];
             }
 
-            if (
-                lower.includes('hack and slash') ||
-                lower.includes('beat \'em up')
-            ) {
+            if (lower.includes('hack and slash') || lower.includes('beat \'em up')) {
                 return GENRE_ICONS['Hack and slash/Beat \'em up'];
             }
 
-            if (
-                lower === 'rpg' ||
-                lower.includes('role-playing')
-            ) {
+            if (lower === 'rpg' || lower.includes('role-playing')) {
                 return GENRE_ICONS['Role-playing (RPG)'];
             }
 
@@ -1275,1132 +443,473 @@
                 return GENRE_ICONS['Turn-based strategy (TBS)'];
             }
 
-            /*
-             * Unknown genre fallback.
-             * Keeps the game visible even if IGDB introduces a
-             * genre we don't have a custom icon for yet.
-             */
             return {
-                label: normalised,
-                icon: `
-                    <svg class="genre-svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9"></circle>
-                        <path d="M12 8v8"></path>
-                        <circle cx="12" cy="5.5" r=".7" class="genre-svg-fill"></circle>
-                    </svg>
-                `
+                icon: '🎮',
+                label: normalised
             };
         }
 
         function renderGenreIcons(genreString) {
+            const genres = sortGenres(splitGenres(genreString));
 
-            const genres = sortGenres(
-                splitGenres(genreString)
-            );
-
-            if (genres.length === 0) {
-                return '';
-            }
+            if (genres.length === 0) return '';
 
             return genres.map(genre => {
-
                 const match = getGenreIconData(genre);
-
-                const safeLabel = match.label
-                    .replace(/&/g, '&amp;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
 
                 return `
                     <span
                         class="genre-icon"
-                        title="${safeLabel}"
-                        aria-label="${safeLabel}"
-                    >
-                        ${match.icon}
-                    </span>
+                        title="${match.label.replace(/"/g, '&quot;')}"
+                        aria-label="${match.label.replace(/"/g, '&quot;')}"
+                    >${match.icon}</span>
                 `;
-
             }).join('');
         }
 
         function getStoredGenreString(genres) {
-
             const sorted = sortGenres(genres);
-
             return sorted.join('|');
         }
 
         function getDisplayGenreString(genreString) {
-
-            return sortGenres(
-                splitGenres(genreString)
-            ).join(', ');
+            return sortGenres(splitGenres(genreString)).join(', ');
         }
 
-        /* ============================================================
-           AUTH
-           ============================================================ */
-
         async function initAuth() {
-
-            const {
-                data: { session }
-            } = await supabaseClient.auth.getSession();
-
-            if (session) {
-                showApp();
-            } else {
-                showAuth();
-            }
-
-            supabaseClient.auth.onAuthStateChange(
-                (_event, session) => {
-
-                    if (session) {
-                        showApp();
-                    } else {
-                        showAuth();
-                    }
-                }
-            );
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) showApp(); else showAuth();
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                if (session) showApp(); else showAuth();
+            });
         }
 
         async function loginWithGoogle() {
-
-            const { error } =
-                await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.href
-                    }
-                });
-
-            if (error) {
-                alert("OAuth error: " + error.message);
-            }
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.href }
+            });
+            if (error) alert("OAuth error: " + error.message);
         }
 
         async function logout() {
-
             await supabaseClient.auth.signOut();
-
             showAuth();
         }
 
         function showApp() {
-
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
-
             initSortable();
             loadGames();
         }
 
         function showAuth() {
-
             document.getElementById('authScreen').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
         }
 
-        /* ============================================================
-           LOAD GAMES
-           ============================================================ */
-
-        async function loadGames() {
-
-            let {
-                data,
-                error
-            } = await supabaseClient
+        async function loadGames() { 
+            let { data, error } = await supabaseClient
                 .from('games')
                 .select('*')
-                .order('sort_order', {
-                    ascending: true
-                });
+                .order('sort_order', { ascending: true }); 
 
-            if (!error) {
-
-                allGames = data || [];
-
-                render();
-            }
+            if (!error) { 
+                allGames = data || []; 
+                render(); 
+            } 
         }
 
-        /* ============================================================
-           TOOLBOX
-           ============================================================ */
-
         function toggleToolbox(e) {
-
-            if (e) {
-                e.stopPropagation();
-            }
-
-            const menu =
-                document.getElementById('toolboxMenu');
-
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('toolboxMenu');
             menu.classList.toggle('hidden');
             menu.classList.toggle('flex');
         }
 
-        /* ============================================================
-           PLATFORM SELECTION
-           ============================================================ */
-
-        function toggleP(p) {
-
+        function toggleP(p) { 
             if (selectedPlatforms.includes(p)) {
-
-                selectedPlatforms =
-                    selectedPlatforms.filter(
-                        x => x !== p
-                    );
-
+                selectedPlatforms = selectedPlatforms.filter(x => x !== p); 
             } else {
-
-                selectedPlatforms.push(p);
+                selectedPlatforms.push(p); 
             }
 
-            document
-                .getElementById(`i-${p}`)
-                .classList.toggle('active');
+            document.getElementById(`i-${p}`).classList.toggle('active'); 
         }
 
-        /* ============================================================
-           DATE
-           ============================================================ */
-
         function parseReleaseDate(val) {
-
-            if (
-                val === undefined ||
-                val === null ||
-                val === 'null' ||
-                val === 'undefined' ||
-                val === ''
-            ) {
-                return null;
-            }
+            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return null;
 
             let num = Number(val);
 
-            if (isNaN(num) || num <= 0) {
-                return null;
-            }
+            if (isNaN(num) || num <= 0) return null;
 
-            if (num > 32503680000) {
-                num = Math.floor(num / 1000);
-            }
+            if (num > 32503680000) num = Math.floor(num / 1000);
 
             return num;
         }
 
-        /* ============================================================
-           FORM SUBMISSION
-           ============================================================ */
-
         async function submitForm() {
-
-            const submitBtn =
-                document.getElementById('submitBtn');
-
-            const tIn =
-                document.getElementById('titleInput');
-
-            const sIn =
-                document.getElementById('seriesInput');
-
-            if (!tIn.value.trim()) {
-                return;
-            }
+            const submitBtn = document.getElementById('submitBtn');
+            const tIn = document.getElementById('titleInput');
+            const sIn = document.getElementById('seriesInput');
+            
+            if (!tIn.value.trim()) return;
 
             submitBtn.disabled = true;
 
             try {
-
-                const cover =
-                    tIn.dataset.img || '';
-
-                const genre =
-                    tIn.dataset.genre || '';
-
-                const releaseDate =
-                    parseReleaseDate(
-                        tIn.dataset.release
-                    );
-
-                const series =
-                    sIn.value.trim() || null;
-
-                let defaultStatus =
-                    currentViewMode === 'wishlist'
-                        ? 'Wishlist'
-                        : 'Backlog';
+                const cover = tIn.dataset.img || '';
+                const genre = tIn.dataset.genre || '';
+                const releaseDate = parseReleaseDate(tIn.dataset.release);
+                const series = sIn.value.trim() || null;
+                let defaultStatus = currentViewMode === 'wishlist' ? 'Wishlist' : 'Backlog';
 
                 if (editingId) {
+                    const cur = allGames.find(g => g.id === editingId);
 
-                    const cur =
-                        allGames.find(
-                            g => g.id === editingId
-                        );
-
-                    const payload = {
-
-                        title:
-                            tIn.value.trim(),
-
-                        series,
-
-                        platform:
-                            selectedPlatforms.join(','),
-
-                        cover_url:
-                            cover || cur.cover_url,
-
-                        genre:
-                            genre || cur.genre,
-
-                        release_date:
-                            releaseDate !== null
-                                ? releaseDate
-                                : cur.release_date
+                    const payload = { 
+                        title: tIn.value.trim(), 
+                        series, 
+                        platform: selectedPlatforms.join(','), 
+                        cover_url: cover || cur.cover_url, 
+                        genre: genre || cur.genre,
+                        release_date: releaseDate !== null ? releaseDate : cur.release_date
                     };
-
-                    if (
-                        series &&
-                        series !== cur.series
-                    ) {
-
-                        const buddies =
-                            allGames.filter(
-                                g => g.series === series
-                            );
-
+                    
+                    if (series && series !== cur.series) { 
+                        const buddies = allGames.filter(g => g.series === series); 
                         if (buddies.length > 0) {
-
-                            payload.sort_order =
-                                Math.max(
-                                    ...buddies.map(
-                                        g => g.sort_order
-                                    )
-                                ) + 1;
+                            payload.sort_order = Math.max(...buddies.map(g => g.sort_order)) + 1; 
                         }
                     }
+                    
+                    const { error } = await supabaseClient
+                        .from('games')
+                        .update(payload)
+                        .eq('id', editingId);
 
-                    const { error } =
-                        await supabaseClient
-                            .from('games')
-                            .update(payload)
-                            .eq('id', editingId);
-
-                    if (error) {
-                        throw error;
-                    }
+                    if (error) throw error;
 
                 } else {
+                    let next = allGames.length > 0 
+                        ? Math.max(...allGames.map(g => g.sort_order)) + 100 
+                        : 100;
 
-                    let next =
-                        allGames.length > 0
-                            ? Math.max(
-                                ...allGames.map(
-                                    g => g.sort_order
-                                )
-                              ) + 100
-                            : 100;
-
-                    if (series) {
-
-                        const buddies =
-                            allGames.filter(
-                                g => g.series === series
-                            );
+                    if (series) { 
+                        const buddies = allGames.filter(g => g.series === series); 
 
                         if (buddies.length > 0) {
-
-                            next =
-                                Math.max(
-                                    ...buddies.map(
-                                        g => g.sort_order
-                                    )
-                                ) + 1;
+                            next = Math.max(...buddies.map(g => g.sort_order)) + 1; 
                         }
                     }
+                    
+                    const { error } = await supabaseClient
+                        .from('games')
+                        .insert([{ 
+                            title: tIn.value.trim(), 
+                            platform: selectedPlatforms.join(','), 
+                            series, 
+                            cover_url: cover, 
+                            genre: genre || 'Game', 
+                            release_date: releaseDate, 
+                            status: defaultStatus, 
+                            sort_order: next 
+                        }]);
 
-                    const { error } =
-                        await supabaseClient
-                            .from('games')
-                            .insert([{
-
-                                title:
-                                    tIn.value.trim(),
-
-                                platform:
-                                    selectedPlatforms.join(','),
-
-                                series,
-
-                                cover_url:
-                                    cover,
-
-                                genre:
-                                    genre || 'Game',
-
-                                release_date:
-                                    releaseDate,
-
-                                status:
-                                    defaultStatus,
-
-                                sort_order:
-                                    next
-                            }]);
-
-                    if (error) {
-                        throw error;
-                    }
+                    if (error) throw error;
                 }
 
-                resetForm();
-
+                resetForm(); 
                 await loadGames();
 
             } catch (err) {
-
-                console.error(
-                    "Save failed:",
-                    err
-                );
-
-                alert(
-                    `Error saving game: ${err.message || 'Check database columns'}`
-                );
-
+                console.error("Save failed:", err);
+                alert(`Error saving game: ${err.message || 'Check database columns'}`);
             } finally {
-
                 submitBtn.disabled = false;
             }
         }
 
-        /* ============================================================
-           RESET FORM
-           ============================================================ */
-
-        function resetForm() {
-
+        function resetForm() { 
             editingId = null;
 
-            const tIn =
-                document.getElementById('titleInput');
+            const tIn = document.getElementById('titleInput'); 
 
-            tIn.value = '';
+            tIn.value = ''; 
 
-            delete tIn.dataset.img;
-            delete tIn.dataset.genre;
-            delete tIn.dataset.release;
+            delete tIn.dataset.img; 
+            delete tIn.dataset.genre; 
+            delete tIn.dataset.release; 
 
-            document.getElementById('seriesInput').value = '';
-
-            document
-                .getElementById('searchResults')
-                .classList.add('hidden');
-
-            document
-                .getElementById('searchResults')
-                .innerHTML = '';
-
-            document
-                .getElementById('seriesResults')
-                .classList.add('hidden');
-
-            document
-                .getElementById('seriesResults')
-                .innerHTML = '';
+            document.getElementById('seriesInput').value = ''; 
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('seriesResults').classList.add('hidden');
+            document.getElementById('seriesResults').innerHTML = '';
 
             igdbSearchResults = [];
 
-            selectedPlatforms = [];
+            selectedPlatforms = []; 
 
-            document
-                .querySelectorAll('.plat-box')
-                .forEach(
-                    el => el.classList.remove('active')
-                );
+            document.querySelectorAll('.plat-box').forEach(el => el.classList.remove('active')); 
 
-            document.getElementById('submitBtn').innerText =
-                "Commit";
-
-            document.getElementById('formModeLabel').innerText =
-                "Search";
-
-            document
-                .getElementById('cancelEdit')
-                .classList.add('hidden');
-
-            document
-                .getElementById('deleteSelectedBtn')
-                .classList.add('hidden');
+            document.getElementById('submitBtn').innerText = "Commit"; 
+            document.getElementById('formModeLabel').innerText = "Search"; 
+            document.getElementById('cancelEdit').classList.add('hidden'); 
+            document.getElementById('deleteSelectedBtn').classList.add('hidden');
         }
 
-        /* ============================================================
-           RENDER
-           ============================================================ */
-
         function render() {
+            const fN = document.getElementById('filterNext').value.toLowerCase();
+            const fB = document.getElementById('filterBacklog').value.toLowerCase();
+            const fA = document.getElementById('filterAlt').value.toLowerCase();
+            const fWR = document.getElementById('filterWishlistReleased').value.toLowerCase();
+            const fWU = document.getElementById('filterWishlistUpcoming').value.toLowerCase();
 
-            const fN =
-                document
-                    .getElementById('filterNext')
-                    .value
-                    .toLowerCase();
-
-            const fB =
-                document
-                    .getElementById('filterBacklog')
-                    .value
-                    .toLowerCase();
-
-            const fA =
-                document
-                    .getElementById('filterAlt')
-                    .value
-                    .toLowerCase();
-
-            const fWR =
-                document
-                    .getElementById('filterWishlistReleased')
-                    .value
-                    .toLowerCase();
-
-            const fWU =
-                document
-                    .getElementById('filterWishlistUpcoming')
-                    .value
-                    .toLowerCase();
-
-            const cols = {
-
-                playing:
-                    document.getElementById('col-playing'),
-
-                next:
-                    document.getElementById('col-next'),
-
-                backlog:
-                    document.getElementById('col-backlog'),
-
-                alt:
-                    document.getElementById('col-alt'),
-
-                wishlistReleased:
-                    document.getElementById(
-                        'col-wishlist-released'
-                    ),
-
-                wishlistUpcoming:
-                    document.getElementById(
-                        'col-wishlist-upcoming'
-                    )
+            const cols = { 
+                playing: document.getElementById('col-playing'), 
+                next: document.getElementById('col-next'), 
+                backlog: document.getElementById('col-backlog'), 
+                alt: document.getElementById('col-alt'), 
+                wishlistReleased: document.getElementById('col-wishlist-released'),
+                wishlistUpcoming: document.getElementById('col-wishlist-upcoming')
             };
 
-            Object.values(cols).forEach(c => {
-
-                if (c) {
-                    c.innerHTML = '';
-                }
+            Object.values(cols).forEach(c => { 
+                if(c) c.innerHTML = ''; 
             });
-
-            const nextPri = {
-                'Up Next': 0,
-                'Started': 1
-            };
-
-            const nowSec =
-                Math.floor(Date.now() / 1000);
+            
+            const nextPri = { 'Up Next': 0, 'Started': 1 };
+            const nowSec = Math.floor(Date.now() / 1000);
 
             if (currentViewMode === 'queue') {
-
-                const activeGames =
-                    allGames.filter(
-                        g => g.status === 'Playing'
-                    );
+                const activeGames = allGames.filter(g => g.status === 'Playing');
 
                 if (activeGames.length > 0) {
-
-                    activeGames.forEach(g =>
-                        cols.playing.appendChild(
-                            createActiveCard(g)
-                        )
-                    );
-
+                    activeGames.forEach(g => cols.playing.appendChild(createActiveCard(g)));
                 } else {
-
-                    cols.playing.innerHTML =
-                        `<p class="text-slate-500 text-sm font-semibold italic">No active session</p>`;
+                    cols.playing.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">No active session</p>`;
                 }
+                
+                allGames
+                    .filter(g => ['Up Next', 'Started'].includes(g.status))
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fN) || 
+                        (g.series && g.series.toLowerCase().includes(fN))
+                    )
+                    .sort((a,b) => 
+                        nextPri[a.status] - nextPri[b.status] || 
+                        a.sort_order - b.sort_order
+                    )
+                    .forEach(g => cols.next.appendChild(createCard(g)));
 
                 allGames
-
-                    .filter(g =>
-                        ['Up Next', 'Started']
-                            .includes(g.status)
+                    .filter(g => ['Backlog', 'Game Pass', 'PS Plus', 'Switch Online', 'Downloaded'].includes(g.status))
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fB) || 
+                        (g.series && g.series.toLowerCase().includes(fB))
                     )
-
-                    .filter(g =>
-                        g.title
-                            .toLowerCase()
-                            .includes(fN) ||
-                        (
-                            g.series &&
-                            g.series
-                                .toLowerCase()
-                                .includes(fN)
-                        )
-                    )
-
-                    .sort((a, b) =>
-                        nextPri[a.status] -
-                        nextPri[b.status] ||
-                        a.sort_order -
-                        b.sort_order
-                    )
-
-                    .forEach(g =>
-                        cols.next.appendChild(
-                            createCard(g)
-                        )
-                    );
-
-                allGames
-
-                    .filter(g =>
-                        [
-                            'Backlog',
-                            'Game Pass',
-                            'PS Plus',
-                            'Switch Online',
-                            'Downloaded'
-                        ].includes(g.status)
-                    )
-
-                    .filter(g =>
-                        g.title
-                            .toLowerCase()
-                            .includes(fB) ||
-                        (
-                            g.series &&
-                            g.series
-                                .toLowerCase()
-                                .includes(fB)
-                        )
-                    )
-
-                    .forEach(g =>
-                        cols.backlog.appendChild(
-                            createCard(g)
-                        )
-                    );
+                    .forEach(g => cols.backlog.appendChild(createCard(g)));
 
             } else if (currentViewMode === 'archive') {
-
                 allGames
-
-                    .filter(g =>
-                        g.status === 'Finished'
+                    .filter(g => g.status === 'Finished')
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fA) || 
+                        (g.series && g.series.toLowerCase().includes(fA))
                     )
-
-                    .filter(g =>
-                        g.title
-                            .toLowerCase()
-                            .includes(fA) ||
-                        (
-                            g.series &&
-                            g.series
-                                .toLowerCase()
-                                .includes(fA)
-                        )
-                    )
-
-                    .forEach(g =>
-                        cols.alt.appendChild(
-                            createCard(g)
-                        )
-                    );
+                    .forEach(g => cols.alt.appendChild(createCard(g)));
 
             } else if (currentViewMode === 'wishlist') {
+                const wishlistGames = allGames.filter(g => g.status === 'Wishlist');
 
-                const wishlistGames =
-                    allGames.filter(
-                        g => g.status === 'Wishlist'
-                    );
+                const sortByReleaseDate = (a, b) => {
+                    const dA = parseReleaseDate(a.release_date);
+                    const dB = parseReleaseDate(b.release_date);
 
-                const sortByReleaseDate =
-                    (a, b) => {
+                    if (dA === null && dB === null) return 0;
+                    if (dA === null) return 1;
+                    if (dB === null) return -1;
 
-                        const dA =
-                            parseReleaseDate(
-                                a.release_date
-                            );
-
-                        const dB =
-                            parseReleaseDate(
-                                b.release_date
-                            );
-
-                        if (
-                            dA === null &&
-                            dB === null
-                        ) {
-                            return 0;
-                        }
-
-                        if (dA === null) {
-                            return 1;
-                        }
-
-                        if (dB === null) {
-                            return -1;
-                        }
-
-                        return dA - dB;
-                    };
+                    return dA - dB;
+                };
 
                 wishlistGames
-
                     .filter(g => {
-
-                        const rDate =
-                            parseReleaseDate(
-                                g.release_date
-                            );
-
-                        return (
-                            rDate !== null &&
-                            rDate <= nowSec
-                        );
+                        const rDate = parseReleaseDate(g.release_date);
+                        return rDate !== null && rDate <= nowSec;
                     })
-
-                    .filter(g =>
-                        g.title
-                            .toLowerCase()
-                            .includes(fWR) ||
-                        (
-                            g.series &&
-                            g.series
-                                .toLowerCase()
-                                .includes(fWR)
-                        )
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fWR) || 
+                        (g.series && g.series.toLowerCase().includes(fWR))
                     )
-
                     .sort(sortByReleaseDate)
-
-                    .forEach(g =>
-                        cols.wishlistReleased
-                            .appendChild(
-                                createCard(g)
-                            )
-                    );
+                    .forEach(g => cols.wishlistReleased.appendChild(createCard(g)));
 
                 wishlistGames
-
                     .filter(g => {
-
-                        const rDate =
-                            parseReleaseDate(
-                                g.release_date
-                            );
-
-                        return (
-                            rDate === null ||
-                            rDate > nowSec
-                        );
+                        const rDate = parseReleaseDate(g.release_date);
+                        return rDate === null || rDate > nowSec;
                     })
-
-                    .filter(g =>
-                        g.title
-                            .toLowerCase()
-                            .includes(fWU) ||
-                        (
-                            g.series &&
-                            g.series
-                                .toLowerCase()
-                                .includes(fWU)
-                        )
+                    .filter(g => 
+                        g.title.toLowerCase().includes(fWU) || 
+                        (g.series && g.series.toLowerCase().includes(fWU))
                     )
-
                     .sort(sortByReleaseDate)
-
-                    .forEach(g =>
-                        cols.wishlistUpcoming
-                            .appendChild(
-                                createCard(g)
-                            )
-                    );
+                    .forEach(g => cols.wishlistUpcoming.appendChild(createCard(g)));
             }
         }
 
-        /* ============================================================
-           ACTIVE SESSION CARD
-           ============================================================ */
-
+        // Horizontal Card Renderer for Active Session
         function createActiveCard(game) {
+            const hasSeries = Boolean(game.series && game.series.trim() !== '');
+            const rDate = parseReleaseDate(game.release_date);
+            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : '';
 
-            const hasSeries =
-                Boolean(
-                    game.series &&
-                    game.series.trim() !== ''
-                );
+            const sortedPlatforms = sortPlatforms(
+                (game.platform || '').split(',')
+            );
 
-            const rDate =
-                parseReleaseDate(
-                    game.release_date
-                );
+            const platB = sortedPlatforms.map(p => { 
+                const i = PLAT_MAP[p]; 
+                return i 
+                    ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>` 
+                    : ''; 
+            }).join(' ');
 
-            const releaseYear =
-                rDate
-                    ? new Date(
-                        rDate * 1000
-                      ).getFullYear()
-                    : '';
+            const div = document.createElement('div');
 
-            const sortedPlatforms =
-                sortPlatforms(
-                    (game.platform || '')
-                        .split(',')
-                );
-
-            const platB =
-                sortedPlatforms
-                    .map(p => {
-
-                        const i =
-                            PLAT_MAP[p];
-
-                        return i
-                            ? `<span class="plat-badge shadow-sm" style="background:${i.c}">${i.n}</span>`
-                            : '';
-
-                    })
-                    .join(' ');
-
-            const div =
-                document.createElement('div');
-
-            div.className =
-                "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
-
+            div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
+            
             div.innerHTML = `
-
-                <img
-                    src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
-                    alt="${game.title}"
-                    class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900"
-                />
+                <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900" />
 
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
-
                     <div class="flex items-center justify-between">
-
-                        ${
-                            hasSeries
-                                ? `<span class="text-[9px] font-bold text-orange-400 bg-orange-950/40 px-2 py-0.5 rounded border border-orange-800/40 truncate max-w-[140px]">⚡ ${game.series}</span>`
-                                : `<span class="text-[9px] font-bold text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/40 truncate">🎮 STANDALONE</span>`
+                        ${hasSeries 
+                            ? `<span class="text-[9px] font-bold text-orange-400 bg-orange-950/40 px-2 py-0.5 rounded border border-orange-800/40 truncate max-w-[140px]">⚡ ${game.series}</span>` 
+                            : `<span class="text-[9px] font-bold text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800/40 truncate">🎮 STANDALONE</span>`
                         }
-
+                        
                         <div class="relative group/menu">
-
-                            <button
-                                class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-amber-400 transition-colors"
-                                title="Change Status"
-                            >✏️</button>
+                            <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-amber-400 transition-colors" title="Change Status">
+                                ✏️
+                            </button>
 
                             <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-indigo-900/80 p-1.5 rounded-lg shadow-xl z-50">
-
-                                <button
-                                    onclick="updateStatus(${game.id}, 'Finished')"
-                                    class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors"
-                                    title="Mark Finished"
-                                >🏆</button>
-
-                                <button
-                                    onclick="updateStatus(${game.id}, 'Up Next')"
-                                    class="p-1.5 rounded hover:bg-sky-500/20 text-sky-400 transition-colors"
-                                    title="Move to Next Focus"
-                                >🎯</button>
-
-                                <button
-                                    onclick="updateStatus(${game.id}, 'Backlog')"
-                                    class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors"
-                                    title="Move to Backlog"
-                                >📦</button>
-
+                                <button onclick="updateStatus(${game.id}, 'Finished')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Finished (🏆)">🏆</button>
+                                <button onclick="updateStatus(${game.id}, 'Up Next')" class="p-1.5 rounded hover:bg-sky-500/20 text-sky-400 transition-colors" title="Move to Next Focus (🎯)">🎯</button>
+                                <button onclick="updateStatus(${game.id}, 'Backlog')" class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors" title="Move to Backlog (📦)">📦</button>
                             </div>
                         </div>
                     </div>
 
-                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">
-                        ${game.title}
-                    </h4>
+                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${game.title}</h4>
 
-                    <span class="text-xs text-slate-400">
-                        ${releaseYear}
-                    </span>
+                    <span class="text-xs text-slate-400">${releaseYear}</span>
 
                     <div class="flex flex-wrap gap-1 mt-0.5">
                         ${platB}
                     </div>
-
                 </div>
             `;
 
             return div;
         }
 
-        /* ============================================================
-           STANDARD GAME CARD
-           ============================================================ */
-
+        // Vertical Standard Card Renderer
         function createCard(game) {
+            const hasSeries = Boolean(game.series && game.series.trim() !== '');
+            const nowSec = Math.floor(Date.now() / 1000);
+            const rDate = parseReleaseDate(game.release_date);
+            const isUnreleased = game.status === 'Wishlist' && (!rDate || rDate > nowSec);
+            const releaseYear = rDate ? new Date(rDate * 1000).getFullYear() : 'TBA';
 
-            const hasSeries =
-                Boolean(
-                    game.series &&
-                    game.series.trim() !== ''
-                );
+            /*
+             * ALL owned platforms are retained.
+             * They are simply sorted according to the user's preferred
+             * display priority.
+             */
+            const sortedPlatforms = sortPlatforms(
+                (game.platform || '').split(',')
+            );
 
-            const nowSec =
-                Math.floor(Date.now() / 1000);
+            const platB = sortedPlatforms.map(p => { 
+                const i = PLAT_MAP[p]; 
 
-            const rDate =
-                parseReleaseDate(
-                    game.release_date
-                );
+                return i 
+                    ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>` 
+                    : ''; 
+            }).join(' ');
 
-            const isUnreleased =
-                game.status === 'Wishlist' &&
-                (!rDate || rDate > nowSec);
+            const genreIcons = renderGenreIcons(game.genre);
 
-            const releaseYear =
-                rDate
-                    ? new Date(
-                        rDate * 1000
-                      ).getFullYear()
-                    : 'TBA';
+            const div = document.createElement('div');
 
-            const sortedPlatforms =
-                sortPlatforms(
-                    (game.platform || '')
-                        .split(',')
-                );
+            div.dataset.id = game.id; 
+            div.dataset.series = game.series || '';
 
-            const platB =
-                sortedPlatforms
-                    .map(p => {
-
-                        const i =
-                            PLAT_MAP[p];
-
-                        return i
-                            ? `
-                                <span
-                                    class="plat-badge shadow-sm"
-                                    style="background:${i.c}"
-                                    title="${i.n}"
-                                >${i.n}</span>
-                              `
-                            : '';
-
-                    })
-                    .join(' ');
-
-            const genreIcons =
-                renderGenreIcons(
-                    game.genre
-                );
-
-            const div =
-                document.createElement('div');
-
-            div.dataset.id =
-                game.id;
-
-            div.dataset.series =
-                game.series || '';
-
-            div.className =
-                `game-card flex flex-col justify-between w-full ${
-                    isUnreleased
-                        ? 'unreleased-card'
-                        : ''
-                }`;
-
+            div.className = `game-card flex flex-col justify-between w-full ${isUnreleased ? 'unreleased-card' : ''}`;
+            
             div.innerHTML = `
-
                 <div>
-
-                    <div class="h-1.5 w-full ${
-                        hasSeries
-                            ? 'bg-amber-500'
-                            : 'bg-cyan-500'
-                    }"></div>
+                    <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
 
                     <div class="p-2.5 pb-1 flex flex-col items-center">
-
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
+                            <img src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}" alt="${game.title}">
 
-                            <img
-                                src="${
-                                    game.cover_url ||
-                                    'https://via.placeholder.com/150x225?text=No+Cover'
-                                }"
-                                alt="${game.title}"
-                            >
-
-                            ${
-                                isUnreleased
-                                    ? `
-                                        <span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">
-                                            UPCOMING
-                                        </span>
-                                      `
-                                    : ''
+                            ${isUnreleased 
+                                ? `<span class="absolute top-2 right-2 bg-purple-900/90 text-purple-200 border border-purple-400/50 text-[9px] font-black px-1.5 py-0.5 rounded shadow">UPCOMING</span>` 
+                                : ''
                             }
-
                         </div>
 
                         <div class="mt-2 mb-1 w-full text-left">
-
-                            ${
-                                hasSeries
-
-                                    ? `
-                                        <span class="inline-block text-[9px] bg-amber-600/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">
-                                            ⚡ ${game.series}
-                                        </span>
-                                      `
-
-                                    : `
-                                        <span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">
-                                            🎮 Standalone
-                                        </span>
-                                      `
+                            ${hasSeries 
+                                ? `<span class="inline-block text-[9px] bg-amber-600/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${game.series}</span>` 
+                                : `<span class="inline-block text-[9px] bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎮 Standalone</span>`
                             }
-
                         </div>
 
                         <div class="flex justify-between items-start gap-1.5 w-full">
+                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${game.title}</h3>
 
-                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">
-                                ${game.title}
-                            </h3>
-
-                            <button
-                                onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})'
-                                title="Edit Game"
-                                class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition"
-                            >✏️</button>
-
+                            <button onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})' title="Edit Game" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
                         </div>
 
                         <!-- Release Year -->
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">
-                            ${releaseYear}
-                        </p>
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}</p>
 
                         <!-- Genre Icons -->
-                        <div
-                            class="genre-icons w-full mt-1.5"
-                            aria-label="Genres"
-                        >
-                            ${
-                                genreIcons ||
-                                `<span class="text-slate-600 text-xs">•</span>`
-                            }
+                        <div class="genre-icons w-full mt-1.5" aria-label="Genres">
+                            ${genreIcons || `<span class="text-slate-600 text-xs">•</span>`}
                         </div>
-
                     </div>
                 </div>
 
                 <!-- Bottom metadata -->
                 <div class="px-2.5 pb-2 mt-1 flex items-center justify-between gap-2 text-xs border-t border-slate-800/80 pt-1.5">
 
-                    <!-- Owned Platforms -->
+                    <!-- All Owned Platforms - sorted by priority -->
                     <div class="platform-display flex-1 min-w-0">
-
-                        ${
-                            platB ||
-                            `<span class="text-slate-600 text-[9px]">No platform</span>`
-                        }
-
+                        ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
                     </div>
 
                     <!-- Status -->
-                    <select
-                        onchange="updateStatus(${game.id}, this.value)"
-                        class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0"
-                    >
-
-                        <option value="Backlog" ${
-                            game.status === 'Backlog'
-                                ? 'selected'
-                                : ''
-                        }>Backlog</option>
-
-                        <option value="Wishlist" ${
-                            game.status === 'Wishlist'
-                                ? 'selected'
-                                : ''
-                        }>Wishlist</option>
-
-                        <option value="Game Pass" ${
-                            game.status === 'Game Pass'
-                                ? 'selected'
-                                : ''
-                        }>Game Pass</option>
-
-                        <option value="PS Plus" ${
-                            game.status === 'PS Plus'
-                                ? 'selected'
-                                : ''
-                        }>PS Plus</option>
-
-                        <option value="Switch Online" ${
-                            game.status === 'Switch Online'
-                                ? 'selected'
-                                : ''
-                        }>Switch Online</option>
-
-                        <option value="Downloaded" ${
-                            game.status === 'Downloaded'
-                                ? 'selected'
-                                : ''
-                        }>Downloaded</option>
-
-                        <option value="Playing" ${
-                            game.status === 'Playing'
-                                ? 'selected'
-                                : ''
-                        }>Playing</option>
-
-                        <option value="Up Next" ${
-                            game.status === 'Up Next'
-                                ? 'selected'
-                                : ''
-                        }>Up Next</option>
-
-                        <option value="Started" ${
-                            game.status === 'Started'
-                                ? 'selected'
-                                : ''
-                        }>Started</option>
-
-                        <option value="Finished" ${
-                            game.status === 'Finished'
-                                ? 'selected'
-                                : ''
-                        }>Finished 🏆</option>
-
+                    <select onchange="updateStatus(${game.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0">
+                        <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                        <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                        <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                        <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                        <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                        <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                        <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                        <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                        <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                        <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
                     </select>
                 </div>
             `;
@@ -2408,34 +917,17 @@
             return div;
         }
 
-        /* ============================================================
-           VIEW SWITCHING
-           ============================================================ */
-
-        function toggleView(v) {
-
+        function toggleView(v) { 
             currentViewMode = v;
 
-            const qv =
-                document.getElementById('queueView');
+            const qv = document.getElementById('queueView');
+            const dt = document.getElementById('dashboardTop');
+            const as = document.getElementById('activeSessionBox');
+            const ia = document.getElementById('inputArea');
+            const av = document.getElementById('altView');
+            const wv = document.getElementById('wishlistView');
 
-            const dt =
-                document.getElementById('dashboardTop');
-
-            const as =
-                document.getElementById('activeSessionBox');
-
-            const ia =
-                document.getElementById('inputArea');
-
-            const av =
-                document.getElementById('altView');
-
-            const wv =
-                document.getElementById('wishlistView');
-
-            if (v === 'queue') {
-
+            if(v === 'queue') {
                 dt.style.display = 'grid';
                 qv.style.display = 'block';
                 as.style.display = 'flex';
@@ -2446,8 +938,7 @@
                 av.style.display = 'none';
                 wv.style.display = 'none';
 
-            } else if (v === 'wishlist') {
-
+            } else if(v === 'wishlist') {
                 dt.style.display = 'grid';
                 as.style.display = 'none';
 
@@ -2459,890 +950,408 @@
                 wv.style.display = 'block';
 
             } else {
-
                 dt.style.display = 'none';
                 qv.style.display = 'none';
                 wv.style.display = 'none';
                 av.style.display = 'block';
 
-                document.getElementById(
-                    'altTitle'
-                ).innerText = 'Archive';
-
-                document.getElementById(
-                    'altTitle'
-                ).style.color = '#34d399';
+                document.getElementById('altTitle').innerText = 'Archive';
+                document.getElementById('altTitle').style.color = '#34d399';
             }
 
             render();
         }
 
-        /* ============================================================
-           EDIT
-           ============================================================ */
+        function editL(g) { 
+            editingId = g.id; 
 
-        function editL(g) {
-
-            editingId = g.id;
-
-            const dt =
-                document.getElementById(
-                    'dashboardTop'
-                );
-
-            const as =
-                document.getElementById(
-                    'activeSessionBox'
-                );
-
-            const ia =
-                document.getElementById(
-                    'inputArea'
-                );
+            const dt = document.getElementById('dashboardTop');
+            const as = document.getElementById('activeSessionBox');
+            const ia = document.getElementById('inputArea');
 
             dt.style.display = 'grid';
-
+            
             if (currentViewMode !== 'queue') {
-
                 as.style.display = 'none';
-
-                ia.classList.remove(
-                    'lg:col-span-7'
-                );
-
-                ia.classList.add(
-                    'lg:col-span-12'
-                );
+                ia.classList.remove('lg:col-span-7');
+                ia.classList.add('lg:col-span-12');
             }
 
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            window.scrollTo({top:0, behavior:'smooth'}); 
+            
+            const tIn = document.getElementById('titleInput');
 
-            const tIn =
-                document.getElementById(
-                    'titleInput'
-                );
+            tIn.value = g.title; 
 
-            tIn.value = g.title;
-
-            if (g.cover_url) {
-                tIn.dataset.img =
-                    g.cover_url;
+            if (g.cover_url) tIn.dataset.img = g.cover_url;
+            if (g.genre) tIn.dataset.genre = g.genre;
+            if (g.release_date !== null && g.release_date !== undefined) {
+                tIn.dataset.release = g.release_date;
             }
 
-            if (g.genre) {
-                tIn.dataset.genre =
-                    g.genre;
-            }
+            document.getElementById('formModeLabel').innerText = "Updating: " + g.title; 
+            document.getElementById('cancelEdit').classList.remove('hidden'); 
+            document.getElementById('deleteSelectedBtn').classList.remove('hidden');
+            
+            selectedPlatforms = (g.platform || '')
+                .split(',')
+                .filter(x => x.trim())
+                .map(x => x.trim()); 
 
-            if (
-                g.release_date !== null &&
-                g.release_date !== undefined
-            ) {
-                tIn.dataset.release =
-                    g.release_date;
-            }
-
-            document.getElementById(
-                'formModeLabel'
-            ).innerText =
-                "Updating: " + g.title;
-
-            document.getElementById(
-                'cancelEdit'
-            ).classList.remove('hidden');
-
-            document.getElementById(
-                'deleteSelectedBtn'
-            ).classList.remove('hidden');
-
-            selectedPlatforms =
-                (g.platform || '')
-                    .split(',')
-                    .filter(x => x.trim())
-                    .map(x => x.trim());
-
-            document
-                .querySelectorAll('.plat-box')
-                .forEach(el => {
-
-                    el.classList.toggle(
-                        'active',
-                        selectedPlatforms.includes(
-                            el.id.replace('i-', '')
-                        )
-                    );
-                });
-
-            document.getElementById(
-                'seriesInput'
-            ).value =
-                g.series || '';
+            document.querySelectorAll('.plat-box').forEach(el => { 
+                el.classList.toggle(
+                    'active', 
+                    selectedPlatforms.includes(el.id.replace('i-', ''))
+                ); 
+            }); 
+            
+            document.getElementById('seriesInput').value = g.series || ''; 
         }
 
-        function exitEditMode() {
-
-            resetForm();
-
-            toggleView(
-                currentViewMode
-            );
+        function exitEditMode() { 
+            resetForm(); 
+            toggleView(currentViewMode); 
         }
-
-        /* ============================================================
-           DELETE
-           ============================================================ */
 
         async function deleteSelectedFromForm() {
+            if (!editingId) return;
 
-            if (!editingId) {
-                return;
-            }
-
-            if (
-                confirm(
-                    "Are you sure you want to delete this game?"
-                )
-            ) {
-
+            if (confirm("Are you sure you want to delete this game?")) {
                 await supabaseClient
                     .from('games')
                     .delete()
                     .eq('id', editingId);
 
                 resetForm();
-
                 loadGames();
             }
         }
-
-        /* ============================================================
-           REPAIR SORT ORDER
-           ============================================================ */
-
-        async function repairSortOrder() {
-
-            const b =
-                document.getElementById(
-                    'repairBtn'
-                );
-
+        
+        async function repairSortOrder() { 
+            const b = document.getElementById('repairBtn'); 
             b.innerText = "⏳";
 
             try {
-
-                let list =
-                    [...allGames]
-                        .sort(
-                            (a, b) =>
-                                a.sort_order -
-                                b.sort_order
-                        );
-
-                let finalOrder = [];
-
-                let processedSeries =
-                    new Set();
+                let list = [...allGames].sort((a,b) => a.sort_order - b.sort_order);
+                let finalOrder = []; 
+                let processedSeries = new Set();
 
                 for (let g of list) {
-
-                    if (
-                        processedSeries.has(
-                            g.series
-                        )
-                    ) {
-                        continue;
-                    }
+                    if (processedSeries.has(g.series)) continue;
 
                     if (g.series) {
+                        let buddies = list.filter(item => item.series === g.series);
+                        finalOrder.push(...buddies); 
+                        processedSeries.add(g.series);
 
-                        let buddies =
-                            list.filter(
-                                item =>
-                                    item.series ===
-                                    g.series
-                            );
-
-                        finalOrder.push(
-                            ...buddies
-                        );
-
-                        processedSeries.add(
-                            g.series
-                        );
-
-                    } else {
-
-                        finalOrder.push(g);
+                    } else { 
+                        finalOrder.push(g); 
                     }
                 }
 
-                for (
-                    let i = 0;
-                    i < finalOrder.length;
-                    i++
-                ) {
-
+                for (let i = 0; i < finalOrder.length; i++) { 
                     await supabaseClient
                         .from('games')
-                        .update({
-                            sort_order:
-                                (i + 1) * 100
-                        })
-                        .eq(
-                            'id',
-                            finalOrder[i].id
-                        );
+                        .update({ sort_order: (i + 1) * 100 })
+                        .eq('id', finalOrder[i].id); 
                 }
 
-                alert(
-                    "Vault rebuild complete!"
-                );
+                alert("Vault rebuild complete!");
 
             } catch (err) {
-
-                alert(
-                    `Rebuild error: ${err.message}`
-                );
+                alert(`Rebuild error: ${err.message}`);
 
             } finally {
-
-                b.innerText = "🔧";
-
-                loadGames();
+                b.innerText = "🔧"; 
+                loadGames(); 
             }
         }
 
-        /* ============================================================
-           STATUS
-           ============================================================ */
-
-        async function updateStatus(id, s) {
-
+        async function updateStatus(id, s) { 
             await supabaseClient
                 .from('games')
-                .update({
-                    status: s
-                })
-                .eq('id', id);
+                .update({ status:s })
+                .eq('id', id); 
 
-            loadGames();
+            loadGames(); 
         }
+        
+        function initSortable() { 
+            ['col-next', 'col-backlog'].forEach(id => { 
+                const el = document.getElementById(id);
 
-        /* ============================================================
-           SORTABLE
-           ============================================================ */
+                if (!el) return;
 
-        function initSortable() {
+                new Sortable(el, { 
+                    group: 'games', 
+                    animation: 250, 
 
-            [
-                'col-next',
-                'col-backlog'
-            ].forEach(id => {
+                    onEnd: async (evt) => { 
+                        let targetS = 'Backlog'; 
 
-                const el =
-                    document.getElementById(id);
-
-                if (!el) {
-                    return;
-                }
-
-                new Sortable(el, {
-
-                    group: 'games',
-
-                    animation: 250,
-
-                    onEnd: async (evt) => {
-
-                        let targetS =
-                            'Backlog';
-
-                        if (
-                            evt.to.id ===
-                            'col-next'
-                        ) {
-                            targetS =
-                                'Up Next';
+                        if(evt.to.id === 'col-next') {
+                            targetS = 'Up Next'; 
                         }
 
-                        const items =
-                            Array.from(
-                                evt.to.children
-                            );
+                        const items = Array.from(evt.to.children); 
 
-                        for (
-                            let i = 0;
-                            i < items.length;
-                            i++
-                        ) {
-
+                        for(let i = 0; i < items.length; i++) {
                             await supabaseClient
                                 .from('games')
-                                .update({
-
-                                    sort_order:
-                                        (i + 1) * 100,
-
-                                    status:
-                                        targetS
-
+                                .update({ 
+                                    sort_order: (i + 1) * 100, 
+                                    status: targetS 
                                 })
-                                .eq(
-                                    'id',
-                                    items[i].dataset.id
-                                );
+                                .eq('id', items[i].dataset.id); 
                         }
 
-                        loadGames();
-                    }
-                });
-            });
+                        loadGames(); 
+                    } 
+                }); 
+            }); 
         }
 
-        /* ============================================================
-           SERIES DROPDOWN
-           ============================================================ */
-
         function filterSeriesDropdown(val) {
+            const sr = document.getElementById('seriesResults');
 
-            const sr =
-                document.getElementById(
-                    'seriesResults'
-                );
+            const existingSeries = Array.from(
+                new Set(
+                    allGames
+                        .map(g => g.series)
+                        .filter(s => s && s.trim() !== '')
+                )
+            );
 
-            const existingSeries =
-                Array.from(
-                    new Set(
-                        allGames
-                            .map(g => g.series)
-                            .filter(
-                                s =>
-                                    s &&
-                                    s.trim() !== ''
-                            )
-                    )
-                );
+            const filtered = existingSeries.filter(
+                s => s.toLowerCase().includes(val.toLowerCase().trim())
+            );
 
-            const filtered =
-                existingSeries.filter(
-                    s =>
-                        s
-                            .toLowerCase()
-                            .includes(
-                                val
-                                    .toLowerCase()
-                                    .trim()
-                            )
-                );
-
-            if (filtered.length === 0) {
-
-                sr.classList.add('hidden');
-
-                return;
+            if (filtered.length === 0) { 
+                sr.classList.add('hidden'); 
+                return; 
             }
 
-            sr.innerHTML =
-                filtered.map(s => {
+            sr.innerHTML = filtered.map(s => 
+                `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`
+            ).join('');
 
-                    const safe =
-                        s.replace(
-                            /'/g,
-                            "\\'"
-                        );
-
-                    return `
-                        <div
-                            onclick="selectSeries('${safe}')"
-                            class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors"
-                        >
-                            ${s}
-                        </div>
-                    `;
-                }).join('');
-
-            sr.classList.remove(
-                'hidden'
-            );
+            sr.classList.remove('hidden');
         }
 
         function selectSeries(name) {
-
-            document.getElementById(
-                'seriesInput'
-            ).value = name;
-
-            document.getElementById(
-                'seriesResults'
-            ).classList.add('hidden');
+            document.getElementById('seriesInput').value = name;
+            document.getElementById('seriesResults').classList.add('hidden');
         }
 
-        /* ============================================================
-           GLOBAL CLICK HANDLER
-           ============================================================ */
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { 
+                document.getElementById('seriesResults').classList.add('hidden'); 
+            }
 
-        document.addEventListener(
-            'click',
-            (e) => {
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults')) { 
+                document.getElementById('searchResults').classList.add('hidden'); 
+            }
 
-                if (
-                    !e.target.closest(
-                        '#seriesInput'
-                    ) &&
-                    !e.target.closest(
-                        '#seriesResults'
-                    )
-                ) {
+            if (!e.target.closest('#toolboxContainer')) {
+                const menu = document.getElementById('toolboxMenu');
 
-                    document.getElementById(
-                        'seriesResults'
-                    ).classList.add(
-                        'hidden'
-                    );
-                }
-
-                if (
-                    !e.target.closest(
-                        '#titleInput'
-                    ) &&
-                    !e.target.closest(
-                        '#searchResults'
-                    )
-                ) {
-
-                    document.getElementById(
-                        'searchResults'
-                    ).classList.add(
-                        'hidden'
-                    );
-                }
-
-                if (
-                    !e.target.closest(
-                        '#toolboxContainer'
-                    )
-                ) {
-
-                    const menu =
-                        document.getElementById(
-                            'toolboxMenu'
-                        );
-
-                    if (menu) {
-
-                        menu.classList.add(
-                            'hidden'
-                        );
-
-                        menu.classList.remove(
-                            'flex'
-                        );
-                    }
+                if (menu) { 
+                    menu.classList.add('hidden'); 
+                    menu.classList.remove('flex'); 
                 }
             }
-        );
+        });
 
         /* ============================================================
-           IGDB SEARCH
+           IGDB GAME SEARCH
+
+           Captures ALL genres returned by IGDB.
+
+           The genres are sorted according to our fixed priority before
+           being stored.
+
+           Search results are cached so selectGame() doesn't need to
+           pass large strings through an inline onclick attribute.
            ============================================================ */
 
-        async function searchGames(q) {
+        async function searchGames(q) { 
+            const r = document.getElementById('searchResults'); 
+            const trimmedQuery = q ? q.trim() : '';
 
-            const r =
-                document.getElementById(
-                    'searchResults'
-                );
-
-            const trimmedQuery =
-                q ? q.trim() : '';
-
-            if (
-                trimmedQuery.length < 2
-            ) {
-
-                r.classList.add(
-                    'hidden'
-                );
-
-                r.innerHTML = '';
-
+            if (trimmedQuery.length < 2) { 
+                r.classList.add('hidden'); 
+                r.innerHTML = ''; 
                 igdbSearchResults = [];
-
-                return;
-            }
+                return; 
+            } 
 
             try {
+                const response = await fetch(`${SB_URL}/functions/v1/igdb-search`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'apikey': SB_KEY 
+                    },
+                    body: JSON.stringify({ query: trimmedQuery })
+                });
 
-                const response =
-                    await fetch(
-                        `${SB_URL}/functions/v1/igdb-search`,
-                        {
-                            method: 'POST',
+                const results = await response.json();
 
-                            headers: {
-                                'Content-Type':
-                                    'application/json',
-
-                                'apikey':
-                                    SB_KEY
-                            },
-
-                            body:
-                                JSON.stringify({
-                                    query:
-                                        trimmedQuery
-                                })
-                        }
-                    );
-
-                const results =
-                    await response.json();
-
-                if (
-                    !results ||
-                    results.length === 0
-                ) {
-
+                if (!results || results.length === 0) { 
                     igdbSearchResults = [];
 
-                    r.innerHTML =
-                        `<div class="p-4 text-sm text-slate-400">No results found.</div>`;
+                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; 
+                    r.classList.remove('hidden'); 
 
-                    r.classList.remove(
-                        'hidden'
-                    );
-
-                    return;
+                    return; 
                 }
 
                 /*
-                 * Retain ALL IGDB genres.
+                 * Build a clean cache of the IGDB results.
+                 * Every genre is retained.
                  */
-                igdbSearchResults =
-                    results.map(g => {
+                igdbSearchResults = results.map(g => {
+                    const genres = (g.genres && g.genres.length)
+                        ? g.genres
+                            .map(x => x.name)
+                            .filter(Boolean)
+                        : [];
 
-                        const genres =
-                            (
-                                g.genres &&
-                                g.genres.length
-                            )
+                    const sortedGenres = sortGenres(genres);
 
-                                ? g.genres
-                                    .map(
-                                        x => x.name
-                                    )
-                                    .filter(Boolean)
+                    const genreString = sortedGenres.length
+                        ? sortedGenres.join('|')
+                        : 'Game';
 
-                                : [];
+                    const cover = g.cover?.image_id 
+                        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` 
+                        : '';
 
-                        const sortedGenres =
-                            sortGenres(
-                                genres
-                            );
+                    const release = g.first_release_date !== undefined
+                        ? g.first_release_date
+                        : '';
 
-                        const genreString =
-                            sortedGenres.length
-                                ? sortedGenres.join('|')
-                                : 'Game';
+                    return {
+                        title: g.name || '',
+                        cover,
+                        genre: genreString,
+                        displayGenre: sortedGenres.length
+                            ? sortedGenres.join(', ')
+                            : 'Game',
+                        release
+                    };
+                });
 
-                        const cover =
-                            g.cover?.image_id
+                r.innerHTML = igdbSearchResults.map((g, index) => {
+                    const yearLabel = g.release 
+                        ? new Date(g.release * 1000).getFullYear() 
+                        : 'TBA';
 
-                                ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`
+                    return `
+                        <div onclick="selectGame(${index})" 
+                             class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
 
-                                : '';
-
-                        const release =
-                            g.first_release_date !== undefined
-                                ? g.first_release_date
-                                : '';
-
-                        return {
-
-                            title:
-                                g.name || '',
-
-                            cover,
-
-                            genre:
-                                genreString,
-
-                            displayGenre:
-                                sortedGenres.length
-                                    ? sortedGenres.join(', ')
-                                    : 'Game',
-
-                            release
-                        };
-                    });
-
-                r.innerHTML =
-                    igdbSearchResults
-                        .map(
-                            (g, index) => {
-
-                                const yearLabel =
-                                    g.release
-                                        ? new Date(
-                                            g.release *
-                                            1000
-                                          ).getFullYear()
-                                        : 'TBA';
-
-                                return `
-
-                                    <div
-                                        onclick="selectGame(${index})"
-                                        class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors"
-                                    >
-
-                                        ${
-                                            g.cover
-
-                                                ? `
-                                                    <img
-                                                        src="${g.cover}"
-                                                        class="w-10 h-14 object-cover rounded shadow bg-slate-900"
-                                                    >
-                                                  `
-
-                                                : `
-                                                    <div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">
-                                                        No Cover
-                                                    </div>
-                                                  `
-                                        }
-
-                                        <div class="min-w-0">
-
-                                            <p class="text-sm font-bold text-white truncate">
-                                                ${g.title}
-                                            </p>
-
-                                            <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">
-                                                ${g.displayGenre} • ${yearLabel}
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-                                `;
+                            ${g.cover 
+                                ? `<img src="${g.cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` 
+                                : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'
                             }
-                        )
-                        .join('');
 
-                r.classList.remove(
-                    'hidden'
-                );
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-white truncate">${g.title}</p>
+                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">
+                                    ${g.displayGenre} • ${yearLabel}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }).join(''); 
+
+                r.classList.remove('hidden');
 
             } catch (err) {
-
                 igdbSearchResults = [];
 
-                r.innerHTML =
-                    `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
-
-                r.classList.remove(
-                    'hidden'
-                );
+                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
+                r.classList.remove('hidden');
             }
         }
 
-        /* ============================================================
-           SELECT IGDB RESULT
-           ============================================================ */
-
         function selectGame(index) {
+            const selected = igdbSearchResults[index];
 
-            const selected =
-                igdbSearchResults[index];
+            if (!selected) return;
 
-            if (!selected) {
-                return;
-            }
+            const tIn = document.getElementById('titleInput'); 
 
-            const tIn =
-                document.getElementById(
-                    'titleInput'
-                );
+            tIn.value = selected.title; 
 
-            tIn.value =
-                selected.title;
-
-            document.getElementById(
-                'searchResults'
-            ).classList.add(
-                'hidden'
-            );
+            document.getElementById('searchResults').classList.add('hidden'); 
 
             if (selected.cover) {
-
-                tIn.dataset.img =
-                    selected.cover;
-
+                tIn.dataset.img = selected.cover;
             } else {
-
                 delete tIn.dataset.img;
             }
 
             if (selected.genre) {
-
-                tIn.dataset.genre =
-                    selected.genre;
-
+                tIn.dataset.genre = selected.genre;
             } else {
-
                 delete tIn.dataset.genre;
             }
 
-            const parsedDate =
-                parseReleaseDate(
-                    selected.release
-                );
+            const parsedDate = parseReleaseDate(selected.release);
 
-            if (
-                parsedDate !== null
-            ) {
-
-                tIn.dataset.release =
-                    parsedDate;
-
+            if (parsedDate !== null) {
+                tIn.dataset.release = parsedDate;
             } else {
-
                 delete tIn.dataset.release;
             }
 
-            document.getElementById(
-                'seriesInput'
-            ).focus();
+            document.getElementById('seriesInput').focus();
         }
 
-        /* ============================================================
-           CSV TEMPLATE
-           ============================================================ */
+        function downloadTemplate() { 
+            const csv = "title,platform,series,genre,status,cover_url\nElden Ring,steam,,RPG,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg"; 
 
-        function downloadTemplate() {
+            const blob = new Blob([csv], { type: 'text/csv' }); 
+            const a = document.createElement('a'); 
 
-            const csv =
-                "title,platform,series,genre,status,cover_url\n" +
-                "Elden Ring,steam,,RPG|Action,Backlog,https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg";
-
-            const blob =
-                new Blob(
-                    [csv],
-                    {
-                        type: 'text/csv'
-                    }
-                );
-
-            const a =
-                document.createElement('a');
-
-            a.href =
-                URL.createObjectURL(blob);
-
-            a.download =
-                'vault_template.csv';
-
-            a.click();
+            a.href = URL.createObjectURL(blob); 
+            a.download = 'vault_template.csv'; 
+            a.click(); 
         }
 
-        /* ============================================================
-           CSV IMPORT
-           ============================================================ */
+        document.getElementById('csvFile').addEventListener('change', function(e) { 
+            const r = new FileReader(); 
 
-        document
-            .getElementById('csvFile')
-            .addEventListener(
-                'change',
-                function(e) {
+            r.onload = async (ev) => { 
+                const rows = ev.target.result.split('\n').slice(1); 
 
-                    const r =
-                        new FileReader();
+                const gToInsert = rows.map(r => { 
+                    const cols = r.split(',').map(x => x?.trim()); 
 
-                    r.onload =
-                        async (ev) => {
+                    if (cols[0]) return { 
+                        title: cols[0], 
+                        platform: cols[1]||'PC', 
+                        series: cols[2]||null, 
+                        genre: cols[3]||'Action', 
+                        status: cols[4]||'Backlog', 
+                        cover_url: cols[5]||'', 
+                        sort_order: 100 
+                    }; 
+                }).filter(x => x); 
 
-                            const rows =
-                                ev.target.result
-                                    .split('\n')
-                                    .slice(1);
+                await supabaseClient
+                    .from('games')
+                    .insert(gToInsert); 
 
-                            const gToInsert =
-                                rows
+                loadGames(); 
+            }; 
 
-                                    .map(r => {
-
-                                        const cols =
-                                            r.split(',')
-                                                .map(
-                                                    x =>
-                                                        x?.trim()
-                                                );
-
-                                        if (
-                                            cols[0]
-                                        ) {
-
-                                            return {
-
-                                                title:
-                                                    cols[0],
-
-                                                platform:
-                                                    cols[1] ||
-                                                    'PC',
-
-                                                series:
-                                                    cols[2] ||
-                                                    null,
-
-                                                genre:
-                                                    cols[3] ||
-                                                    'Action',
-
-                                                status:
-                                                    cols[4] ||
-                                                    'Backlog',
-
-                                                cover_url:
-                                                    cols[5] ||
-                                                    '',
-
-                                                sort_order:
-                                                    100
-                                            };
-                                        }
-                                    })
-
-                                    .filter(
-                                        x => x
-                                    );
-
-                            await supabaseClient
-                                .from('games')
-                                .insert(
-                                    gToInsert
-                                );
-
-                            loadGames();
-                        };
-
-                    r.readAsText(
-                        e.target.files[0]
-                    );
-                }
-            );
-
-        /* ============================================================
-           START
-           ============================================================ */
+            r.readAsText(e.target.files[0]); 
+        });
 
         initAuth();
-
     </script>
 </body>
 </html>
