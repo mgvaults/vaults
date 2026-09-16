@@ -502,7 +502,6 @@
             'Point-and-click',
             'Tactical',
             'Shooter',
-            
             'Real Time Strategy (RTS)',
             'Turn-based strategy (TBS)',
             'Strategy',
@@ -523,13 +522,12 @@
             'Card & Board Game',
             'Quiz/Trivia',
             'Pinball',
-            'Visual Novel'
-             'Simulator',
+            'Visual Novel',
+            'Simulator'
         ];
 
         function normaliseGenreName(genre) {
             const value = (genre || '').trim();
-
             const aliases = {
                 'Real-time strategy (RTS)': 'Real Time Strategy (RTS)',
                 'Real Time Strategy (RTS)': 'Real Time Strategy (RTS)',
@@ -546,19 +544,15 @@
 
             return aliases[value] || value;
         }
-
         function splitGenres(genreString) {
             if (!genreString) return [];
-
             const separator = genreString.includes('|') ? '|' : ',';
-
             return genreString
                 .split(separator)
                 .map(g => normaliseGenreName(g))
                 .map(g => g.trim())
                 .filter(Boolean);
         }
-
         function sortGenres(genres) {
             const uniqueGenres = [...new Set(
                 genres.map(g => normaliseGenreName(g)).filter(Boolean)
@@ -567,25 +561,19 @@
             return uniqueGenres.sort((a, b) => {
                 const aIndex = GENRE_PRIORITY.indexOf(a);
                 const bIndex = GENRE_PRIORITY.indexOf(b);
-
                 const aPriority = aIndex === -1 ? 999 : aIndex;
                 const bPriority = bIndex === -1 ? 999 : bIndex;
-
                 if (aPriority !== bPriority) {
                     return aPriority - bPriority;
                 }
-
                 return a.localeCompare(b);
             });
         }
-
         function getGenreIconData(genre) {
             const normalised = normaliseGenreName(genre);
-
             if (GENRE_ICONS[normalised]) {
                 return GENRE_ICONS[normalised];
             }
-
             const lower = normalised.toLowerCase();
 
             if (
