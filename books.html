@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Vault - Books</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body { background-color: #0b0f19; color: #f1f5f9; }
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
 
         .book-card {
             background-color: #1e293b;
@@ -129,9 +133,14 @@
 
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
-    <!-- AUTH -->
+    <!-- =========================================================
+         AUTH
+    ========================================================== -->
+
     <div id="authScreen">
+
         <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
+
             <div class="mb-2 text-amber-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">
                 Vault
             </div>
@@ -140,7 +149,8 @@
                 Authentication Required
             </p>
 
-            <button onclick="loginWithGoogle()"
+            <button
+                onclick="loginWithGoogle()"
                 class="w-full bg-white text-slate-900 py-4 px-6 rounded-2xl font-black hover:bg-slate-100 transition flex items-center justify-center gap-3 uppercase tracking-wider text-sm shadow-lg">
 
                 <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -151,212 +161,305 @@
                 </svg>
 
                 Sign in with Google
+
             </button>
+
         </div>
+
     </div>
 
-    <!-- MAIN APP -->
-    <div id="mainApp" style="display: none;">
+
+    <!-- =========================================================
+         MAIN APP
+    ========================================================== -->
+
+    <div id="mainApp" style="display:none;">
+
         <div class="max-w-7xl mx-auto">
 
-            <!-- HEADER -->
+
+            <!-- =====================================================
+                 HEADER
+            ====================================================== -->
+
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
 
                 <div class="flex items-center gap-2">
-                    <button onclick="window.location.href='index.html'"
+
+                    <button
+                        onclick="window.location.href='index.html'"
                         title="Home Vault"
                         class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">
                         🏠
                     </button>
 
-                    <button onclick="window.location.href='games.html'"
+                    <button
+                        onclick="window.location.href='games.html'"
                         title="Games Vault"
                         class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">
                         🎮
                     </button>
 
-                    <button onclick="window.location.href='movies.html'"
+                    <button
+                        onclick="window.location.href='movies.html'"
                         title="Movies Vault"
                         class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">
                         🎬
                     </button>
 
-                    <button onclick="toggleView('queue')"
+                    <button
+                        onclick="toggleView('queue')"
                         title="Books Vault"
                         class="bg-amber-600 p-2.5 px-4 rounded-xl text-2xl shadow-lg">
                         📚
                     </button>
+
                 </div>
+
 
                 <h1 class="text-3xl font-black tracking-tighter text-amber-500 uppercase italic">
                     Books Vault
                 </h1>
 
+
                 <div class="flex items-center gap-2">
 
-                    <button onclick="toggleView('wishlist')"
+                    <button
+                        onclick="toggleView('wishlist')"
                         title="Wishlist Vault"
                         class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-amber-400">
                         🪄
                     </button>
 
-                    <button onclick="toggleView('archive')"
+                    <button
+                        onclick="toggleView('archive')"
                         title="Finished Archive"
                         class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-emerald-600">
                         🏆
                     </button>
 
-                    <button onclick="window.location.href='stats.html'"
+                    <button
+                        onclick="window.location.href='stats.html'"
                         title="The Vault - Statistics"
                         class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">
                         📊
                     </button>
 
-                    <div class="relative" id="toolboxContainer">
 
-                        <button onclick="toggleToolboxMenu(event)"
+                    <!-- TOOLBOX -->
+
+                    <div
+                        class="relative"
+                        id="toolboxContainer">
+
+                        <button
+                            onclick="toggleToolboxMenu(event)"
                             title="Tools"
                             class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">
                             🧰
                         </button>
 
-                        <div id="toolboxDropdown"
+
+                        <div
+                            id="toolboxDropdown"
                             class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
 
-                            <!-- NEW REPAIR BUTTON -->
-                            <button onclick="repairBookSeries(); closeToolboxMenu();"
+
+                            <!-- REPAIR -->
+
+                            <button
+                                onclick="openRepairModal(); closeToolboxMenu();"
                                 title="Repair Book Series"
                                 class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">
                                 🔧
                             </button>
 
-                            <button onclick="downloadTemplate(); closeToolboxMenu();"
+
+                            <!-- CSV TEMPLATE -->
+
+                            <button
+                                onclick="downloadTemplate(); closeToolboxMenu();"
                                 title="CSV Template"
                                 class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">
                                 💾
                             </button>
 
-                            <button onclick="document.getElementById('csvFile').click(); closeToolboxMenu();"
+
+                            <!-- IMPORT -->
+
+                            <button
+                                onclick="document.getElementById('csvFile').click(); closeToolboxMenu();"
                                 title="Import CSV"
                                 class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">
                                 📥
                             </button>
 
-                            <button onclick="logout(); closeToolboxMenu();"
+
+                            <!-- SIGN OUT -->
+
+                            <button
+                                onclick="logout(); closeToolboxMenu();"
                                 title="Sign Out"
                                 class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600">
                                 🔒
                             </button>
+
                         </div>
+
                     </div>
+
                 </div>
 
-                <input type="file" id="csvFile" accept=".csv" class="hidden">
+
+                <input
+                    type="file"
+                    id="csvFile"
+                    accept=".csv"
+                    class="hidden">
+
             </header>
 
 
-            <!-- TOP DASHBOARD -->
-            <div id="dashboardTop"
+            <!-- =====================================================
+                 TOP DASHBOARD
+            ====================================================== -->
+
+            <div
+                id="dashboardTop"
                 class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
 
+
                 <!-- CURRENTLY READING -->
-                <div id="activeSessionBox"
+
+                <div
+                    id="activeSessionBox"
                     class="lg:col-span-5 bg-amber-950/20 p-5 rounded-[2.5rem] border border-amber-500/20 shadow-inner flex flex-col justify-between">
 
                     <h2 class="text-amber-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">
                         Currently Reading 📖
                     </h2>
 
-                    <div id="col-reading"
+                    <div
+                        id="col-reading"
                         class="flex-1 flex flex-col gap-3 justify-center">
                     </div>
+
                 </div>
 
 
                 <!-- INPUT -->
-                <div id="inputArea"
+
+                <div
+                    id="inputArea"
                     class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
 
                     <div class="flex flex-col gap-3 relative">
 
                         <div class="text-[10px] font-black text-amber-400 uppercase px-1 italic flex justify-between">
 
-                            <span id="formModeLabel">Search</span>
+                            <span id="formModeLabel">
+                                Search
+                            </span>
 
                             <div class="flex gap-2">
-                                <button id="cancelEdit"
+
+                                <button
+                                    id="cancelEdit"
                                     onclick="exitEditMode()"
                                     class="hidden text-slate-400 hover:text-white text-xs font-bold">
                                     Cancel
                                 </button>
 
-                                <button id="deleteSelectedBtn"
+                                <button
+                                    id="deleteSelectedBtn"
                                     onclick="deleteSelectedFromForm()"
                                     class="hidden text-red-400 hover:text-red-300 text-xs font-bold">
                                     🗑️ Delete
                                 </button>
+
                             </div>
+
                         </div>
 
 
-                        <!-- BOOK SEARCH -->
-                        <input id="titleInput"
+                        <!-- SEARCH -->
+
+                        <input
+                            id="titleInput"
                             type="text"
                             oninput="searchBooks(this.value)"
                             placeholder="Search for book title or ISBN..."
+                            autocomplete="off"
                             class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
 
-                        <div id="searchResults"
+
+                        <div
+                            id="searchResults"
                             class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white">
                         </div>
 
 
                         <!-- TYPE -->
+
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
-                            <div onclick="toggleType('Book')"
+
+                            <div
+                                onclick="toggleType('Book')"
                                 id="i-book"
                                 class="type-box active"
                                 title="Book">
-                                <span style="color:#f59e0b; font-size: 16px;">📚</span>
+                                <span style="color:#f59e0b; font-size:16px;">📚</span>
                             </div>
+
                         </div>
 
 
                         <!-- AUTHOR / SERIES -->
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                            <input id="authorInput"
+                            <input
+                                id="authorInput"
                                 type="text"
                                 placeholder="Author Name"
                                 class="bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
 
+
                             <div class="relative">
 
-                                <input id="seriesInput"
+                                <input
+                                    id="seriesInput"
                                     type="text"
                                     oninput="filterSeriesDropdown(this.value)"
                                     onfocus="filterSeriesDropdown(this.value)"
                                     placeholder="Series Name (Automatic)"
                                     class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
 
-                                <div id="seriesResults"
+
+                                <div
+                                    id="seriesResults"
                                     class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white">
                                 </div>
 
                             </div>
+
                         </div>
 
 
                         <!-- SERIES NUMBER -->
+
                         <div class="flex gap-3 text-white relative">
 
-                            <input id="seriesNumInput"
+                            <input
+                                id="seriesNumInput"
                                 type="number"
                                 step="0.1"
                                 placeholder="Book #"
                                 class="w-28 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
 
-                            <button onclick="submitForm()"
+
+                            <button
+                                onclick="submitForm()"
                                 id="submitBtn"
                                 class="flex-1 bg-amber-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-amber-500 transition">
                                 Commit
@@ -365,11 +468,16 @@
                         </div>
 
                     </div>
+
                 </div>
+
             </div>
 
 
-            <!-- MAIN QUEUE -->
+            <!-- =====================================================
+                 QUEUE
+            ====================================================== -->
+
             <div id="queueView">
 
                 <div class="flex justify-between items-center mb-6">
@@ -378,45 +486,65 @@
                         Bookshelf Collection
                     </h2>
 
+
                     <div class="flex items-center gap-3">
 
-                        <select id="sortSelect"
+                        <select
+                            id="sortSelect"
                             onchange="render()"
                             class="col-filter">
 
-                            <option value="title">Sort: Title / Series</option>
-                            <option value="author">Sort: Author</option>
+                            <option value="title">
+                                Sort: Title / Series
+                            </option>
+
+                            <option value="author">
+                                Sort: Author
+                            </option>
 
                         </select>
 
-                        <input id="filterMain"
+
+                        <input
+                            id="filterMain"
                             type="text"
                             oninput="render()"
                             placeholder="Filter collection..."
                             class="col-filter">
 
                     </div>
+
                 </div>
 
-                <div id="col-main"
+
+                <div
+                    id="col-main"
                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 </div>
+
             </div>
 
 
-            <!-- ARCHIVE -->
-            <div id="altView" class="hidden">
+            <!-- =====================================================
+                 ARCHIVE
+            ====================================================== -->
+
+            <div
+                id="altView"
+                class="hidden">
 
                 <div class="flex justify-between items-center mb-8">
 
                     <div class="w-44"></div>
 
-                    <h2 id="altTitle"
+                    <h2
+                        id="altTitle"
                         class="font-black text-2xl uppercase tracking-widest italic text-emerald-400 text-center">
                         Finished Archive 🏆
                     </h2>
 
-                    <input id="filterAlt"
+                    <input
+                        id="filterAlt"
                         type="text"
                         oninput="render()"
                         placeholder="Filter titles..."
@@ -424,14 +552,22 @@
 
                 </div>
 
-                <div id="col-alt"
+
+                <div
+                    id="col-alt"
                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 </div>
+
             </div>
 
 
-            <!-- WISHLIST -->
-            <div id="wishlistView" class="hidden">
+            <!-- =====================================================
+                 WISHLIST
+            ====================================================== -->
+
+            <div
+                id="wishlistView"
+                class="hidden">
 
                 <div class="flex justify-between items-center mb-8">
 
@@ -441,7 +577,8 @@
                         Book Wishlist 🪄
                     </h2>
 
-                    <input id="filterWishlist"
+                    <input
+                        id="filterWishlist"
                         type="text"
                         oninput="render()"
                         placeholder="Filter wishlist..."
@@ -449,67 +586,87 @@
 
                 </div>
 
-                <div id="col-wishlist"
+
+                <div
+                    id="col-wishlist"
                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 </div>
+
             </div>
 
         </div>
+
     </div>
 
 
-    <!-- REPAIR MODAL -->
-    <div id="repairModal"
+    <!-- =========================================================
+         REPAIR MODAL
+    ========================================================== -->
+
+    <div
+        id="repairModal"
         class="hidden fixed inset-0 bg-black/80 z-[100] items-center justify-center p-4">
 
-        <div class="bg-slate-800 border border-slate-700 rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div class="bg-slate-800 border border-slate-700 rounded-[2rem] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
 
             <div class="p-6 border-b border-slate-700">
 
-                <div class="flex justify-between items-start">
+                <div class="flex justify-between items-start gap-4">
 
                     <div>
+
                         <h2 class="text-xl font-black text-amber-400 uppercase italic tracking-tight">
                             Repair Book Series 🔧
                         </h2>
 
                         <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                            This checks books against Google Books and fills in missing series information
-                            and missing series numbers.
+                            Checks your existing books against Open Library and Google Books.
+                            Missing series information can be added, and reliable series numbers
+                            can be corrected.
                         </p>
 
-                        <p class="text-[10px] text-slate-500 mt-2">
-                            Existing series numbers are preserved, including decimal numbers such as 4.5.
+                        <p class="text-[10px] text-emerald-400 mt-2 font-bold">
+                            Existing numbers are NOT automatically trusted — if Google Books
+                            reports a reliable sequence number, the Vault will be corrected.
                         </p>
+
                     </div>
 
-                    <button onclick="closeRepairModal()"
+
+                    <button
+                        onclick="closeRepairModal()"
                         class="text-slate-400 hover:text-white text-xl">
                         ✕
                     </button>
 
                 </div>
+
             </div>
 
 
-            <div id="repairSummary"
+            <div
+                id="repairSummary"
                 class="p-6">
             </div>
 
 
-            <div id="repairResults"
+            <div
+                id="repairResults"
                 class="hidden flex-1 overflow-y-auto px-6 pb-6">
             </div>
 
 
             <div class="p-6 border-t border-slate-700 flex justify-end gap-3">
 
-                <button onclick="closeRepairModal()"
+                <button
+                    onclick="closeRepairModal()"
                     class="bg-slate-700 hover:bg-slate-600 px-5 py-3 rounded-xl text-xs font-black uppercase">
                     Close
                 </button>
 
-                <button id="startRepairBtn"
+
+                <button
+                    id="startRepairBtn"
                     onclick="startSeriesRepair()"
                     class="bg-amber-600 hover:bg-amber-500 px-5 py-3 rounded-xl text-xs font-black uppercase">
                     Start Repair
@@ -518,72 +675,113 @@
             </div>
 
         </div>
+
     </div>
 
 
 <script>
 
-    /* ============================================================
-       SUPABASE
-    ============================================================ */
+/* ================================================================
+   SUPABASE
+================================================================ */
 
-    const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+const SB_URL =
+    'https://zioiamijgblwxlfevcdr.supabase.co';
 
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+const SB_KEY =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6MTc3Njk2ODAyNSwiZXhwIjoyMDkyNTQ0MDI1fQ.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
-    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-
-
-    /* ============================================================
-       STATE
-    ============================================================ */
-
-    let allBooks = [];
-    let editingId = null;
-    let currentViewMode = 'queue';
-    let searchDebounce = null;
+const supabaseClient =
+    supabase.createClient(
+        SB_URL,
+        SB_KEY
+    );
 
 
-    /* ============================================================
-       TOOLBOX
-    ============================================================ */
+/* ================================================================
+   STATE
+================================================================ */
 
-    function toggleToolboxMenu(e) {
+let allBooks = [];
 
-        e.stopPropagation();
+let editingId = null;
 
-        const dropdown = document.getElementById('toolboxDropdown');
+let currentViewMode =
+    'queue';
 
-        dropdown.classList.toggle('hidden');
-        dropdown.classList.toggle('flex');
-    }
+let searchDebounce = null;
 
+let currentSearchResults = [];
 
-    function closeToolboxMenu() {
+let repairRunning = false;
 
-        const dropdown = document.getElementById('toolboxDropdown');
-
-        dropdown.classList.add('hidden');
-        dropdown.classList.remove('flex');
-    }
+const repairCache =
+    new Map();
 
 
-    /* ============================================================
-       AUTH
-    ============================================================ */
+/* ================================================================
+   TOOLBOX
+================================================================ */
 
-    async function initAuth() {
+function toggleToolboxMenu(e) {
 
-        const { data: { session } } =
-            await supabaseClient.auth.getSession();
+    e.stopPropagation();
 
-        if (session) {
-            showApp();
-        } else {
-            showAuth();
+    const dropdown =
+        document.getElementById(
+            'toolboxDropdown'
+        );
+
+    dropdown.classList.toggle(
+        'hidden'
+    );
+
+    dropdown.classList.toggle(
+        'flex'
+    );
+}
+
+
+function closeToolboxMenu() {
+
+    const dropdown =
+        document.getElementById(
+            'toolboxDropdown'
+        );
+
+    dropdown.classList.add(
+        'hidden'
+    );
+
+    dropdown.classList.remove(
+        'flex'
+    );
+}
+
+
+/* ================================================================
+   AUTH
+================================================================ */
+
+async function initAuth() {
+
+    const {
+        data: {
+            session
         }
+    } =
+        await supabaseClient.auth.getSession();
 
-        supabaseClient.auth.onAuthStateChange((_event, session) => {
+
+    if (session) {
+        showApp();
+    } else {
+        showAuth();
+    }
+
+
+    supabaseClient.auth.onAuthStateChange(
+        (_event, session) => {
 
             if (session) {
                 showApp();
@@ -591,2167 +789,1031 @@
                 showAuth();
             }
 
+        }
+    );
+}
+
+
+async function loginWithGoogle() {
+
+    const {
+        error
+    } =
+        await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo:
+                    window.location.href
+            }
         });
+
+
+    if (error) {
+
+        alert(
+            'OAuth error: ' +
+            error.message
+        );
+
+    }
+}
+
+
+async function logout() {
+
+    await supabaseClient.auth.signOut();
+
+    showAuth();
+}
+
+
+function showApp() {
+
+    document.getElementById(
+        'authScreen'
+    ).style.display = 'none';
+
+
+    document.getElementById(
+        'mainApp'
+    ).style.display = 'block';
+
+
+    loadBooks();
+}
+
+
+function showAuth() {
+
+    document.getElementById(
+        'authScreen'
+    ).style.display = 'flex';
+
+
+    document.getElementById(
+        'mainApp'
+    ).style.display = 'none';
+}
+
+
+/* ================================================================
+   LOAD BOOKS
+================================================================ */
+
+async function loadBooks() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from('books')
+            .select('*');
+
+
+    if (error) {
+
+        console.error(
+            'Failed to load books:',
+            error
+        );
+
+        return;
     }
 
 
-    async function loginWithGoogle() {
-
-        const { error } =
-            await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.href
-                }
-            });
-
-        if (error) {
-            alert("OAuth error: " + error.message);
-        }
-    }
+    allBooks =
+        data || [];
 
 
-    async function logout() {
-
-        await supabaseClient.auth.signOut();
-
-        showAuth();
-    }
+    render();
+}
 
 
-    function showApp() {
+/* ================================================================
+   GENERAL HELPERS
+================================================================ */
 
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
+function toggleType(t) {
 
-        loadBooks();
-    }
-
-
-    function showAuth() {
-
-        document.getElementById('authScreen').style.display = 'flex';
-        document.getElementById('mainApp').style.display = 'none';
-    }
+    document.getElementById(
+        'i-book'
+    ).classList.add(
+        'active'
+    );
+}
 
 
-    /* ============================================================
-       LOAD BOOKS
-    ============================================================ */
+function parseReleaseYear(val) {
 
-    async function loadBooks() {
-
-        const { data, error } =
-            await supabaseClient
-                .from('books')
-                .select('*');
-
-        if (!error) {
-
-            allBooks = data || [];
-
-            render();
-
-        } else {
-
-            console.error("Failed to load books:", error);
-
-        }
-    }
-
-
-    /* ============================================================
-       GENERAL HELPERS
-    ============================================================ */
-
-    function toggleType(t) {
-
-        document.getElementById('i-book')
-            .classList.toggle('active', true);
-    }
-
-
-    function parseReleaseYear(val) {
-
-        if (
-            val === undefined ||
-            val === null ||
-            val === 'null' ||
-            val === 'undefined' ||
-            val === ''
-        ) {
-            return 'TBA';
-        }
-
-        if (
-            typeof val === 'number' &&
-            val > 1000 &&
-            val < 3000
-        ) {
-            return val.toString();
-        }
-
-        if (
-            typeof val === 'string' &&
-            /^\d{4}$/.test(val.trim())
-        ) {
-            return val.trim();
-        }
-
-        if (
-            typeof val === 'string' &&
-            val.includes('-')
-        ) {
-
-            const yearPart = val.split('-')[0];
-
-            if (
-                yearPart.length === 4 &&
-                !isNaN(yearPart)
-            ) {
-                return yearPart;
-            }
-        }
-
-        let num = Number(val);
-
-        if (!isNaN(num) && num > 0) {
-
-            if (num > 32503680000) {
-                num = Math.floor(num / 1000);
-            }
-
-            const dateObj = new Date(num * 1000);
-
-            if (!isNaN(dateObj.getFullYear())) {
-                return dateObj.getFullYear().toString();
-            }
-        }
-
+    if (
+        val === undefined ||
+        val === null ||
+        val === 'null' ||
+        val === 'undefined' ||
+        val === ''
+    ) {
         return 'TBA';
     }
 
 
-    function normalizeText(value) {
-
-        return (value || '')
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9]+/g, ' ')
-            .trim();
+    if (
+        typeof val === 'number' &&
+        val > 1000 &&
+        val < 3000
+    ) {
+        return val.toString();
     }
 
 
-    function titleSimilarity(a, b) {
+    if (
+        typeof val === 'string' &&
+        /^\d{4}$/.test(
+            val.trim()
+        )
+    ) {
+        return val.trim();
+    }
 
-        const na = normalizeText(a);
-        const nb = normalizeText(b);
 
-        if (!na || !nb) return 0;
+    if (
+        typeof val === 'string' &&
+        val.includes('-')
+    ) {
 
-        if (na === nb) return 1;
+        const yearPart =
+            val.split('-')[0];
+
 
         if (
-            na.includes(nb) ||
-            nb.includes(na)
+            yearPart.length === 4 &&
+            !isNaN(yearPart)
         ) {
-            return 0.85;
+            return yearPart;
         }
-
-        const aWords = new Set(na.split(/\s+/));
-        const bWords = new Set(nb.split(/\s+/));
-
-        const intersection =
-            [...aWords].filter(x => bWords.has(x)).length;
-
-        const union =
-            new Set([...aWords, ...bWords]).size;
-
-        return union ? intersection / union : 0;
     }
 
 
-    function authorSimilarity(bookAuthor, apiAuthors) {
+    const num =
+        Number(val);
 
-        const target = normalizeText(bookAuthor);
 
-        if (!target || !apiAuthors || !apiAuthors.length) {
-            return 0;
+    if (
+        !isNaN(num) &&
+        num > 0
+    ) {
+
+        let timestamp =
+            num;
+
+
+        if (
+            timestamp >
+            32503680000
+        ) {
+            timestamp =
+                Math.floor(
+                    timestamp / 1000
+                );
         }
 
-        let best = 0;
 
-        apiAuthors.forEach(author => {
+        const dateObj =
+            new Date(
+                timestamp * 1000
+            );
 
-            const candidate = normalizeText(author);
 
-            if (!candidate) return;
+        if (
+            !isNaN(
+                dateObj.getFullYear()
+            )
+        ) {
 
-            if (candidate === target) {
-                best = Math.max(best, 1);
+            return dateObj
+                .getFullYear()
+                .toString();
+        }
+    }
+
+
+    return 'TBA';
+}
+
+
+function normalizeText(value) {
+
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(
+            /[\u0300-\u036f]/g,
+            ''
+        )
+        .replace(
+            /[^a-z0-9]+/g,
+            ' '
+        )
+        .trim();
+}
+
+
+function escapeHtml(value) {
+
+    return String(value ?? '')
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+        .replace(
+            /</g,
+            '&lt;'
+        )
+        .replace(
+            />/g,
+            '&gt;'
+        )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+        .replace(
+            /'/g,
+            '&#039;'
+        );
+}
+
+
+function titleSimilarity(a, b) {
+
+    const na =
+        normalizeText(a);
+
+    const nb =
+        normalizeText(b);
+
+
+    if (!na || !nb) {
+        return 0;
+    }
+
+
+    if (na === nb) {
+        return 1;
+    }
+
+
+    if (
+        na.includes(nb) ||
+        nb.includes(na)
+    ) {
+        return 0.85;
+    }
+
+
+    const aWords =
+        new Set(
+            na.split(/\s+/)
+        );
+
+    const bWords =
+        new Set(
+            nb.split(/\s+/)
+        );
+
+
+    const intersection =
+        [...aWords]
+            .filter(
+                x => bWords.has(x)
+            )
+            .length;
+
+
+    const union =
+        new Set([
+            ...aWords,
+            ...bWords
+        ]).size;
+
+
+    return union
+        ? intersection / union
+        : 0;
+}
+
+
+function authorSimilarity(
+    bookAuthor,
+    apiAuthors
+) {
+
+    const target =
+        normalizeText(
+            bookAuthor
+        );
+
+
+    if (
+        !target ||
+        !Array.isArray(apiAuthors) ||
+        !apiAuthors.length
+    ) {
+        return 0;
+    }
+
+
+    let best = 0;
+
+
+    apiAuthors.forEach(
+        author => {
+
+            const candidate =
+                normalizeText(
+                    author
+                );
+
+
+            if (!candidate) {
                 return;
             }
 
-            const targetParts = target.split(/\s+/);
-            const candidateParts = candidate.split(/\s+/);
+
+            if (
+                candidate === target
+            ) {
+
+                best = 1;
+                return;
+            }
+
+
+            const targetParts =
+                target.split(/\s+/);
+
+            const candidateParts =
+                candidate.split(/\s+/);
+
 
             const overlap =
-                targetParts.filter(x =>
-                    candidateParts.includes(x)
+                targetParts.filter(
+                    x =>
+                        candidateParts
+                            .includes(x)
                 ).length;
+
 
             const score =
                 overlap /
-                Math.max(targetParts.length, candidateParts.length);
+                Math.max(
+                    targetParts.length,
+                    candidateParts.length
+                );
 
-            best = Math.max(best, score);
-        });
 
-        return best;
+            best =
+                Math.max(
+                    best,
+                    score
+                );
+        }
+    );
+
+
+    return best;
+}
+
+
+/* ================================================================
+   GOOGLE BOOKS
+================================================================ */
+
+/*
+ * Google Books exposes:
+ *
+ * volumeInfo.seriesInfo.volumeSeries[].orderNumber
+ *
+ * That is the actual series sequence.
+ *
+ * We deliberately DO NOT use bookDisplayNumber because Google
+ * explicitly describes that as display-only.
+ */
+
+function extractGoogleSeriesInfo(
+    item
+) {
+
+    const info =
+        item?.volumeInfo ||
+        item ||
+        {};
+
+
+    const seriesInfo =
+        info.seriesInfo;
+
+
+    if (
+        !seriesInfo ||
+        !Array.isArray(
+            seriesInfo.volumeSeries
+        )
+    ) {
+
+        return {
+            seriesId: '',
+            order: null,
+            displayNumber: '',
+            shortTitle: ''
+        };
     }
 
 
-    /* ============================================================
-       GOOGLE BOOKS SERIES LOOKUP
-    ============================================================ */
+    const candidates =
+        seriesInfo.volumeSeries
+            .filter(
+                series => {
 
-    async function getGoogleVolume(volumeId) {
+                    if (!series) {
+                        return false;
+                    }
 
-        if (!volumeId) return null;
 
-        try {
+                    const order =
+                        Number(
+                            series.orderNumber
+                        );
 
-            const url =
-                `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(volumeId)}?projection=full&includeNonComicsSeries=true`;
 
-            const response = await fetch(url);
+                    return (
+                        Number.isFinite(
+                            order
+                        ) &&
+                        order >= 0
+                    );
+                }
+            );
 
-            if (!response.ok) {
-                return null;
-            }
 
-            return await response.json();
+    if (!candidates.length) {
 
-        } catch (error) {
-
-            console.warn("Google volume lookup failed:", error);
-
-            return null;
-        }
+        return {
+            seriesId: '',
+            order: null,
+            displayNumber:
+                seriesInfo.bookDisplayNumber ||
+                '',
+            shortTitle:
+                seriesInfo.shortSeriesBookTitle ||
+                ''
+        };
     }
 
 
-    async function getGoogleSeriesName(seriesIds) {
+    /*
+     * Prefer a normal single volume where possible.
+     * This helps avoid treating an omnibus/collection as the
+     * ordinary series sequence when Google gives us multiple
+     * series relationships.
+     */
 
-        if (!seriesIds || !seriesIds.length) {
-            return '';
-        }
+    const selected =
+        candidates.find(
+            s =>
+                String(
+                    s.seriesBookType || ''
+                ).toLowerCase()
+                    .includes(
+                        'single'
+                    )
+        ) ||
+        candidates[0];
 
-        try {
 
-            const params =
-                seriesIds
-                    .map(id => `series_id=${encodeURIComponent(id)}`)
-                    .join('&');
+    return {
 
-            const url =
-                `https://www.googleapis.com/books/v1/series/get?${params}`;
+        seriesId:
+            selected.seriesId ||
+            '',
 
-            const response = await fetch(url);
+        order:
+            Number(
+                selected.orderNumber
+            ),
 
-            if (!response.ok) {
-                return '';
-            }
+        displayNumber:
+            seriesInfo.bookDisplayNumber ||
+            '',
 
-            const data = await response.json();
+        shortTitle:
+            seriesInfo.shortSeriesBookTitle ||
+            ''
+    };
+}
 
-            if (
-                data.series &&
-                data.series.length > 0
-            ) {
-                return data.series[0].title || '';
-            }
 
-        } catch (error) {
+/* ================================================================
+   OPEN LIBRARY
+================================================================ */
 
-            console.warn("Google series lookup failed:", error);
-        }
+function extractOpenLibrarySeries(
+    doc
+) {
 
+    if (!doc || !doc.series) {
         return '';
     }
 
 
-    async function extractGoogleSeries(volume) {
+    if (
+        Array.isArray(
+            doc.series
+        )
+    ) {
 
-        if (!volume || !volume.volumeInfo) {
-            return {
-                series: '',
-                seriesNum: null
-            };
-        }
+        const values =
+            doc.series
+                .map(
+                    value => {
 
-        const info = volume.volumeInfo;
-        const seriesInfo = info.seriesInfo;
+                        if (
+                            typeof value ===
+                            'string'
+                        ) {
+                            return value;
+                        }
 
-        if (
-            !seriesInfo ||
-            !seriesInfo.volumeSeries ||
-            !seriesInfo.volumeSeries.length
-        ) {
-            return {
-                series: '',
-                seriesNum: null
-            };
-        }
+                        return value?.name ||
+                            '';
+                    }
+                )
+                .filter(Boolean);
 
 
-        /*
-         * Prefer an actual numbered series entry.
-         * This avoids picking an empty/secondary series record.
-         */
+        return values[0] || '';
+    }
 
-        let candidates =
-            seriesInfo.volumeSeries.filter(s =>
-                s &&
-                s.seriesId &&
-                Number.isFinite(Number(s.orderNumber))
+
+    if (
+        typeof doc.series ===
+        'string'
+    ) {
+        return doc.series;
+    }
+
+
+    return '';
+}
+
+
+/* ================================================================
+   GOOGLE SEARCH MATCHING
+================================================================ */
+
+function scoreGoogleBook(
+    title,
+    author,
+    item
+) {
+
+    const info =
+        item?.volumeInfo ||
+        {};
+
+
+    let score = 0;
+
+
+    const titleScore =
+        titleSimilarity(
+            title,
+            info.title || ''
+        );
+
+
+    score +=
+        titleScore * 10;
+
+
+    const authorScore =
+        authorSimilarity(
+            author,
+            info.authors || []
+        );
+
+
+    score +=
+        authorScore * 5;
+
+
+    const seriesInfo =
+        extractGoogleSeriesInfo(
+            item
+        );
+
+
+    if (
+        seriesInfo.order !== null
+    ) {
+        score += 2;
+    }
+
+
+    return score;
+}
+
+
+function findBestGoogleBook(
+    title,
+    author,
+    items
+) {
+
+    let best = null;
+    let bestScore = 0;
+
+
+    for (
+        const item
+        of items || []
+    ) {
+
+        const score =
+            scoreGoogleBook(
+                title,
+                author,
+                item
             );
 
 
-        if (!candidates.length) {
+        if (
+            score >
+            bestScore
+        ) {
 
-            candidates =
-                seriesInfo.volumeSeries.filter(s =>
-                    s && s.seriesId
-                );
+            bestScore =
+                score;
+
+            best =
+                item;
         }
+    }
 
 
-        if (!candidates.length) {
-
-            return {
-                series: '',
-                seriesNum: null
-            };
-        }
+    return {
+        item: best,
+        score: bestScore
+    };
+}
 
 
-        const selected = candidates[0];
+/* ================================================================
+   SEARCH
+================================================================ */
 
-        const seriesName =
-            await getGoogleSeriesName([
-                selected.seriesId
+function searchBooks(q) {
+
+    clearTimeout(
+        searchDebounce
+    );
+
+
+    searchDebounce =
+        setTimeout(
+            () => executeSearch(q),
+            350
+        );
+}
+
+
+async function executeSearch(q) {
+
+    const resultsBox =
+        document.getElementById(
+            'searchResults'
+        );
+
+
+    const query =
+        String(q || '').trim();
+
+
+    if (
+        query.length < 2
+    ) {
+
+        resultsBox.classList.add(
+            'hidden'
+        );
+
+        resultsBox.innerHTML =
+            '';
+
+        return;
+    }
+
+
+    resultsBox.classList.remove(
+        'hidden'
+    );
+
+
+    resultsBox.innerHTML = `
+        <div class="p-4 text-sm text-slate-400">
+            Searching books and series...
+        </div>
+    `;
+
+
+    try {
+
+        /*
+         * Search both services.
+         *
+         * Open Library:
+         *   title / author / series name
+         *
+         * Google Books:
+         *   title / author / series order
+         */
+
+        const openLibraryUrl =
+            `https://openlibrary.org/search.json?` +
+            `q=${encodeURIComponent(query)}` +
+            `&limit=7` +
+            `&fields=key,title,author_name,cover_i,subject,first_publish_year,series`;
+
+
+        const googleUrl =
+            `https://www.googleapis.com/books/v1/volumes?` +
+            `q=${encodeURIComponent(query)}` +
+            `&maxResults=10` +
+            `&projection=full`;
+
+
+        const [
+            olResult,
+            googleResult
+        ] =
+            await Promise.allSettled([
+
+                fetch(
+                    openLibraryUrl
+                ),
+
+                fetch(
+                    googleUrl
+                )
+
             ]);
 
 
-        return {
-            series: seriesName || '',
-            seriesNum:
-                Number.isFinite(Number(selected.orderNumber))
-                    ? Number(selected.orderNumber)
-                    : null
-        };
-    }
+        let olDocs = [];
 
+        let googleItems = [];
 
-    /* ============================================================
-       SEARCH BOOK METADATA
-    ============================================================ */
-
-    async function lookupBookMetadata(title, author = '') {
-
-        let bestVolume = null;
-        let bestScore = 0;
-
-
-        /*
-         * GOOGLE BOOKS
-         *
-         * This is now our primary lookup because it exposes
-         * seriesInfo, orderNumber and series IDs.
-         */
-
-        try {
-
-            const qParts = [];
-
-            if (title) {
-                qParts.push(`intitle:"${title}"`);
-            }
-
-            if (author) {
-                qParts.push(`inauthor:"${author}"`);
-            }
-
-            const query =
-                qParts.length
-                    ? qParts.join(' ')
-                    : title;
-
-
-            const url =
-                `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10&projection=full&includeNonComicsSeries=true`;
-
-            const response = await fetch(url);
-
-            if (response.ok) {
-
-                const data = await response.json();
-
-                if (data.items) {
-
-                    data.items.forEach(item => {
-
-                        const info = item.volumeInfo || {};
-
-                        const titleScore =
-                            titleSimilarity(
-                                title,
-                                info.title || ''
-                            );
-
-                        const authorScore =
-                            authorSimilarity(
-                                author,
-                                info.authors || []
-                            );
-
-                        const score =
-                            (titleScore * 0.75) +
-                            (authorScore * 0.25);
-
-                        if (score > bestScore) {
-
-                            bestScore = score;
-                            bestVolume = item;
-                        }
-
-                    });
-                }
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Google Books search failed:",
-                error
-            );
-        }
-
-
-        /*
-         * If Google found something useful, get the complete volume
-         * record because that is where seriesInfo is most reliable.
-         */
 
         if (
-            bestVolume &&
-            bestVolume.id &&
-            bestScore >= 0.45
+            olResult.status ===
+            'fulfilled' &&
+            olResult.value.ok
         ) {
 
-            const complete =
-                await getGoogleVolume(bestVolume.id);
+            const data =
+                await olResult.value.json();
 
-            if (complete) {
-
-                bestVolume = complete;
-            }
+            olDocs =
+                data.docs || [];
         }
 
 
+        if (
+            googleResult.status ===
+            'fulfilled' &&
+            googleResult.value.ok
+        ) {
+
+            const data =
+                await googleResult
+                    .value
+                    .json();
+
+            googleItems =
+                data.items || [];
+        }
+
+
+        const results = [];
+
+
         /*
-         * Extract the series information.
+         * Open Library results form the visible list.
+         * Google Books is used to enrich each result with the
+         * series sequence number.
          */
 
-        if (bestVolume) {
+        for (
+            const doc
+            of olDocs
+        ) {
 
-            const series =
-                await extractGoogleSeries(bestVolume);
-
-            const info =
-                bestVolume.volumeInfo || {};
-
-            const cover =
-                info.imageLinks
-                    ? (
-                        info.imageLinks.thumbnail ||
-                        info.imageLinks.smallThumbnail ||
-                        ''
-                    ).replace('http://', 'https://')
-                    : '';
+            const title =
+                doc.title || '';
 
 
-            return {
+            const author =
+                Array.isArray(
+                    doc.author_name
+                )
+                    ? doc.author_name.join(
+                        ', '
+                    )
+                    : 'Unknown';
 
-                title: info.title || title,
 
-                author:
-                    info.authors
-                        ? info.authors.join(', ')
-                        : (author || 'Unknown'),
+            const bestGoogle =
+                findBestGoogleBook(
+                    title,
+                    author,
+                    googleItems
+                );
 
-                coverUrl: cover,
+
+            const googleSeries =
+                bestGoogle.item
+                    ? extractGoogleSeriesInfo(
+                        bestGoogle.item
+                    )
+                    : null;
+
+
+            const seriesName =
+                extractOpenLibrarySeries(
+                    doc
+                );
+
+
+            let cover =
+                '';
+
+
+            if (doc.cover_i) {
+
+                cover =
+                    `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
+            }
+
+
+            results.push({
+
+                title,
+
+                author,
+
+                coverUrl:
+                    cover,
 
                 genre:
-                    info.categories
-                        ? info.categories[0]
+                    Array.isArray(
+                        doc.subject
+                    ) &&
+                    doc.subject.length
+                        ? doc.subject[0]
                         : 'Book',
 
                 releaseYear:
-                    info.publishedDate
-                        ? info.publishedDate.split('-')[0]
-                        : '',
+                    doc.first_publish_year ||
+                    '',
 
-                series: series.series,
+                series:
+                    seriesName,
 
-                seriesNum: series.seriesNum,
+                seriesNum:
+                    googleSeries &&
+                    googleSeries.order !== null
+                        ? googleSeries.order
+                        : null
 
-                confidence: bestScore
-
-            };
+            });
         }
 
 
         /*
-         * OPEN LIBRARY FALLBACK
-         *
-         * It remains useful for title/author/cover data, but we don't
-         * rely on it for automatic series numbering.
+         * If Open Library returned nothing, use Google Books
+         * directly.
          */
 
-        try {
+        if (
+            !results.length
+        ) {
 
-            const olRes =
-                await fetch(
-                    `https://openlibrary.org/search.json?q=${encodeURIComponent(title)}&limit=7`
-                );
+            for (
+                const item
+                of googleItems
+            ) {
 
-            if (olRes.ok) {
-
-                const olData = await olRes.json();
-
-                if (
-                    olData.docs &&
-                    olData.docs.length
-                ) {
-
-                    const doc = olData.docs[0];
-
-                    const isbn =
-                        doc.isbn
-                            ? doc.isbn[0]
-                            : '';
-
-                    const coverUrl =
-                        doc.cover_i
-                            ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-                            : (
-                                isbn
-                                    ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`
-                                    : ''
-                            );
-
-                    return {
-
-                        title:
-                            doc.title || title,
-
-                        author:
-                            doc.author_name
-                                ? doc.author_name.join(', ')
-                                : (author || 'Unknown'),
-
-                        coverUrl,
-
-                        genre:
-                            doc.subject
-                                ? doc.subject[0]
-                                : 'Book',
-
-                        releaseYear:
-                            doc.first_publish_year
-                                ? doc.first_publish_year.toString()
-                                : '',
-
-                        series: '',
-                        seriesNum: null,
-                        confidence: 0.5
-                    };
-                }
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Open Library fallback failed:",
-                error
-            );
-        }
+                const info =
+                    item.volumeInfo ||
+                    {};
 
 
-        return null;
-    }
-
-
-    /* ============================================================
-       SAVE BOOK
-    ============================================================ */
-
-    async function submitForm() {
-
-        const submitBtn =
-            document.getElementById('submitBtn');
-
-        const tIn =
-            document.getElementById('titleInput');
-
-        const aIn =
-            document.getElementById('authorInput');
-
-        const sIn =
-            document.getElementById('seriesInput');
-
-        const snIn =
-            document.getElementById('seriesNumInput');
-
-
-        if (!tIn.value.trim()) {
-            return;
-        }
-
-
-        submitBtn.disabled = true;
-
-
-        try {
-
-            const cover =
-                tIn.dataset.img || '';
-
-            const genre =
-                tIn.dataset.genre || '';
-
-            const releaseYear =
-                tIn.dataset.release || '';
-
-            const series =
-                sIn.value.trim() || null;
-
-            const seriesNum =
-                snIn.value !== ''
-                    ? parseFloat(snIn.value)
-                    : null;
-
-            const defaultStatus =
-                currentViewMode === 'wishlist'
-                    ? 'Wishlist'
-                    : 'To Read';
-
-
-            if (editingId) {
-
-                const cur =
-                    allBooks.find(
-                        b => b.id === editingId
+                const seriesInfo =
+                    extractGoogleSeriesInfo(
+                        item
                     );
 
 
-                const payload = {
+                let cover =
+                    info.imageLinks?.thumbnail ||
+                    info.imageLinks?.smallThumbnail ||
+                    '';
+
+
+                cover =
+                    cover.replace(
+                        'http://',
+                        'https://'
+                    );
+
+
+                results.push({
 
                     title:
-                        tIn.value.trim(),
+                        info.title ||
+                        '',
 
                     author:
-                        aIn.value.trim() ||
-                        'Unknown',
+                        Array.isArray(
+                            info.authors
+                        )
+                            ? info.authors.join(
+                                ', '
+                            )
+                            : 'Unknown',
 
-                    series,
-
-                    series_num:
-                        seriesNum,
-
-                    cover_url:
-                        cover ||
-                        cur.cover_url,
+                    coverUrl:
+                        cover,
 
                     genre:
-                        genre ||
-                        cur.genre,
-
-                    release_year:
-                        releaseYear ||
-                        cur.release_year
-                };
-
-
-                const { error } =
-                    await supabaseClient
-                        .from('books')
-                        .update(payload)
-                        .eq('id', editingId);
-
-
-                if (error) {
-                    throw error;
-                }
-
-            } else {
-
-                const { error } =
-                    await supabaseClient
-                        .from('books')
-                        .insert([{
-
-                            title:
-                                tIn.value.trim(),
-
-                            author:
-                                aIn.value.trim() ||
-                                'Unknown',
-
-                            series,
-
-                            series_num:
-                                seriesNum,
-
-                            cover_url:
-                                cover,
-
-                            genre:
-                                genre ||
-                                'Book',
-
-                            release_year:
-                                releaseYear,
-
-                            status:
-                                defaultStatus
-
-                        }]);
-
-
-                if (error) {
-                    throw error;
-                }
-            }
-
-
-            resetForm();
-
-            await loadBooks();
-
-        } catch (err) {
-
-            console.error(
-                "Save failed:",
-                err
-            );
-
-            alert(
-                `Error saving book: ${
-                    err.message ||
-                    'Check database settings'
-                }`
-            );
-
-        } finally {
-
-            submitBtn.disabled = false;
-        }
-    }
-
-
-    function resetForm() {
-
-        editingId = null;
-
-
-        const tIn =
-            document.getElementById('titleInput');
-
-        tIn.value = '';
-
-        delete tIn.dataset.img;
-        delete tIn.dataset.genre;
-        delete tIn.dataset.release;
-
-
-        document.getElementById(
-            'authorInput'
-        ).value = '';
-
-        document.getElementById(
-            'seriesInput'
-        ).value = '';
-
-        document.getElementById(
-            'seriesNumInput'
-        ).value = '';
-
-
-        document.getElementById(
-            'searchResults'
-        ).classList.add('hidden');
-
-        document.getElementById(
-            'searchResults'
-        ).innerHTML = '';
-
-
-        document.getElementById(
-            'seriesResults'
-        ).classList.add('hidden');
-
-        document.getElementById(
-            'seriesResults'
-        ).innerHTML = '';
-
-
-        document.getElementById(
-            'submitBtn'
-        ).innerText = "Commit";
-
-
-        document.getElementById(
-            'formModeLabel'
-        ).innerText = "Search";
-
-
-        document.getElementById(
-            'cancelEdit'
-        ).classList.add('hidden');
-
-
-        document.getElementById(
-            'deleteSelectedBtn'
-        ).classList.add('hidden');
-    }
-
-
-    /* ============================================================
-       RENDER
-    ============================================================ */
-
-    function render() {
-
-        const fM =
-            document.getElementById(
-                'filterMain'
-            ).value.toLowerCase();
-
-        const fA =
-            document.getElementById(
-                'filterAlt'
-            ).value.toLowerCase();
-
-        const fW =
-            document.getElementById(
-                'filterWishlist'
-            )
-                ? document.getElementById(
-                    'filterWishlist'
-                ).value.toLowerCase()
-                : '';
-
-
-        const sortBy =
-            document.getElementById(
-                'sortSelect'
-            )
-                ? document.getElementById(
-                    'sortSelect'
-                ).value
-                : 'title';
-
-
-        const cols = {
-
-            reading:
-                document.getElementById(
-                    'col-reading'
-                ),
-
-            main:
-                document.getElementById(
-                    'col-main'
-                ),
-
-            alt:
-                document.getElementById(
-                    'col-alt'
-                ),
-
-            wishlist:
-                document.getElementById(
-                    'col-wishlist'
-                )
-        };
-
-
-        Object.values(cols).forEach(c => {
-
-            if (c) {
-                c.innerHTML = '';
-            }
-
-        });
-
-
-        const sortedList =
-            [...allBooks].sort((a, b) => {
-
-                const aAuthor =
-                    (a.author || '').toLowerCase();
-
-                const bAuthor =
-                    (b.author || '').toLowerCase();
-
-
-                const aSeries =
-                    (a.series || '').trim();
-
-                const bSeries =
-                    (b.series || '').trim();
-
-
-                const aNum =
-                    a.series_num !== null &&
-                    a.series_num !== undefined &&
-                    a.series_num !== ''
-                        ? Number(a.series_num)
-                        : 0;
-
-
-                const bNum =
-                    b.series_num !== null &&
-                    b.series_num !== undefined &&
-                    b.series_num !== ''
-                        ? Number(b.series_num)
-                        : 0;
-
-
-                if (sortBy === 'author') {
-
-                    if (aAuthor !== bAuthor) {
-                        return aAuthor.localeCompare(
-                            bAuthor
-                        );
-                    }
-
-                    if (aSeries && bSeries) {
-
-                        if (
-                            aSeries.toLowerCase() !==
-                            bSeries.toLowerCase()
-                        ) {
-
-                            return aSeries.localeCompare(
-                                bSeries
-                            );
-                        }
-
-                        return aNum - bNum;
-                    }
-
-                    if (aSeries && !bSeries) {
-                        return -1;
-                    }
-
-                    if (!aSeries && bSeries) {
-                        return 1;
-                    }
-
-                    return a.title.localeCompare(
-                        b.title
-                    );
-                }
-
-
-                if (
-                    aSeries &&
-                    bSeries &&
-                    aSeries.toLowerCase() ===
-                    bSeries.toLowerCase()
-                ) {
-                    return aNum - bNum;
-                }
-
-
-                if (aSeries && bSeries) {
-
-                    const sCmp =
-                        aSeries.localeCompare(
-                            bSeries
-                        );
-
-                    if (sCmp !== 0) {
-                        return sCmp;
-                    }
-
-                    return aNum - bNum;
-                }
-
-
-                const aKey =
-                    aSeries || a.title;
-
-                const bKey =
-                    bSeries || b.title;
-
-
-                const keyCmp =
-                    aKey.localeCompare(bKey);
-
-                if (keyCmp !== 0) {
-                    return keyCmp;
-                }
-
-                return aNum - bNum;
-
-            });
-
-
-        if (currentViewMode === 'queue') {
-
-            const activeBooks =
-                [...allBooks].filter(
-                    b => b.status === 'Reading'
-                );
-
-
-            if (activeBooks.length > 0) {
-
-                activeBooks.forEach(b =>
-                    cols.reading.appendChild(
-                        createActiveCard(b)
-                    )
-                );
-
-            } else {
-
-                cols.reading.innerHTML =
-                    `<p class="text-slate-500 text-sm font-semibold italic">
-                        Nothing currently being read
-                    </p>`;
-            }
-
-
-            sortedList
-                .filter(
-                    b =>
-                        ![
-                            'Reading',
-                            'Finished',
-                            'Wishlist',
-                            'Not Interested'
-                        ].includes(b.status)
-                )
-                .filter(
-                    b =>
-                        b.title
-                            .toLowerCase()
-                            .includes(fM) ||
-
-                        (
-                            b.author &&
-                            b.author
-                                .toLowerCase()
-                                .includes(fM)
-                        ) ||
-
-                        (
-                            b.series &&
-                            b.series
-                                .toLowerCase()
-                                .includes(fM)
-                        )
-                )
-                .forEach(b =>
-                    cols.main.appendChild(
-                        createCard(b)
-                    )
-                );
-
-        }
-
-        else if (currentViewMode === 'archive') {
-
-            sortedList
-                .filter(
-                    b => b.status === 'Finished'
-                )
-                .filter(
-                    b =>
-                        b.title
-                            .toLowerCase()
-                            .includes(fA) ||
-
-                        (
-                            b.author &&
-                            b.author
-                                .toLowerCase()
-                                .includes(fA)
-                        )
-                )
-                .forEach(b =>
-                    cols.alt.appendChild(
-                        createCard(b)
-                    )
-                );
-
-        }
-
-        else if (currentViewMode === 'wishlist') {
-
-            sortedList
-                .filter(
-                    b => b.status === 'Wishlist'
-                )
-                .filter(
-                    b =>
-                        b.title
-                            .toLowerCase()
-                            .includes(fW) ||
-
-                        (
-                            b.author &&
-                            b.author
-                                .toLowerCase()
-                                .includes(fW)
-                        )
-                )
-                .forEach(b =>
-                    cols.wishlist.appendChild(
-                        createCard(b)
-                    )
-                );
-        }
-    }
-
-
-    /* ============================================================
-       ACTIVE CARD
-    ============================================================ */
-
-    function createActiveCard(book) {
-
-        const hasSeries =
-            Boolean(
-                book.series &&
-                book.series.trim() !== ''
-            );
-
-
-        const releaseYear =
-            parseReleaseYear(
-                book.release_year
-            );
-
-
-        const seriesLabel =
-            getSeriesLabel(book);
-
-
-        const activeBadgeStyle =
-            hasSeries
-                ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
-                : 'text-sky-400 bg-sky-950/40 border-sky-800/40';
-
-
-        const div =
-            document.createElement('div');
-
-
-        div.className =
-            "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
-
-
-        const coverSrc =
-            book.cover_url ||
-            'https://via.placeholder.com/150x225?text=No+Cover';
-
-
-        div.innerHTML = `
-
-            <div class="w-14 h-20 flex-shrink-0 bg-slate-900 rounded-md overflow-hidden flex items-center justify-center">
-
-                <img
-                    src="${coverSrc}"
-                    onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
-                    alt="${book.title}"
-                    class="w-full h-full object-cover shadow-md"
-                />
-
-            </div>
-
-
-            <div class="flex flex-col gap-1 flex-1 min-w-0">
-
-                <div class="flex items-center justify-between">
-
-                    ${
-                        hasSeries
-                            ? `
-                                <span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate max-w-[180px]">
-                                    ⚡ ${seriesLabel}
-                                </span>
-                            `
-                            : `
-                                <span class="text-[9px] font-bold ${activeBadgeStyle} px-2 py-0.5 rounded border truncate">
-                                    📚 STANDALONE
-                                </span>
-                            `
-                    }
-
-
-                    <div class="relative group/menu">
-
-                        <button
-                            class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors"
-                            title="Change Status">
-
-                            <svg class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24">
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                />
-
-                            </svg>
-
-                        </button>
-
-
-                        <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-amber-900/80 p-1.5 rounded-lg shadow-xl z-50">
-
-                            <button
-                                onclick="updateStatus(${book.id}, 'To Read')"
-                                class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400 transition-colors"
-                                title="Move to Collection">
-                                📚
-                            </button>
-
-                            <button
-                                onclick="updateStatus(${book.id}, 'Finished')"
-                                class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors"
-                                title="Mark Finished">
-                                🏆
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">
-                    ${book.title}
-                </h4>
-
-
-                <span class="text-xs text-slate-400">
-                    ${book.author || 'Unknown'} • ${releaseYear}
-                </span>
-
-
-                <div class="flex items-center gap-2 mt-0.5">
-
-                    <span class="text-[9px] bg-amber-900/60 text-amber-300 px-1.5 py-0.5 rounded uppercase font-semibold">
-                        📖 READING
-                    </span>
-
-                </div>
-
-            </div>
-        `;
-
-
-        return div;
-    }
-
-
-    /* ============================================================
-       NORMAL BOOK CARD
-    ============================================================ */
-
-    function createCard(book) {
-
-        const hasSeries =
-            Boolean(
-                book.series &&
-                book.series.trim() !== ''
-            );
-
-
-        const releaseYear =
-            parseReleaseYear(
-                book.release_year
-            );
-
-
-        const seriesLabel =
-            getSeriesLabel(book);
-
-
-        const div =
-            document.createElement('div');
-
-
-        div.dataset.id =
-            book.id;
-
-        div.dataset.series =
-            book.series || '';
-
-        div.className =
-            `book-card flex flex-col justify-between w-full`;
-
-
-        const topBarColor =
-            hasSeries
-                ? 'bg-amber-500'
-                : 'bg-cyan-500';
-
-
-        const badgeStyle =
-            hasSeries
-                ? 'bg-amber-600/20 text-amber-400 border-amber-500/30'
-                : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
-
-
-        const coverSrc =
-            book.cover_url ||
-            'https://via.placeholder.com/150x225?text=No+Cover';
-
-
-        div.innerHTML = `
-
-            <div>
-
-                <div class="h-1.5 w-full ${topBarColor}"></div>
-
-
-                <div class="p-2.5 pb-1 flex flex-col items-center">
-
-                    <div class="book-poster-container shadow-inner">
-
-                        <img
-                            src="${coverSrc}"
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
-                            alt="${book.title}"
-                        />
-
-                    </div>
-
-
-                    <div class="mt-2 mb-1 w-full text-left">
-
-                        ${
-                            hasSeries
-                                ? `
-                                    <span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">
-                                        ⚡ ${seriesLabel}
-                                    </span>
-                                `
-                                : `
-                                    <span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">
-                                        📚 Standalone
-                                    </span>
-                                `
-                        }
-
-                    </div>
-
-
-                    <div class="flex justify-between items-start gap-1.5 w-full">
-
-                        <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">
-                            ${book.title}
-                        </h3>
-
-
-                        <button
-                            onclick='editL(${JSON.stringify(book).replace(/'/g, "&apos;")})'
-                            title="Edit"
-                            class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">
-                            ✏️
-                        </button>
-
-                    </div>
-
-
-                    <p class="text-xs text-amber-400 font-bold mt-0.5 text-left w-full truncate">
-                        ${book.author || 'Unknown'}
-                    </p>
-
-
-                    <p class="text-[11px] text-slate-400 text-left w-full">
-                        ${releaseYear}
-                    </p>
-
-
-                    <div class="flex flex-wrap gap-1 mt-2 w-full">
-
-                        <span class="type-badge shadow-sm">
-                            BOOK
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
-
-                <div class="flex items-center justify-between gap-1">
-
-                    <span class="${hasSeries ? 'text-amber-400' : 'text-cyan-400'} font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">
-                        ${book.genre || 'Book'}
-                    </span>
-
-
-                    <select
-                        onchange="updateStatus(${book.id}, this.value)"
-                        class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-
-                        <option value="To Read" ${book.status === 'To Read' ? 'selected' : ''}>
-                            To Read 📚
-                        </option>
-
-                        <option value="Reading" ${book.status === 'Reading' ? 'selected' : ''}>
-                            Reading 📖
-                        </option>
-
-                        <option value="Wishlist" ${book.status === 'Wishlist' ? 'selected' : ''}>
-                            Wishlist 🪄
-                        </option>
-
-                        <option value="Finished" ${book.status === 'Finished' ? 'selected' : ''}>
-                            Finished 🏆
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
-        `;
-
-
-        return div;
-    }
-
-
-    /* ============================================================
-       SERIES DISPLAY
-    ============================================================ */
-
-    function getSeriesLabel(book) {
-
-        const series =
-            (book.series || '').trim();
-
-
-        if (!series) {
-            return '';
-        }
-
-
-        const num =
-            book.series_num;
-
-
-        if (
-            num === null ||
-            num === undefined ||
-            num === ''
-        ) {
-            return series;
-        }
-
-
-        return `${series} #${Number(num)}`;
-    }
-
-
-    /* ============================================================
-       VIEW SWITCHING
-    ============================================================ */
-
-    function toggleView(v) {
-
-        currentViewMode = v;
-
-
-        const qv =
-            document.getElementById(
-                'queueView'
-            );
-
-        const dt =
-            document.getElementById(
-                'dashboardTop'
-            );
-
-        const as =
-            document.getElementById(
-                'activeSessionBox'
-            );
-
-        const ia =
-            document.getElementById(
-                'inputArea'
-            );
-
-        const av =
-            document.getElementById(
-                'altView'
-            );
-
-        const wv =
-            document.getElementById(
-                'wishlistView'
-            );
-
-
-        if (v === 'queue') {
-
-            dt.style.display = 'grid';
-            qv.style.display = 'block';
-            as.style.display = 'flex';
-
-            ia.classList.remove(
-                'lg:col-span-12'
-            );
-
-            ia.classList.add(
-                'lg:col-span-7'
-            );
-
-            av.style.display = 'none';
-            wv.style.display = 'none';
-
-        }
-
-        else if (v === 'wishlist') {
-
-            dt.style.display = 'grid';
-            as.style.display = 'none';
-
-            ia.classList.remove(
-                'lg:col-span-7'
-            );
-
-            ia.classList.add(
-                'lg:col-span-12'
-            );
-
-            qv.style.display = 'none';
-            av.style.display = 'none';
-            wv.style.display = 'block';
-
-        }
-
-        else {
-
-            dt.style.display = 'none';
-            qv.style.display = 'none';
-            wv.style.display = 'none';
-            av.style.display = 'block';
-
-            document.getElementById(
-                'altTitle'
-            ).innerText =
-                'Finished Archive 🏆';
-
-            document.getElementById(
-                'altTitle'
-            ).style.color =
-                '#34d399';
-        }
-
-
-        render();
-    }
-
-
-    /* ============================================================
-       EDIT
-    ============================================================ */
-
-    function editL(b) {
-
-        editingId = b.id;
-
-
-        const dt =
-            document.getElementById(
-                'dashboardTop'
-            );
-
-        const as =
-            document.getElementById(
-                'activeSessionBox'
-            );
-
-        const ia =
-            document.getElementById(
-                'inputArea'
-            );
-
-
-        dt.style.display = 'grid';
-
-
-        if (currentViewMode !== 'queue') {
-
-            as.style.display = 'none';
-
-            ia.classList.remove(
-                'lg:col-span-7'
-            );
-
-            ia.classList.add(
-                'lg:col-span-12'
-            );
-        }
-
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-
-
-        const tIn =
-            document.getElementById(
-                'titleInput'
-            );
-
-
-        tIn.value =
-            b.title;
-
-
-        if (b.cover_url) {
-            tIn.dataset.img =
-                b.cover_url;
-        }
-
-        if (b.genre) {
-            tIn.dataset.genre =
-                b.genre;
-        }
-
-        if (b.release_year) {
-            tIn.dataset.release =
-                b.release_year;
-        }
-
-
-        document.getElementById(
-            'formModeLabel'
-        ).innerText =
-            "Updating: " + b.title;
-
-
-        document.getElementById(
-            'cancelEdit'
-        ).classList.remove('hidden');
-
-
-        document.getElementById(
-            'deleteSelectedBtn'
-        ).classList.remove('hidden');
-
-
-        document.getElementById(
-            'authorInput'
-        ).value =
-            b.author || '';
-
-
-        document.getElementById(
-            'seriesInput'
-        ).value =
-            b.series || '';
-
-
-        document.getElementById(
-            'seriesNumInput'
-        ).value =
-            b.series_num !== null &&
-            b.series_num !== undefined
-                ? b.series_num
-                : '';
-    }
-
-
-    function exitEditMode() {
-
-        resetForm();
-
-        toggleView(
-            currentViewMode
-        );
-    }
-
-
-    async function deleteSelectedFromForm() {
-
-        if (!editingId) {
-            return;
-        }
-
-
-        if (
-            confirm(
-                "Are you sure you want to delete this book?"
-            )
-        ) {
-
-            await supabaseClient
-                .from('books')
-                .delete()
-                .eq('id', editingId);
-
-
-            resetForm();
-
-            loadBooks();
-        }
-    }
-
-
-    async function updateStatus(id, s) {
-
-        await supabaseClient
-            .from('books')
-            .update({
-                status: s
-            })
-            .eq('id', id);
-
-
-        loadBooks();
-    }
-
-
-    /* ============================================================
-       SERIES DROPDOWN
-    ============================================================ */
-
-    function filterSeriesDropdown(val) {
-
-        const sr =
-            document.getElementById(
-                'seriesResults'
-            );
-
-
-        const existingSeries =
-            Array.from(
-                new Set(
-                    allBooks
-                        .map(b => b.series)
-                        .filter(
-                            s =>
-                                s &&
-                                s.trim() !== ''
-                        )
-                )
-            );
-
-
-        const filtered =
-            existingSeries.filter(
-                s =>
-                    s
-                        .toLowerCase()
-                        .includes(
-                            val
-                                .toLowerCase()
-                                .trim()
-                        )
-            );
-
-
-        if (filtered.length === 0) {
-
-            sr.classList.add('hidden');
-
-            return;
-        }
-
-
-        sr.innerHTML =
-            filtered.map(
-                s => `
-                    <div
-                        onclick="selectSeries('${s.replace(/'/g, "\\'")}')"
-                        class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">
-                        ${s}
-                    </div>
-                `
-            ).join('');
-
-
-        sr.classList.remove('hidden');
-    }
-
-
-    function selectSeries(name) {
-
-        document.getElementById(
-            'seriesInput'
-        ).value = name;
-
-
-        document.getElementById(
-            'seriesResults'
-        ).classList.add('hidden');
-    }
-
-
-    /* ============================================================
-       BOOK SEARCH
-    ============================================================ */
-
-    function searchBooks(q) {
-
-        clearTimeout(searchDebounce);
-
-        searchDebounce =
-            setTimeout(
-                () => executeSearch(q),
-                350
-            );
-    }
-
-
-    async function executeSearch(q) {
-
-        const r =
-            document.getElementById(
-                'searchResults'
-            );
-
-
-        const trimmedQuery =
-            q
-                ? q.trim()
-                : '';
-
-
-        if (trimmedQuery.length < 2) {
-
-            r.classList.add('hidden');
-            r.innerHTML = '';
-
-            return;
-        }
-
-
-        r.innerHTML = `
-            <div class="p-4 text-sm text-slate-400">
-                Searching books and series...
-            </div>
-        `;
-
-        r.classList.remove('hidden');
-
-
-        try {
-
-            const items = [];
-
-
-            /*
-             * Google Books first.
-             * This gives us seriesInfo and orderNumber.
-             */
-
-            const gbRes =
-                await fetch(
-                    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(trimmedQuery)}&maxResults=7&projection=full&includeNonComicsSeries=true`
-                );
-
-
-            if (gbRes.ok) {
-
-                const gbData =
-                    await gbRes.json();
-
-
-                if (
-                    gbData.items &&
-                    gbData.items.length
-                ) {
-
-                    for (
-                        const item
-                        of gbData.items
-                    ) {
-
-                        const info =
-                            item.volumeInfo ||
-                            {};
-
-
-                        let series = '';
-                        let seriesNum = null;
-
-
-                        /*
-                         * The search result may already contain
-                         * seriesInfo. If not, the complete volume
-                         * request below should provide it.
-                         */
-
-                        if (
-                            info.seriesInfo &&
-                            info.seriesInfo.volumeSeries
-                        ) {
-
-                            const first =
-                                info
-                                    .seriesInfo
-                                    .volumeSeries
-                                    .find(
-                                        s =>
-                                            s &&
-                                            s.seriesId
-                                    );
-
-
-                            if (first) {
-
-                                seriesNum =
-                                    Number.isFinite(
-                                        Number(
-                                            first.orderNumber
-                                        )
-                                    )
-                                        ? Number(
-                                            first.orderNumber
-                                        )
-                                        : null;
-
-
-                                series =
-                                    await getGoogleSeriesName([
-                                        first.seriesId
-                                    ]);
-                            }
-                        }
-
-
-                        /*
-                         * If series data wasn't present in the
-                         * search response, fetch the volume.
-                         */
-
-                        if (
-                            !series &&
-                            item.id
-                        ) {
-
-                            const complete =
-                                await getGoogleVolume(
-                                    item.id
-                                );
-
-
-                            if (complete) {
-
-                                const extracted =
-                                    await extractGoogleSeries(
-                                        complete
-                                    );
-
-
-                                series =
-                                    extracted.series;
-
-                                seriesNum =
-                                    extracted.seriesNum;
-                            }
-                        }
-
-
-                        const cover =
-                            info.imageLinks
-                                ? (
-                                    info.imageLinks.thumbnail ||
-                                    info.imageLinks.smallThumbnail ||
-                                    ''
-                                ).replace(
-                                    'http://',
-                                    'https://'
+                        Array.isArray(
+                            info.categories
+                        ) &&
+                        info.categories.length
+                            ? info.categories[0]
+                            : 'Book',
+
+                    releaseYear:
+                        info.publishedDate
+                            ? info.publishedDate
+                                .substring(
+                                    0,
+                                    4
                                 )
-                                : '';
+                            : '',
 
+                    series:
+                        '',
 
-                        items.push({
+                    seriesNum:
+                        seriesInfo.order
 
-                            title:
-                                info.title || '',
-
-                            author:
-                                info.authors
-                                    ? info.authors.join(', ')
-                                    : 'Unknown',
-
-                            coverUrl:
-                                cover,
-
-                            genre:
-                                info.categories
-                                    ? info.categories[0]
-                                    : 'Book',
-
-                            releaseYear:
-                                info.publishedDate
-                                    ? info.publishedDate.split('-')[0]
-                                    : '',
-
-                            series,
-                            seriesNum
-
-                        });
-                    }
-                }
+                });
             }
+        }
 
 
-            /*
-             * If Google doesn't return anything, use Open Library.
-             */
-
-            if (!items.length) {
-
-                const olRes =
-                    await fetch(
-                        `https://openlibrary.org/search.json?q=${encodeURIComponent(trimmedQuery)}&limit=7`
-                    );
+        currentSearchResults =
+            results;
 
 
-                if (olRes.ok) {
+        if (
+            !results.length
+        ) {
 
-                    const olData =
-                        await olRes.json();
+            resultsBox.innerHTML = `
+                <div class="p-4 text-sm text-slate-400">
+                    No results found.
+                </div>
+            `;
 
-
-                    if (
-                        olData.docs &&
-                        olData.docs.length
-                    ) {
-
-                        olData.docs.forEach(doc => {
-
-                            const isbn =
-                                doc.isbn
-                                    ? doc.isbn[0]
-                                    : '';
+            return;
+        }
 
 
-                            const coverUrl =
-                                doc.cover_i
-                                    ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-                                    : (
-                                        isbn
-                                            ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`
-                                            : ''
-                                    );
-
-
-                            items.push({
-
-                                title:
-                                    doc.title || '',
-
-                                author:
-                                    doc.author_name
-                                        ? doc.author_name.join(', ')
-                                        : 'Unknown',
-
-                                coverUrl,
-
-                                genre:
-                                    doc.subject
-                                        ? doc.subject[0]
-                                        : 'Book',
-
-                                releaseYear:
-                                    doc.first_publish_year
-                                        ? doc.first_publish_year.toString()
-                                        : '',
-
-                                series: '',
-                                seriesNum: null
-
-                            });
-
-                        });
-                    }
-                }
-            }
-
-
-            if (!items.length) {
-
-                r.innerHTML =
-                    `<div class="p-4 text-sm text-slate-400">
-                        No results found.
-                    </div>`;
-
-                return;
-            }
-
-
-            r.innerHTML =
-                items.map(
-                    (item, index) => {
-
-                        const safeTitle =
-                            escapeHtml(
-                                item.title || ''
-                            );
-
-                        const safeAuthor =
-                            escapeHtml(
-                                item.author ||
-                                'Unknown'
-                            );
-
-                        const safeGenre =
-                            escapeHtml(
-                                item.genre ||
-                                'Book'
-                            );
-
-                        const safeSeries =
-                            escapeHtml(
-                                item.series ||
-                                ''
-                            );
-
+        resultsBox.innerHTML =
+            results
+                .map(
+                    (
+                        item,
+                        index
+                    ) => {
 
                         const seriesText =
                             item.series
                                 ? `
                                     <div class="text-[10px] text-amber-300 font-bold mt-1">
-                                        ⚡ ${safeSeries}
+                                        ⚡ ${escapeHtml(item.series)}
                                         ${
                                             item.seriesNum !== null &&
                                             item.seriesNum !== undefined
@@ -2762,7 +1824,7 @@
                                 `
                                 : `
                                     <div class="text-[10px] text-slate-500 mt-1">
-                                        Standalone / series not found
+                                        Series information not found
                                     </div>
                                 `;
 
@@ -2771,13 +1833,13 @@
 
                             <div
                                 onclick="selectBookResult(${index})"
-                                class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
+                                class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white transition-colors">
 
                                 ${
                                     item.coverUrl
                                         ? `
                                             <img
-                                                src="${item.coverUrl}"
+                                                src="${escapeHtml(item.coverUrl)}"
                                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
                                                 class="w-10 h-14 object-cover rounded shadow bg-slate-900"
                                             >
@@ -2790,14 +1852,16 @@
                                 }
 
 
-                                <div class="min-w-0">
+                                <div class="min-w-0 flex-1">
 
                                     <p class="text-sm font-bold text-white truncate">
-                                        ${safeTitle}
+                                        ${escapeHtml(item.title)}
                                     </p>
 
                                     <p class="text-xs text-amber-400 font-bold uppercase mt-0.5 truncate">
-                                        ${safeAuthor} • ${item.releaseYear || 'TBA'}
+                                        ${escapeHtml(item.author || 'Unknown')}
+                                        •
+                                        ${escapeHtml(item.releaseYear || 'TBA')}
                                     </p>
 
                                     ${seriesText}
@@ -2805,273 +1869,2505 @@
                                 </div>
 
                             </div>
+
                         `;
                     }
-                ).join('');
+                )
+                .join('');
 
 
-            /*
-             * Store the results temporarily so the click handler
-             * doesn't have to put lots of escaped data into HTML.
-             */
+    } catch (error) {
 
-            window.currentBookSearchResults =
-                items;
+        console.error(
+            'Book search failed:',
+            error
+        );
 
 
-        } catch (err) {
+        resultsBox.innerHTML = `
+            <div class="p-4 text-sm text-red-400 font-bold">
+                Search failed: ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
 
-            r.innerHTML =
-                `<div class="p-4 text-sm text-rose-400 font-bold">
-                    Search error: ${escapeHtml(err.message)}
-                </div>`;
-        }
+
+function selectBookResult(index) {
+
+    const book =
+        currentSearchResults[
+            index
+        ];
+
+
+    if (!book) {
+        return;
     }
 
 
-    function selectBookResult(index) {
+    selectBook(
+        book.title,
+        book.author,
+        book.coverUrl,
+        book.genre,
+        book.releaseYear,
+        book.series,
+        book.seriesNum
+    );
+}
 
-        const item =
-            window.currentBookSearchResults &&
-            window.currentBookSearchResults[index];
+
+function selectBook(
+    title,
+    author,
+    cover,
+    genre,
+    releaseYear,
+    series = '',
+    seriesNum = null
+) {
+
+    const titleInput =
+        document.getElementById(
+            'titleInput'
+        );
 
 
-        if (!item) {
-            return;
+    const seriesInput =
+        document.getElementById(
+            'seriesInput'
+        );
+
+
+    const seriesNumInput =
+        document.getElementById(
+            'seriesNumInput'
+        );
+
+
+    titleInput.value =
+        title || '';
+
+
+    document.getElementById(
+        'authorInput'
+    ).value =
+        author || '';
+
+
+    if (cover) {
+
+        titleInput.dataset.img =
+            cover;
+
+    } else {
+
+        delete titleInput.dataset.img;
+    }
+
+
+    if (genre) {
+
+        titleInput.dataset.genre =
+            genre;
+
+    } else {
+
+        delete titleInput.dataset.genre;
+    }
+
+
+    if (releaseYear) {
+
+        titleInput.dataset.release =
+            releaseYear;
+
+    } else {
+
+        delete titleInput.dataset.release;
+    }
+
+
+    /*
+     * Automatic series data.
+     */
+
+    seriesInput.value =
+        series || '';
+
+
+    seriesNumInput.value =
+        (
+            seriesNum !== null &&
+            seriesNum !== undefined
+        )
+            ? seriesNum
+            : '';
+
+
+    document.getElementById(
+        'searchResults'
+    ).classList.add(
+        'hidden'
+    );
+
+
+    /*
+     * Focus series so it is easy to manually correct it if
+     * necessary.
+     */
+
+    seriesInput.focus();
+}
+
+
+/* ================================================================
+   SAVE
+================================================================ */
+
+async function submitForm() {
+
+    const titleInput =
+        document.getElementById(
+            'titleInput'
+        );
+
+    const authorInput =
+        document.getElementById(
+            'authorInput'
+        );
+
+    const seriesInput =
+        document.getElementById(
+            'seriesInput'
+        );
+
+    const seriesNumInput =
+        document.getElementById(
+            'seriesNumInput'
+        );
+
+    const submitButton =
+        document.getElementById(
+            'submitBtn'
+        );
+
+
+    const title =
+        titleInput.value.trim();
+
+
+    if (!title) {
+        return;
+    }
+
+
+    submitButton.disabled =
+        true;
+
+
+    try {
+
+        const series =
+            seriesInput.value.trim() ||
+            null;
+
+
+        const seriesNum =
+            seriesNumInput.value !== ''
+                ? parseFloat(
+                    seriesNumInput.value
+                )
+                : null;
+
+
+        const cover =
+            titleInput.dataset.img ||
+            '';
+
+
+        const genre =
+            titleInput.dataset.genre ||
+            'Book';
+
+
+        const releaseYear =
+            titleInput.dataset.release ||
+            '';
+
+
+        if (editingId) {
+
+            const currentBook =
+                allBooks.find(
+                    book =>
+                        book.id ===
+                        editingId
+                );
+
+
+            const payload = {
+
+                title,
+
+                author:
+                    authorInput.value.trim() ||
+                    'Unknown',
+
+                series,
+
+                series_num:
+                    seriesNum,
+
+                cover_url:
+                    cover ||
+                    currentBook?.cover_url ||
+                    '',
+
+                genre:
+                    genre ||
+                    currentBook?.genre ||
+                    'Book',
+
+                release_year:
+                    releaseYear ||
+                    currentBook?.release_year ||
+                    ''
+            };
+
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from('books')
+                    .update(payload)
+                    .eq(
+                        'id',
+                        editingId
+                    );
+
+
+            if (error) {
+                throw error;
+            }
+
+        } else {
+
+            const status =
+                currentViewMode ===
+                'wishlist'
+                    ? 'Wishlist'
+                    : 'To Read';
+
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from('books')
+                    .insert([{
+
+                        title,
+
+                        author:
+                            authorInput
+                                .value
+                                .trim() ||
+                            'Unknown',
+
+                        series,
+
+                        series_num:
+                            seriesNum,
+
+                        cover_url:
+                            cover,
+
+                        genre,
+
+                        release_year:
+                            releaseYear,
+
+                        status
+
+                    }]);
+
+
+            if (error) {
+                throw error;
+            }
         }
 
 
-        selectBook(
-            item.title,
-            item.author,
-            item.coverUrl,
-            item.genre,
-            item.releaseYear,
-            item.series,
-            item.seriesNum
+        resetForm();
+
+        await loadBooks();
+
+
+    } catch (error) {
+
+        console.error(
+            'Save failed:',
+            error
+        );
+
+
+        alert(
+            'Error saving book: ' +
+            (
+                error.message ||
+                'Unknown error'
+            )
+        );
+
+    } finally {
+
+        submitButton.disabled =
+            false;
+    }
+}
+
+
+function resetForm() {
+
+    editingId = null;
+
+
+    const titleInput =
+        document.getElementById(
+            'titleInput'
+        );
+
+
+    titleInput.value =
+        '';
+
+
+    delete titleInput.dataset.img;
+    delete titleInput.dataset.genre;
+    delete titleInput.dataset.release;
+
+
+    document.getElementById(
+        'authorInput'
+    ).value =
+        '';
+
+
+    document.getElementById(
+        'seriesInput'
+    ).value =
+        '';
+
+
+    document.getElementById(
+        'seriesNumInput'
+    ).value =
+        '';
+
+
+    document.getElementById(
+        'searchResults'
+    ).innerHTML =
+        '';
+
+
+    document.getElementById(
+        'searchResults'
+    ).classList.add(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'seriesResults'
+    ).innerHTML =
+        '';
+
+
+    document.getElementById(
+        'seriesResults'
+    ).classList.add(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'submitBtn'
+    ).innerText =
+        'Commit';
+
+
+    document.getElementById(
+        'formModeLabel'
+    ).innerText =
+        'Search';
+
+
+    document.getElementById(
+        'cancelEdit'
+    ).classList.add(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'deleteSelectedBtn'
+    ).classList.add(
+        'hidden'
+    );
+}
+
+
+/* ================================================================
+   RENDER
+================================================================ */
+
+function render() {
+
+    const filterMain =
+        document.getElementById(
+            'filterMain'
+        )?.value
+        ?.toLowerCase() ||
+        '';
+
+
+    const filterAlt =
+        document.getElementById(
+            'filterAlt'
+        )?.value
+        ?.toLowerCase() ||
+        '';
+
+
+    const filterWishlist =
+        document.getElementById(
+            'filterWishlist'
+        )?.value
+        ?.toLowerCase() ||
+        '';
+
+
+    const sortBy =
+        document.getElementById(
+            'sortSelect'
+        )?.value ||
+        'title';
+
+
+    const columns = {
+
+        reading:
+            document.getElementById(
+                'col-reading'
+            ),
+
+        main:
+            document.getElementById(
+                'col-main'
+            ),
+
+        alt:
+            document.getElementById(
+                'col-alt'
+            ),
+
+        wishlist:
+            document.getElementById(
+                'col-wishlist'
+            )
+
+    };
+
+
+    Object.values(columns)
+        .forEach(
+            column => {
+
+                if (column) {
+                    column.innerHTML =
+                        '';
+                }
+
+            }
+        );
+
+
+    const sorted =
+        [...allBooks].sort(
+            (a, b) => {
+
+                const aAuthor =
+                    (
+                        a.author ||
+                        ''
+                    ).toLowerCase();
+
+
+                const bAuthor =
+                    (
+                        b.author ||
+                        ''
+                    ).toLowerCase();
+
+
+                const aSeries =
+                    (
+                        a.series ||
+                        ''
+                    ).trim();
+
+
+                const bSeries =
+                    (
+                        b.series ||
+                        ''
+                    ).trim();
+
+
+                const aNum =
+                    Number(
+                        a.series_num
+                    ) || 0;
+
+
+                const bNum =
+                    Number(
+                        b.series_num
+                    ) || 0;
+
+
+                if (
+                    sortBy ===
+                    'author'
+                ) {
+
+                    const authorCompare =
+                        aAuthor.localeCompare(
+                            bAuthor
+                        );
+
+
+                    if (
+                        authorCompare !== 0
+                    ) {
+                        return authorCompare;
+                    }
+                }
+
+
+                if (
+                    aSeries &&
+                    bSeries &&
+                    normalizeText(
+                        aSeries
+                    ) ===
+                    normalizeText(
+                        bSeries
+                    )
+                ) {
+
+                    return (
+                        aNum -
+                        bNum
+                    );
+                }
+
+
+                if (
+                    aSeries &&
+                    !bSeries
+                ) {
+                    return -1;
+                }
+
+
+                if (
+                    !aSeries &&
+                    bSeries
+                ) {
+                    return 1;
+                }
+
+
+                const aKey =
+                    aSeries ||
+                    a.title ||
+                    '';
+
+
+                const bKey =
+                    bSeries ||
+                    b.title ||
+                    '';
+
+
+                const keyCompare =
+                    aKey.localeCompare(
+                        bKey
+                    );
+
+
+                if (
+                    keyCompare !== 0
+                ) {
+                    return keyCompare;
+                }
+
+
+                return (
+                    aNum -
+                    bNum
+                );
+            }
+        );
+
+
+    if (
+        currentViewMode ===
+        'queue'
+    ) {
+
+        const reading =
+            sorted.filter(
+                book =>
+                    book.status ===
+                    'Reading'
+            );
+
+
+        if (
+            reading.length
+        ) {
+
+            reading.forEach(
+                book =>
+                    columns.reading
+                        .appendChild(
+                            createActiveCard(
+                                book
+                            )
+                        )
+            );
+
+        } else {
+
+            columns.reading.innerHTML =
+                `
+                    <p class="text-slate-500 text-sm font-semibold italic">
+                        Nothing currently being read
+                    </p>
+                `;
+        }
+
+
+        sorted
+            .filter(
+                book =>
+                    ![
+                        'Reading',
+                        'Finished',
+                        'Wishlist',
+                        'Not Interested'
+                    ].includes(
+                        book.status
+                    )
+            )
+            .filter(
+                book => {
+
+                    const title =
+                        (
+                            book.title ||
+                            ''
+                        ).toLowerCase();
+
+
+                    const author =
+                        (
+                            book.author ||
+                            ''
+                        ).toLowerCase();
+
+
+                    const series =
+                        (
+                            book.series ||
+                            ''
+                        ).toLowerCase();
+
+
+                    return (
+                        title.includes(
+                            filterMain
+                        ) ||
+                        author.includes(
+                            filterMain
+                        ) ||
+                        series.includes(
+                            filterMain
+                        )
+                    );
+                }
+            )
+            .forEach(
+                book =>
+                    columns.main
+                        .appendChild(
+                            createCard(
+                                book
+                            )
+                        )
+            );
+
+    } else if (
+        currentViewMode ===
+        'archive'
+    ) {
+
+        sorted
+            .filter(
+                book =>
+                    book.status ===
+                    'Finished'
+            )
+            .filter(
+                book => {
+
+                    const title =
+                        (
+                            book.title ||
+                            ''
+                        ).toLowerCase();
+
+
+                    const author =
+                        (
+                            book.author ||
+                            ''
+                        ).toLowerCase();
+
+
+                    return (
+                        title.includes(
+                            filterAlt
+                        ) ||
+                        author.includes(
+                            filterAlt
+                        )
+                    );
+                }
+            )
+            .forEach(
+                book =>
+                    columns.alt
+                        .appendChild(
+                            createCard(
+                                book
+                            )
+                        )
+            );
+
+    } else {
+
+        sorted
+            .filter(
+                book =>
+                    book.status ===
+                    'Wishlist'
+            )
+            .filter(
+                book => {
+
+                    const title =
+                        (
+                            book.title ||
+                            ''
+                        ).toLowerCase();
+
+
+                    const author =
+                        (
+                            book.author ||
+                            ''
+                        ).toLowerCase();
+
+
+                    return (
+                        title.includes(
+                            filterWishlist
+                        ) ||
+                        author.includes(
+                            filterWishlist
+                        )
+                    );
+                }
+            )
+            .forEach(
+                book =>
+                    columns.wishlist
+                        .appendChild(
+                            createCard(
+                                book
+                            )
+                        )
+            );
+    }
+}
+
+
+/* ================================================================
+   SERIES DISPLAY
+================================================================ */
+
+function getSeriesLabel(book) {
+
+    const series =
+        (
+            book.series ||
+            ''
+        ).trim();
+
+
+    if (!series) {
+        return '';
+    }
+
+
+    if (
+        book.series_num === null ||
+        book.series_num === undefined ||
+        book.series_num === ''
+    ) {
+        return series;
+    }
+
+
+    return (
+        `${series} #${Number(
+            book.series_num
+        )}`
+    );
+}
+
+
+/* ================================================================
+   ACTIVE CARD
+================================================================ */
+
+function createActiveCard(book) {
+
+    const div =
+        document.createElement(
+            'div'
+        );
+
+
+    const hasSeries =
+        Boolean(
+            book.series &&
+            book.series.trim()
+        );
+
+
+    const releaseYear =
+        parseReleaseYear(
+            book.release_year
+        );
+
+
+    const cover =
+        book.cover_url ||
+        'https://via.placeholder.com/150x225?text=No+Cover';
+
+
+    div.className =
+        'flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full';
+
+
+    div.innerHTML = `
+
+        <div class="w-14 h-20 flex-shrink-0 bg-slate-900 rounded-md overflow-hidden flex items-center justify-center">
+
+            <img
+                src="${escapeHtml(cover)}"
+                onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
+                alt="${escapeHtml(book.title)}"
+                class="w-full h-full object-cover shadow-md">
+
+        </div>
+
+
+        <div class="flex flex-col gap-1 flex-1 min-w-0">
+
+            <div class="flex items-center justify-between">
+
+                ${
+                    hasSeries
+                        ? `
+                            <span class="text-[9px] font-bold text-amber-400 bg-amber-950/40 border-amber-800/40 px-2 py-0.5 rounded border truncate max-w-[180px]">
+                                ⚡ ${escapeHtml(
+                                    getSeriesLabel(
+                                        book
+                                    )
+                                )}
+                            </span>
+                        `
+                        : `
+                            <span class="text-[9px] font-bold text-sky-400 bg-sky-950/40 border-sky-800/40 px-2 py-0.5 rounded border">
+                                📚 STANDALONE
+                            </span>
+                        `
+                }
+
+
+                <div class="relative group/menu">
+
+                    <button
+                        class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors">
+                        ✏️
+                    </button>
+
+
+                    <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-amber-900/80 p-1.5 rounded-lg shadow-xl z-50">
+
+                        <button
+                            onclick="updateStatus(${book.id}, 'To Read')"
+                            class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400"
+                            title="Move to Collection">
+                            📚
+                        </button>
+
+                        <button
+                            onclick="updateStatus(${book.id}, 'Finished')"
+                            class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400"
+                            title="Mark Finished">
+                            🏆
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">
+                ${escapeHtml(book.title)}
+            </h4>
+
+
+            <span class="text-xs text-slate-400">
+                ${escapeHtml(book.author || 'Unknown')} • ${releaseYear}
+            </span>
+
+
+            <div class="flex items-center gap-2 mt-0.5">
+
+                <span class="text-[9px] bg-amber-900/60 text-amber-300 px-1.5 py-0.5 rounded uppercase font-semibold">
+                    📖 READING
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+
+    return div;
+}
+
+
+/* ================================================================
+   NORMAL CARD
+================================================================ */
+
+function createCard(book) {
+
+    const div =
+        document.createElement(
+            'div'
+        );
+
+
+    const hasSeries =
+        Boolean(
+            book.series &&
+            book.series.trim()
+        );
+
+
+    const releaseYear =
+        parseReleaseYear(
+            book.release_year
+        );
+
+
+    const cover =
+        book.cover_url ||
+        'https://via.placeholder.com/150x225?text=No+Cover';
+
+
+    const topBar =
+        hasSeries
+            ? 'bg-amber-500'
+            : 'bg-cyan-500';
+
+
+    const badge =
+        hasSeries
+            ? 'bg-amber-600/20 text-amber-400 border-amber-500/30'
+            : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
+
+
+    div.dataset.id =
+        book.id;
+
+
+    div.dataset.series =
+        book.series || '';
+
+
+    div.className =
+        'book-card flex flex-col justify-between w-full';
+
+
+    div.innerHTML = `
+
+        <div>
+
+            <div class="h-1.5 w-full ${topBar}"></div>
+
+
+            <div class="p-2.5 pb-1 flex flex-col items-center">
+
+                <div class="book-poster-container shadow-inner">
+
+                    <img
+                        src="${escapeHtml(cover)}"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
+                        alt="${escapeHtml(book.title)}">
+
+                </div>
+
+
+                <div class="mt-2 mb-1 w-full text-left">
+
+                    <span class="inline-block text-[9px] ${badge} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">
+
+                        ${
+                            hasSeries
+                                ? `⚡ ${escapeHtml(
+                                    getSeriesLabel(
+                                        book
+                                    )
+                                )}`
+                                : '📚 Standalone'
+                        }
+
+                    </span>
+
+                </div>
+
+
+                <div class="flex justify-between items-start gap-1.5 w-full">
+
+                    <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">
+                        ${escapeHtml(book.title)}
+                    </h3>
+
+
+                    <button
+                        onclick="editL(${book.id})"
+                        title="Edit"
+                        class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">
+                        ✏️
+                    </button>
+
+                </div>
+
+
+                <p class="text-xs text-amber-400 font-bold mt-0.5 text-left w-full truncate">
+                    ${escapeHtml(book.author || 'Unknown')}
+                </p>
+
+
+                <p class="text-[11px] text-slate-400 text-left w-full">
+                    ${releaseYear}
+                </p>
+
+
+                <div class="flex flex-wrap gap-1 mt-2 w-full">
+
+                    <span class="type-badge shadow-sm">
+                        BOOK
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
+
+            <div class="flex items-center justify-between gap-1">
+
+                <span class="${hasSeries ? 'text-amber-400' : 'text-cyan-400'} font-bold uppercase text-[10px] truncate min-w-0 flex-1 text-left">
+                    ${escapeHtml(book.genre || 'Book')}
+                </span>
+
+
+                <select
+                    onchange="updateStatus(${book.id}, this.value)"
+                    class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+
+                    <option
+                        value="To Read"
+                        ${book.status === 'To Read' ? 'selected' : ''}>
+                        To Read 📚
+                    </option>
+
+                    <option
+                        value="Reading"
+                        ${book.status === 'Reading' ? 'selected' : ''}>
+                        Reading 📖
+                    </option>
+
+                    <option
+                        value="Wishlist"
+                        ${book.status === 'Wishlist' ? 'selected' : ''}>
+                        Wishlist 🪄
+                    </option>
+
+                    <option
+                        value="Finished"
+                        ${book.status === 'Finished' ? 'selected' : ''}>
+                        Finished 🏆
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+    `;
+
+
+    return div;
+}
+
+
+/* ================================================================
+   VIEW SWITCHING
+================================================================ */
+
+function toggleView(v) {
+
+    currentViewMode =
+        v;
+
+
+    const dashboard =
+        document.getElementById(
+            'dashboardTop'
+        );
+
+
+    const queue =
+        document.getElementById(
+            'queueView'
+        );
+
+
+    const reading =
+        document.getElementById(
+            'activeSessionBox'
+        );
+
+
+    const input =
+        document.getElementById(
+            'inputArea'
+        );
+
+
+    const archive =
+        document.getElementById(
+            'altView'
+        );
+
+
+    const wishlist =
+        document.getElementById(
+            'wishlistView'
+        );
+
+
+    if (
+        v === 'queue'
+    ) {
+
+        dashboard.style.display =
+            'grid';
+
+        queue.style.display =
+            'block';
+
+        reading.style.display =
+            'flex';
+
+
+        input.classList.remove(
+            'lg:col-span-12'
+        );
+
+        input.classList.add(
+            'lg:col-span-7'
+        );
+
+
+        archive.style.display =
+            'none';
+
+        wishlist.style.display =
+            'none';
+
+    } else if (
+        v === 'wishlist'
+    ) {
+
+        dashboard.style.display =
+            'grid';
+
+        reading.style.display =
+            'none';
+
+
+        input.classList.remove(
+            'lg:col-span-7'
+        );
+
+        input.classList.add(
+            'lg:col-span-12'
+        );
+
+
+        queue.style.display =
+            'none';
+
+        archive.style.display =
+            'none';
+
+        wishlist.style.display =
+            'block';
+
+    } else {
+
+        dashboard.style.display =
+            'none';
+
+        queue.style.display =
+            'none';
+
+        wishlist.style.display =
+            'none';
+
+        archive.style.display =
+            'block';
+
+
+        document.getElementById(
+            'altTitle'
+        ).innerText =
+            'Finished Archive 🏆';
+
+        document.getElementById(
+            'altTitle'
+        ).style.color =
+            '#34d399';
+    }
+
+
+    render();
+}
+
+
+/* ================================================================
+   EDIT
+================================================================ */
+
+function editL(id) {
+
+    const book =
+        allBooks.find(
+            b =>
+                Number(b.id) ===
+                Number(id)
+        );
+
+
+    if (!book) {
+        return;
+    }
+
+
+    editingId =
+        book.id;
+
+
+    const dashboard =
+        document.getElementById(
+            'dashboardTop'
+        );
+
+
+    const reading =
+        document.getElementById(
+            'activeSessionBox'
+        );
+
+
+    const input =
+        document.getElementById(
+            'inputArea'
+        );
+
+
+    dashboard.style.display =
+        'grid';
+
+
+    if (
+        currentViewMode !==
+        'queue'
+    ) {
+
+        reading.style.display =
+            'none';
+
+
+        input.classList.remove(
+            'lg:col-span-7'
+        );
+
+        input.classList.add(
+            'lg:col-span-12'
         );
     }
 
 
-    function selectBook(
-        t,
-        a,
-        c,
-        g,
-        r,
-        series = '',
-        seriesNum = null
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+
+    const titleInput =
+        document.getElementById(
+            'titleInput'
+        );
+
+
+    titleInput.value =
+        book.title ||
+        '';
+
+
+    titleInput.dataset.img =
+        book.cover_url ||
+        '';
+
+
+    titleInput.dataset.genre =
+        book.genre ||
+        '';
+
+
+    titleInput.dataset.release =
+        book.release_year ||
+        '';
+
+
+    document.getElementById(
+        'authorInput'
+    ).value =
+        book.author ||
+        '';
+
+
+    document.getElementById(
+        'seriesInput'
+    ).value =
+        book.series ||
+        '';
+
+
+    document.getElementById(
+        'seriesNumInput'
+    ).value =
+        (
+            book.series_num !== null &&
+            book.series_num !== undefined
+        )
+            ? book.series_num
+            : '';
+
+
+    document.getElementById(
+        'formModeLabel'
+    ).innerText =
+        'Updating: ' +
+        book.title;
+
+
+    document.getElementById(
+        'cancelEdit'
+    ).classList.remove(
+        'hidden'
+    );
+
+
+    document.getElementById(
+        'deleteSelectedBtn'
+    ).classList.remove(
+        'hidden'
+    );
+}
+
+
+function exitEditMode() {
+
+    resetForm();
+
+    toggleView(
+        currentViewMode
+    );
+}
+
+
+async function deleteSelectedFromForm() {
+
+    if (!editingId) {
+        return;
+    }
+
+
+    if (
+        !confirm(
+            'Are you sure you want to delete this book?'
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from('books')
+            .delete()
+            .eq(
+                'id',
+                editingId
+            );
+
+
+    if (error) {
+
+        alert(
+            'Delete failed: ' +
+            error.message
+        );
+
+        return;
+    }
+
+
+    resetForm();
+
+    await loadBooks();
+}
+
+
+async function updateStatus(
+    id,
+    status
+) {
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from('books')
+            .update({
+                status
+            })
+            .eq(
+                'id',
+                id
+            );
+
+
+    if (error) {
+
+        alert(
+            'Status update failed: ' +
+            error.message
+        );
+
+        return;
+    }
+
+
+    await loadBooks();
+}
+
+
+/* ================================================================
+   SERIES DROPDOWN
+================================================================ */
+
+function filterSeriesDropdown(
+    value
+) {
+
+    const box =
+        document.getElementById(
+            'seriesResults'
+        );
+
+
+    const search =
+        String(
+            value || ''
+        )
+            .toLowerCase()
+            .trim();
+
+
+    const series =
+        [
+            ...new Set(
+                allBooks
+                    .map(
+                        book =>
+                            (
+                                book.series ||
+                                ''
+                            ).trim()
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+    const filtered =
+        series.filter(
+            item =>
+                item
+                    .toLowerCase()
+                    .includes(
+                        search
+                    )
+        );
+
+
+    if (
+        !filtered.length
     ) {
 
-        const tIn =
-            document.getElementById(
-                'titleInput'
-            );
+        box.classList.add(
+            'hidden'
+        );
 
-
-        tIn.value = t;
-
-
-        document.getElementById(
-            'searchResults'
-        ).classList.add('hidden');
-
-
-        if (c) {
-            tIn.dataset.img = c;
-        }
-
-        if (g) {
-            tIn.dataset.genre = g;
-        }
-
-        if (r) {
-            tIn.dataset.release = r;
-        }
-
-
-        document.getElementById(
-            'authorInput'
-        ).value = a;
-
-
-        /*
-         * THIS IS THE IMPORTANT CHANGE:
-         *
-         * Selecting the book now automatically fills the series
-         * and the series number found by Google Books.
-         */
-
-        document.getElementById(
-            'seriesInput'
-        ).value = series || '';
-
-
-        document.getElementById(
-            'seriesNumInput'
-        ).value =
-            seriesNum !== null &&
-            seriesNum !== undefined
-                ? seriesNum
-                : '';
-
-
-        document.getElementById(
-            'seriesInput'
-        ).focus();
+        return;
     }
 
 
-    function escapeHtml(value) {
+    box.innerHTML =
+        filtered
+            .map(
+                (item, index) => `
+                    <div
+                        onclick="selectSeriesByIndex(${index})"
+                        class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate">
+                        ${escapeHtml(item)}
+                    </div>
+                `
+            )
+            .join('');
 
-        return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+
+    window.currentSeriesOptions =
+        filtered;
+
+
+    box.classList.remove(
+        'hidden'
+    );
+}
+
+
+function selectSeriesByIndex(
+    index
+) {
+
+    const series =
+        window.currentSeriesOptions?.[
+            index
+        ];
+
+
+    if (!series) {
+        return;
     }
 
 
-    /* ============================================================
-       REPAIR SYSTEM
-    ============================================================ */
+    document.getElementById(
+        'seriesInput'
+    ).value =
+        series;
 
-    function repairBookSeries() {
 
-        const modal =
-            document.getElementById(
-                'repairModal'
+    document.getElementById(
+        'seriesResults'
+    ).classList.add(
+        'hidden'
+    );
+}
+
+
+/* ================================================================
+   SERIES REPAIR
+================================================================ */
+
+/*
+ * IMPORTANT:
+ *
+ * Repair now does NOT simply fill blank values.
+ *
+ * If an existing book has:
+ *
+ *     series = "Poirot"
+ *     series_num = 3.5
+ *
+ * and Google Books reports:
+ *
+ *     orderNumber = 4
+ *
+ * the database will be changed to:
+ *
+ *     series_num = 4
+ *
+ * Existing SERIES NAMES are protected.
+ *
+ * If an existing series number is present but Google does NOT
+ * provide a reliable number, the existing value is left alone.
+ */
+
+
+function openRepairModal() {
+
+    if (
+        repairRunning
+    ) {
+        return;
+    }
+
+
+    const modal =
+        document.getElementById(
+            'repairModal'
+        );
+
+
+    const summary =
+        document.getElementById(
+            'repairSummary'
+        );
+
+
+    const results =
+        document.getElementById(
+            'repairResults'
+        );
+
+
+    const button =
+        document.getElementById(
+            'startRepairBtn'
+        );
+
+
+    summary.innerHTML = `
+
+        <div class="bg-amber-950/30 border border-amber-500/20 rounded-2xl p-4">
+
+            <div class="text-sm text-white font-bold">
+                ${allBooks.length} books will be checked.
+            </div>
+
+            <div class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Open Library will be used for series names and Google Books
+                will be used for reliable numerical series order where available.
+            </div>
+
+            <div class="text-xs text-emerald-400 font-bold mt-3">
+                ✓ Existing series names will be preserved.
+            </div>
+
+            <div class="text-xs text-emerald-400 font-bold mt-1">
+                ✓ Existing series numbers can be corrected when reliable metadata exists.
+            </div>
+
+            <div class="text-xs text-slate-500 mt-1">
+                Books without reliable series metadata will be left alone.
+            </div>
+
+        </div>
+    `;
+
+
+    results.innerHTML =
+        '';
+
+
+    results.classList.add(
+        'hidden'
+    );
+
+
+    button.disabled =
+        false;
+
+
+    button.innerText =
+        'Start Repair';
+
+
+    modal.classList.remove(
+        'hidden'
+    );
+
+
+    modal.classList.add(
+        'flex'
+    );
+}
+
+
+function closeRepairModal() {
+
+    if (
+        repairRunning
+    ) {
+        return;
+    }
+
+
+    const modal =
+        document.getElementById(
+            'repairModal'
+        );
+
+
+    modal.classList.add(
+        'hidden'
+    );
+
+
+    modal.classList.remove(
+        'flex'
+    );
+}
+
+
+function repairDelay(
+    ms
+) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+    );
+}
+
+
+/* ---------------------------------------------------------------
+   OPEN LIBRARY REPAIR LOOKUP
+---------------------------------------------------------------- */
+
+async function getOpenLibraryRepairMatch(
+    book
+) {
+
+    const query =
+        `${book.title || ''} ${book.author || ''}`
+            .trim();
+
+
+    if (!query) {
+        return null;
+    }
+
+
+    const url =
+        `https://openlibrary.org/search.json?` +
+        `q=${encodeURIComponent(query)}` +
+        `&limit=8` +
+        `&fields=key,title,author_name,first_publish_year,series`;
+
+
+    try {
+
+        const response =
+            await fetch(
+                url
             );
 
 
-        const summary =
-            document.getElementById(
-                'repairSummary'
+        if (!response.ok) {
+            return null;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const docs =
+            data.docs || [];
+
+
+        let best =
+            null;
+
+        let bestScore =
+            0;
+
+
+        for (
+            const doc
+            of docs
+        ) {
+
+            const titleScore =
+                titleSimilarity(
+                    book.title,
+                    doc.title || ''
+                );
+
+
+            const authorScore =
+                authorSimilarity(
+                    book.author,
+                    doc.author_name || []
+                );
+
+
+            const score =
+                (
+                    titleScore * 10
+                ) +
+                (
+                    authorScore * 5
+                );
+
+
+            if (
+                score >
+                bestScore
+            ) {
+
+                bestScore =
+                    score;
+
+                best =
+                    doc;
+            }
+        }
+
+
+        if (
+            bestScore < 7
+        ) {
+            return null;
+        }
+
+
+        return {
+
+            series:
+                extractOpenLibrarySeries(
+                    best
+                ),
+
+            score:
+                bestScore
+
+        };
+
+    } catch (error) {
+
+        console.warn(
+            'Open Library repair lookup failed:',
+            error
+        );
+
+
+        return null;
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   GOOGLE BOOKS REPAIR LOOKUP
+---------------------------------------------------------------- */
+
+async function getGoogleRepairMatch(
+    book
+) {
+
+    const title =
+        String(
+            book.title || ''
+        ).trim();
+
+
+    const author =
+        String(
+            book.author || ''
+        ).trim();
+
+
+    if (!title) {
+        return null;
+    }
+
+
+    /*
+     * If we already have a series name, include it in the query.
+     *
+     * This is particularly useful for existing Christie/Poirot/
+     * Marple-style data where the series name is already known.
+     */
+
+    const existingSeries =
+        String(
+            book.series || ''
+        ).trim();
+
+
+    const queries = [];
+
+
+    if (
+        existingSeries
+    ) {
+
+        queries.push(
+            `"${existingSeries}" "${title}" ${author}`
+        );
+    }
+
+
+    queries.push(
+        `"${title}" ${author}`
+    );
+
+
+    let bestItem =
+        null;
+
+    let bestScore =
+        0;
+
+
+    for (
+        const query
+        of queries
+    ) {
+
+        const url =
+            `https://www.googleapis.com/books/v1/volumes?` +
+            `q=${encodeURIComponent(query)}` +
+            `&maxResults=10` +
+            `&projection=full`;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    url
+                );
+
+
+            if (!response.ok) {
+                continue;
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const items =
+                data.items || [];
+
+
+            for (
+                const item
+                of items
+            ) {
+
+                const info =
+                    item.volumeInfo ||
+                    {};
+
+
+                const titleScore =
+                    titleSimilarity(
+                        title,
+                        info.title || ''
+                    );
+
+
+                const authorScore =
+                    authorSimilarity(
+                        author,
+                        info.authors || []
+                    );
+
+
+                const seriesInfo =
+                    extractGoogleSeriesInfo(
+                        item
+                    );
+
+
+                /*
+                 * We are specifically looking for a volume that:
+                 *
+                 * 1. matches the title
+                 * 2. matches the author
+                 * 3. preferably has seriesInfo
+                 */
+
+                let score =
+                    (
+                        titleScore * 10
+                    ) +
+                    (
+                        authorScore * 5
+                    );
+
+
+                if (
+                    seriesInfo.order !== null
+                ) {
+
+                    score += 4;
+                }
+
+
+                if (
+                    existingSeries &&
+                    seriesInfo.seriesId
+                ) {
+
+                    score += 2;
+                }
+
+
+                if (
+                    score >
+                    bestScore
+                ) {
+
+                    bestScore =
+                        score;
+
+                    bestItem =
+                        item;
+                }
+            }
+
+
+            /*
+             * If the series-specific query produced a strong match,
+             * we don't need to try the weaker generic query.
+             */
+
+            if (
+                bestScore >= 14
+            ) {
+                break;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                'Google repair query failed:',
+                error
             );
+        }
+    }
 
 
-        const results =
-            document.getElementById(
-                'repairResults'
+    if (
+        !bestItem ||
+        bestScore < 7
+    ) {
+
+        return null;
+    }
+
+
+    /*
+     * Fetch the complete volume record as an additional check.
+     */
+
+    if (
+        bestItem.id
+    ) {
+
+        try {
+
+            const volumeResponse =
+                await fetch(
+                    `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(bestItem.id)}?projection=full`
+                );
+
+
+            if (
+                volumeResponse.ok
+            ) {
+
+                const complete =
+                    await volumeResponse.json();
+
+
+                if (complete) {
+                    bestItem =
+                        complete;
+                }
+            }
+
+        } catch (error) {
+
+            console.warn(
+                'Google volume detail lookup failed:',
+                error
             );
+        }
+    }
 
 
-        const startBtn =
-            document.getElementById(
-                'startRepairBtn'
-            );
+    const seriesInfo =
+        extractGoogleSeriesInfo(
+            bestItem
+        );
 
+
+    return {
+
+        order:
+            seriesInfo.order,
+
+        seriesId:
+            seriesInfo.seriesId,
+
+        score:
+            bestScore
+
+    };
+}
+
+
+/* ---------------------------------------------------------------
+   REPAIR ONE BOOK
+---------------------------------------------------------------- */
+
+async function repairOneBook(
+    book
+) {
+
+    const cacheKey =
+        [
+            normalizeText(
+                book.title
+            ),
+            normalizeText(
+                book.author
+            ),
+            normalizeText(
+                book.series
+            )
+        ].join('|');
+
+
+    if (
+        repairCache.has(
+            cacheKey
+        )
+    ) {
+
+        return repairCache.get(
+            cacheKey
+        );
+    }
+
+
+    const [
+        openLibrary,
+        google
+    ] =
+        await Promise.all([
+
+            getOpenLibraryRepairMatch(
+                book
+            ),
+
+            getGoogleRepairMatch(
+                book
+            )
+
+        ]);
+
+
+    const detectedSeries =
+        openLibrary?.series ||
+        '';
+
+
+    const detectedOrder =
+        google?.order !== null &&
+        google?.order !== undefined &&
+        Number.isFinite(
+            Number(
+                google.order
+            )
+        )
+            ? Number(
+                google.order
+            )
+            : null;
+
+
+    const result = {
+
+        detectedSeries,
+
+        detectedOrder,
+
+        openLibraryScore:
+            openLibrary?.score ||
+            0,
+
+        googleScore:
+            google?.score ||
+            0,
+
+        googleSeriesId:
+            google?.seriesId ||
+            ''
+
+    };
+
+
+    repairCache.set(
+        cacheKey,
+        result
+    );
+
+
+    return result;
+}
+
+
+/* ---------------------------------------------------------------
+   START REPAIR
+---------------------------------------------------------------- */
+
+async function startSeriesRepair() {
+
+    if (
+        repairRunning
+    ) {
+        return;
+    }
+
+
+    if (
+        !allBooks.length
+    ) {
+
+        alert(
+            'There are no books to repair.'
+        );
+
+        return;
+    }
+
+
+    repairRunning =
+        true;
+
+
+    const startButton =
+        document.getElementById(
+            'startRepairBtn'
+        );
+
+
+    const summary =
+        document.getElementById(
+            'repairSummary'
+        );
+
+
+    const results =
+        document.getElementById(
+            'repairResults'
+        );
+
+
+    startButton.disabled =
+        true;
+
+
+    startButton.innerText =
+        'Repairing...';
+
+
+    results.classList.remove(
+        'hidden'
+    );
+
+
+    results.innerHTML =
+        '';
+
+
+    let checked =
+        0;
+
+    let updated =
+        0;
+
+    let seriesAdded =
+        0;
+
+    let numbersCorrected =
+        0;
+
+    let unchanged =
+        0;
+
+    let noReliableData =
+        0;
+
+    let errors =
+        0;
+
+
+    function updateSummary() {
 
         summary.innerHTML = `
 
-            <div class="bg-amber-950/30 border border-amber-500/20 rounded-2xl p-4">
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
 
-                <div class="text-sm text-white font-bold">
-                    ${allBooks.length} books are currently in your Vault.
+                <div class="bg-slate-900 rounded-xl p-3 text-center">
+                    <div class="text-lg font-black text-white">
+                        ${checked}
+                    </div>
+                    <div class="text-[9px] text-slate-500 uppercase font-bold">
+                        Checked
+                    </div>
                 </div>
 
-                <div class="text-xs text-slate-400 mt-2 leading-relaxed">
-                    The repair will check each book against Google Books.
-                    Missing series names and missing series numbers will be
-                    filled automatically.
+
+                <div class="bg-slate-900 rounded-xl p-3 text-center">
+                    <div class="text-lg font-black text-amber-400">
+                        ${seriesAdded}
+                    </div>
+                    <div class="text-[9px] text-slate-500 uppercase font-bold">
+                        Series Added
+                    </div>
                 </div>
 
-                <div class="text-xs text-emerald-400 font-bold mt-3">
-                    ✓ Existing series numbers will NOT be overwritten.
+
+                <div class="bg-slate-900 rounded-xl p-3 text-center">
+                    <div class="text-lg font-black text-emerald-400">
+                        ${numbersCorrected}
+                    </div>
+                    <div class="text-[9px] text-slate-500 uppercase font-bold">
+                        Numbers Fixed
+                    </div>
                 </div>
 
-                <div class="text-xs text-emerald-400 font-bold mt-1">
-                    ✓ Your decimal numbers such as 4.5 will remain untouched.
+
+                <div class="bg-slate-900 rounded-xl p-3 text-center">
+                    <div class="text-lg font-black text-slate-300">
+                        ${unchanged}
+                    </div>
+                    <div class="text-[9px] text-slate-500 uppercase font-bold">
+                        No Change
+                    </div>
+                </div>
+
+
+                <div class="bg-slate-900 rounded-xl p-3 text-center">
+                    <div class="text-lg font-black text-slate-500">
+                        ${noReliableData}
+                    </div>
+                    <div class="text-[9px] text-slate-500 uppercase font-bold">
+                        No Data
+                    </div>
+                </div>
+
+
+                <div class="bg-slate-900 rounded-xl p-3 text-center">
+                    <div class="text-lg font-black text-red-400">
+                        ${errors}
+                    </div>
+                    <div class="text-[9px] text-slate-500 uppercase font-bold">
+                        Errors
+                    </div>
                 </div>
 
             </div>
         `;
-
-
-        results.classList.add('hidden');
-        results.innerHTML = '';
-
-
-        startBtn.disabled = false;
-        startBtn.innerText = 'Start Repair';
-
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
     }
 
 
-    function closeRepairModal() {
-
-        const modal =
-            document.getElementById(
-                'repairModal'
-            );
+    updateSummary();
 
 
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-
-    async function startSeriesRepair() {
-
-        const startBtn =
-            document.getElementById(
-                'startRepairBtn'
-            );
-
-
-        const summary =
-            document.getElementById(
-                'repairSummary'
-            );
-
-
-        const results =
-            document.getElementById(
-                'repairResults'
-            );
-
-
-        startBtn.disabled = true;
-        startBtn.innerText = 'Repairing...';
-
-
-        results.classList.remove('hidden');
-
-
-        let checked = 0;
-        let seriesFound = 0;
-        let numbersFound = 0;
-        let alreadyCorrect = 0;
-        let noMatch = 0;
-        let errors = 0;
-
-
-        results.innerHTML = `
-
-            <div class="text-xs text-slate-400 mb-4">
-                Starting repair...
-            </div>
-        `;
-
-
-        /*
-         * Process sequentially rather than firing hundreds of
-         * requests simultaneously.
-         */
+    try {
 
         for (
-            const book of allBooks
+            const book
+            of allBooks
         ) {
 
             checked++;
 
 
             const row =
-                document.createElement('div');
+                document.createElement(
+                    'div'
+                );
 
 
             row.className =
@@ -3085,14 +4381,20 @@
                     <div class="min-w-0">
 
                         <div class="text-xs text-white font-bold truncate">
-                            ${escapeHtml(book.title)}
+                            ${escapeHtml(
+                                book.title
+                            )}
                         </div>
 
                         <div class="text-[10px] text-slate-500 truncate">
-                            ${escapeHtml(book.author || 'Unknown')}
+                            ${escapeHtml(
+                                book.author ||
+                                'Unknown'
+                            )}
                         </div>
 
                     </div>
+
 
                     <div class="text-[10px] text-amber-400 font-bold shrink-0">
                         Checking...
@@ -3102,90 +4404,154 @@
             `;
 
 
-            results.appendChild(row);
+            results.appendChild(
+                row
+            );
+
+
+            /*
+             * Keep the newest result visible.
+             */
+
+            results.scrollTop =
+                results.scrollHeight;
 
 
             try {
 
                 const metadata =
-                    await lookupBookMetadata(
-                        book.title,
-                        book.author
+                    await repairOneBook(
+                        book
                     );
 
 
                 if (!metadata) {
 
-                    noMatch++;
+                    noReliableData++;
 
 
-                    row.lastElementChild.innerHTML =
-                        `<span class="text-slate-500">No match</span>`;
+                    row.innerHTML += `
+                        <div class="text-[10px] text-slate-500 mt-1">
+                            No reliable metadata found.
+                        </div>
+                    `;
+
 
                     continue;
                 }
 
 
-                const updates = {};
+                const update = {};
+
+
+                const existingSeries =
+                    String(
+                        book.series ||
+                        ''
+                    ).trim();
+
+
+                const existingNumber =
+                    (
+                        book.series_num !== null &&
+                        book.series_num !== undefined &&
+                        book.series_num !== ''
+                    )
+                        ? Number(
+                            book.series_num
+                        )
+                        : null;
 
 
                 /*
-                 * Only fill a missing series.
-                 */
-
-                const hasExistingSeries =
-                    Boolean(
-                        book.series &&
-                        book.series.trim()
-                    );
-
-
-                if (
-                    !hasExistingSeries &&
-                    metadata.series
-                ) {
-
-                    updates.series =
-                        metadata.series;
-
-                    seriesFound++;
-                }
-
-
-                /*
-                 * Only fill a missing series number.
+                 * --------------------------------------------------
+                 * SERIES NAME
+                 * --------------------------------------------------
                  *
-                 * Existing values — including decimals — survive.
+                 * We ONLY fill a blank series name.
+                 *
+                 * We never replace a series name that the user has
+                 * already entered.
                  */
 
-                const hasExistingNumber =
-                    book.series_num !== null &&
-                    book.series_num !== undefined &&
-                    book.series_num !== '';
-
-
                 if (
-                    !hasExistingNumber &&
-                    metadata.seriesNum !== null &&
-                    metadata.seriesNum !== undefined
+                    !existingSeries &&
+                    metadata.detectedSeries
                 ) {
 
-                    updates.series_num =
-                        metadata.seriesNum;
+                    update.series =
+                        metadata.detectedSeries;
 
-                    numbersFound++;
+                    seriesAdded++;
                 }
 
 
+                /*
+                 * --------------------------------------------------
+                 * SERIES NUMBER
+                 * --------------------------------------------------
+                 *
+                 * THIS IS THE IMPORTANT FIX.
+                 *
+                 * Existing numbers are NOT automatically trusted.
+                 *
+                 * If Google gives us a reliable orderNumber, we
+                 * compare it to the database value and correct it.
+                 *
+                 * Therefore:
+                 *
+                 *     3.5 -> 4
+                 *
+                 * is allowed.
+                 *
+                 * But if Google has no reliable sequence number,
+                 * the existing value is left untouched.
+                 */
+
+                const usableSeries =
+                    existingSeries ||
+                    metadata.detectedSeries;
+
+
                 if (
-                    Object.keys(updates).length > 0
+                    usableSeries &&
+                    metadata.detectedOrder !== null
                 ) {
 
-                    const { error } =
+                    if (
+                        existingNumber === null ||
+                        existingNumber !==
+                        metadata.detectedOrder
+                    ) {
+
+                        update.series_num =
+                            metadata.detectedOrder;
+
+                        numbersCorrected++;
+                    }
+                }
+
+
+                /*
+                 * Save only when something actually changed.
+                 */
+
+                if (
+                    Object.keys(
+                        update
+                    ).length
+                ) {
+
+                    const {
+                        error
+                    } =
                         await supabaseClient
                             .from('books')
-                            .update(updates)
-                            .eq('id', book.id);
+                            .update(update)
+                            .eq(
+                                'id',
+                                book.id
+                            );
 
 
                     if (error) {
@@ -3195,28 +4561,62 @@
 
                     Object.assign(
                         book,
-                        updates
+                        update
                     );
 
 
-                    row.lastElementChild.innerHTML =
-                        `
-                            <span class="text-emerald-400 font-bold">
-                                ✓ Repaired
-                            </span>
-                        `;
+                    updated++;
+
+
+                    const changes =
+                        [];
+
+
+                    if (
+                        update.series
+                    ) {
+
+                        changes.push(
+                            `Series: ${escapeHtml(
+                                update.series
+                            )}`
+                        );
+                    }
+
+
+                    if (
+                        update.series_num !==
+                        undefined
+                    ) {
+
+                        changes.push(
+                            `Number: ${escapeHtml(
+                                String(
+                                    update.series_num
+                                )
+                            )}`
+                        );
+                    }
+
+
+                    row.innerHTML += `
+                        <div class="text-[10px] text-emerald-400 font-bold mt-1">
+                            ✓ ${changes.join(
+                                ' • '
+                            )}
+                        </div>
+                    `;
 
                 } else {
 
-                    alreadyCorrect++;
+                    unchanged++;
 
 
-                    row.lastElementChild.innerHTML =
-                        `
-                            <span class="text-slate-400">
-                                ✓ No change
-                            </span>
-                        `;
+                    row.innerHTML += `
+                        <div class="text-[10px] text-slate-500 mt-1">
+                            ✓ No change required
+                        </div>
+                    `;
                 }
 
 
@@ -3226,196 +4626,175 @@
 
 
                 console.error(
-                    `Series repair failed for ${book.title}:`,
+                    'Repair failed for:',
+                    book.title,
                     error
                 );
 
 
-                row.lastElementChild.innerHTML =
-                    `
-                        <span class="text-red-400">
-                            Error
-                        </span>
-                    `;
+                row.innerHTML += `
+                    <div class="text-[10px] text-red-400 font-bold mt-1">
+                        ✕ ${escapeHtml(
+                            error.message ||
+                            'Lookup failed'
+                        )}
+                    </div>
+                `;
             }
 
 
+            updateSummary();
+
+
             /*
-             * Small pause between books so the repair doesn't
-             * hammer the external service.
+             * Small pause to avoid hammering public APIs.
              */
 
-            await sleep(250);
-
-
-            summary.innerHTML = `
-
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-
-                    <div class="bg-slate-900 rounded-xl p-3 text-center">
-                        <div class="text-lg font-black text-white">
-                            ${checked}
-                        </div>
-                        <div class="text-[9px] text-slate-500 uppercase font-bold">
-                            Checked
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 rounded-xl p-3 text-center">
-                        <div class="text-lg font-black text-amber-400">
-                            ${seriesFound}
-                        </div>
-                        <div class="text-[9px] text-slate-500 uppercase font-bold">
-                            Series Added
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 rounded-xl p-3 text-center">
-                        <div class="text-lg font-black text-emerald-400">
-                            ${numbersFound}
-                        </div>
-                        <div class="text-[9px] text-slate-500 uppercase font-bold">
-                            Numbers Added
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 rounded-xl p-3 text-center">
-                        <div class="text-lg font-black text-slate-300">
-                            ${alreadyCorrect}
-                        </div>
-                        <div class="text-[9px] text-slate-500 uppercase font-bold">
-                            No Change
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 rounded-xl p-3 text-center">
-                        <div class="text-lg font-black text-slate-500">
-                            ${noMatch}
-                        </div>
-                        <div class="text-[9px] text-slate-500 uppercase font-bold">
-                            No Match
-                        </div>
-                    </div>
-
-                </div>
-            `;
+            await repairDelay(
+                350
+            );
         }
 
 
-        startBtn.disabled = false;
-        startBtn.innerText = 'Repair Complete';
+        /*
+         * Refresh from Supabase after the complete run.
+         */
+
+        await loadBooks();
+
+
+        startButton.innerText =
+            'Repair Complete';
 
 
         summary.innerHTML += `
 
-            <div class="mt-3 text-[10px] text-slate-500">
-                ${
-                    errors > 0
-                        ? `${errors} book(s) returned an error.`
-                        : 'No lookup errors were reported.'
-                }
+            <div class="mt-3 bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-400 font-bold">
+                Repair finished. ${updated} book(s) were updated.
+                ${numbersCorrected} series number(s) were corrected.
             </div>
         `;
 
 
-        await loadBooks();
+    } finally {
+
+        repairRunning =
+            false;
+
+
+        startButton.disabled =
+            false;
+
+
+        if (
+            startButton.innerText ===
+            'Repairing...'
+        ) {
+
+            startButton.innerText =
+                'Start Repair';
+        }
     }
+}
 
 
-    function sleep(ms) {
+/* ================================================================
+   CSV
+================================================================ */
 
-        return new Promise(
-            resolve =>
-                setTimeout(
-                    resolve,
-                    ms
-                )
+function downloadTemplate() {
+
+    const csv =
+        [
+            'title,author,series,series_num,genre,status,cover_url',
+            'Dune,Frank Herbert,Dune Chronicles,1,Sci-Fi,To Read,https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg'
+        ].join(
+            '\n'
         );
-    }
 
 
-    /* ============================================================
-       CSV
-    ============================================================ */
-
-    function downloadTemplate() {
-
-        const csv =
-            "title,author,series,series_num,genre,status,cover_url\n" +
-            "Dune,Frank Herbert,Dune Chronicles,1,Sci-Fi,To Read,https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg";
-
-
-        const blob =
-            new Blob(
-                [csv],
-                {
-                    type: 'text/csv'
-                }
-            );
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    'text/csv'
+            }
+        );
 
 
-        const a =
-            document.createElement('a');
+    const link =
+        document.createElement(
+            'a'
+        );
 
 
-        a.href =
-            URL.createObjectURL(blob);
+    link.href =
+        URL.createObjectURL(
+            blob
+        );
 
 
-        a.download =
-            'books_template.csv';
+    link.download =
+        'books_template.csv';
 
 
-        a.click();
-    }
+    link.click();
 
 
-    document
-        .getElementById('csvFile')
-        .addEventListener(
-            'change',
-            function(e) {
-
-                const file =
-                    e.target.files[0];
-
-                if (!file) {
-                    return;
-                }
+    URL.revokeObjectURL(
+        link.href
+    );
+}
 
 
-                const reader =
-                    new FileReader();
+document
+    .getElementById(
+        'csvFile'
+    )
+    .addEventListener(
+        'change',
+        function(event) {
+
+            const file =
+                event.target.files[0];
 
 
-                reader.onload =
-                    async (ev) => {
-
-                        const rows =
-                            ev.target.result
-                                .split('\n')
-                                .slice(1);
+            if (!file) {
+                return;
+            }
 
 
-                        const bToInsert =
-                            rows
-                                .map(row => {
+            const reader =
+                new FileReader();
 
-                                    /*
-                                     * Retain the existing simple CSV
-                                     * importer behaviour.
-                                     */
 
-                                    const cols =
+            reader.onload =
+                async function(e) {
+
+                    const rows =
+                        e.target.result
+                            .split(/\r?\n/)
+                            .slice(1);
+
+
+                    const books =
+                        rows
+                            .map(
+                                row => {
+
+                                    const columns =
                                         row
                                             .split(',')
                                             .map(
-                                                x =>
-                                                    x?.trim()
+                                                value =>
+                                                    value.trim()
                                             );
 
 
-                                    if (!cols[0]) {
+                                    if (
+                                        !columns[0]
+                                    ) {
                                         return null;
                                     }
 
@@ -3423,135 +4802,147 @@
                                     return {
 
                                         title:
-                                            cols[0],
+                                            columns[0],
 
                                         author:
-                                            cols[1] ||
+                                            columns[1] ||
                                             'Unknown',
 
                                         series:
-                                            cols[2] ||
+                                            columns[2] ||
                                             null,
 
                                         series_num:
-                                            cols[3]
+                                            columns[3]
                                                 ? parseFloat(
-                                                    cols[3]
+                                                    columns[3]
                                                 )
                                                 : null,
 
                                         genre:
-                                            cols[4] ||
+                                            columns[4] ||
                                             'Book',
 
                                         status:
-                                            cols[5] ||
+                                            columns[5] ||
                                             'To Read',
 
                                         cover_url:
-                                            cols[6] ||
+                                            columns[6] ||
                                             ''
+
                                     };
-
-                                })
-                                .filter(Boolean);
-
-
-                        if (!bToInsert.length) {
-                            return;
-                        }
+                                }
+                            )
+                            .filter(Boolean);
 
 
-                        const { error } =
-                            await supabaseClient
-                                .from('books')
-                                .insert(
-                                    bToInsert
-                                );
+                    if (
+                        !books.length
+                    ) {
+                        return;
+                    }
 
 
-                        if (error) {
-
-                            alert(
-                                "CSV import failed: " +
-                                error.message
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+                            .from('books')
+                            .insert(
+                                books
                             );
 
-                            return;
-                        }
+
+                    if (error) {
+
+                        alert(
+                            'CSV import failed: ' +
+                            error.message
+                        );
+
+                        return;
+                    }
 
 
-                        loadBooks();
-                    };
+                    await loadBooks();
 
 
-                reader.readAsText(file);
-            }
-        );
+                    event.target.value =
+                        '';
+                };
 
 
-    /* ============================================================
-       GLOBAL CLICK HANDLER
-    ============================================================ */
-
-    document.addEventListener(
-        'click',
-        (e) => {
-
-            if (
-                !e.target.closest(
-                    '#seriesInput'
-                ) &&
-                !e.target.closest(
-                    '#seriesResults'
-                )
-            ) {
-
-                document
-                    .getElementById(
-                        'seriesResults'
-                    )
-                    .classList
-                    .add('hidden');
-            }
-
-
-            if (
-                !e.target.closest(
-                    '#titleInput'
-                ) &&
-                !e.target.closest(
-                    '#searchResults'
-                )
-            ) {
-
-                document
-                    .getElementById(
-                        'searchResults'
-                    )
-                    .classList
-                    .add('hidden');
-            }
-
-
-            if (
-                !e.target.closest(
-                    '#toolboxContainer'
-                )
-            ) {
-
-                closeToolboxMenu();
-            }
-
+            reader.readAsText(
+                file
+            );
         }
     );
 
 
-    /* ============================================================
-       INITIALISE
-    ============================================================ */
+/* ================================================================
+   GLOBAL CLICK HANDLER
+================================================================ */
 
-    initAuth();
+document.addEventListener(
+    'click',
+    function(event) {
+
+        if (
+            !event.target.closest(
+                '#seriesInput'
+            ) &&
+            !event.target.closest(
+                '#seriesResults'
+            )
+        ) {
+
+            document
+                .getElementById(
+                    'seriesResults'
+                )
+                .classList.add(
+                    'hidden'
+                );
+        }
+
+
+        if (
+            !event.target.closest(
+                '#titleInput'
+            ) &&
+            !event.target.closest(
+                '#searchResults'
+            )
+        ) {
+
+            document
+                .getElementById(
+                    'searchResults'
+                )
+                .classList.add(
+                    'hidden'
+                );
+        }
+
+
+        if (
+            !event.target.closest(
+                '#toolboxContainer'
+            )
+        ) {
+
+            closeToolboxMenu();
+        }
+    }
+);
+
+
+/* ================================================================
+   INITIALISE
+================================================================ */
+
+initAuth();
 
 </script>
 
