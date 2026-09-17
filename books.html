@@ -685,17 +685,9 @@
    SUPABASE
 ================================================================ */
 
-const SB_URL =
-    'https://zioiamijgblwxlfevcdr.supabase.co';
-
-const SB_KEY =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6MTc3Njk2ODAyNSwiZXhwIjoyMDkyNTQ0MDI1fQ.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
-
-const supabaseClient =
-    supabase.createClient(
-        SB_URL,
-        SB_KEY
-    );
+const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
 
 /* ================================================================
