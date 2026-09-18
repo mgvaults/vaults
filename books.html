@@ -714,6 +714,7 @@
 ================================================================ */
 
 const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
 const supabaseClient =
@@ -730,6 +731,10 @@ const supabaseClient =
 let allBooks = [];
 
 let editingId = null;
+
+let editingOriginalSeries = null;
+
+let editingOriginalSeriesNum = null;
 
 let currentViewMode = 'queue';
 
@@ -823,6 +828,17 @@ const GENRE_ICONS = [
         ],
         icon: '🕵️',
         label: 'Mystery'
+    },
+
+    {
+        names: [
+            'cozy mystery',
+            'cosy mystery',
+            'cozy mysteries',
+            'cosy mysteries'
+        ],
+        icon: '☕',
+        label: 'Cozy Mystery'
     },
 
     {
@@ -1074,6 +1090,421 @@ const GENRE_ICONS = [
         icon: '📄',
         label: 'Short Stories'
     }
+
+];
+
+
+/* ================================================================
+   GENRE METADATA RULES
+================================================================ */
+
+/*
+ * These are deliberately more restrictive than GENRE_ICONS.
+ *
+ * Open Library "subjects" are broad library metadata and can contain
+ * things such as:
+ *
+ *   Cooking
+ *   England
+ *   Families
+ *   Women
+ *   20th century
+ *
+ * Those are NOT automatically treated as genres.
+ *
+ * Google Books "categories" are generally stronger genre signals.
+ */
+
+const GENRE_RULES = [
+
+    {
+        label: 'Science Fiction',
+        terms: [
+            'science fiction',
+            'sci fi',
+            'sci-fi',
+            'science-fiction',
+            'scifi'
+        ]
+    },
+
+    {
+        label: 'Fantasy',
+        terms: [
+            'fantasy'
+        ]
+    },
+
+    {
+        label: 'Cozy Mystery',
+        terms: [
+            'cozy mystery',
+            'cosy mystery',
+            'cozy mysteries',
+            'cosy mysteries',
+            'cozy & traditional mysteries',
+            'cozy and traditional mysteries'
+        ]
+    },
+
+    {
+        label: 'Mystery',
+        terms: [
+            'mystery',
+            'mysteries',
+            'mystery & detective',
+            'mystery and detective',
+            'mystery & detective fiction',
+            'detective',
+            'detective fiction',
+            'detective stories',
+            'whodunit',
+            'whodunits'
+        ]
+    },
+
+    {
+        label: 'Crime',
+        terms: [
+            'crime',
+            'crime fiction',
+            'criminal fiction',
+            'crime & mystery',
+            'crime and mystery',
+            'crime & thriller',
+            'crime and thriller'
+        ]
+    },
+
+    {
+        label: 'Thriller',
+        terms: [
+            'thriller',
+            'thrillers',
+            'suspense',
+            'suspense fiction',
+            'mystery thriller',
+            'psychological thriller',
+            'legal thriller',
+            'political thriller',
+            'spy thriller',
+            'techno thriller'
+        ]
+    },
+
+    {
+        label: 'Horror',
+        terms: [
+            'horror',
+            'horror fiction',
+            'ghost stories',
+            'ghost story',
+            'occult fiction',
+            'supernatural horror'
+        ]
+    },
+
+    {
+        label: 'Romance',
+        terms: [
+            'romance',
+            'romance fiction',
+            'romantic fiction',
+            'love stories'
+        ]
+    },
+
+    {
+        label: 'Adventure',
+        terms: [
+            'adventure',
+            'adventure fiction'
+        ]
+    },
+
+    {
+        label: 'Action',
+        terms: [
+            'action',
+            'action fiction'
+        ]
+    },
+
+    {
+        label: 'Historical',
+        terms: [
+            'historical fiction',
+            'historical novel',
+            'historical novels',
+            'historical'
+        ]
+    },
+
+    {
+        label: 'Biography',
+        terms: [
+            'biography',
+            'biographies'
+        ]
+    },
+
+    {
+        label: 'Memoir / Autobiography',
+        terms: [
+            'memoir',
+            'memoirs',
+            'autobiography',
+            'autobiographies'
+        ]
+    },
+
+    {
+        label: 'Philosophy',
+        terms: [
+            'philosophy',
+            'philosophical'
+        ]
+    },
+
+    {
+        label: 'Psychology',
+        terms: [
+            'psychology',
+            'psychological'
+        ]
+    },
+
+    {
+        label: 'Science',
+        terms: [
+            'science',
+            'natural science',
+            'popular science'
+        ]
+    },
+
+    {
+        label: 'Technology',
+        terms: [
+            'technology',
+            'computers',
+            'computer science',
+            'information technology'
+        ]
+    },
+
+    {
+        label: 'Politics',
+        terms: [
+            'politics',
+            'political',
+            'political science'
+        ]
+    },
+
+    {
+        label: 'Religion',
+        terms: [
+            'religion',
+            'religious',
+            'christianity',
+            'christian fiction',
+            'islam',
+            'judaism'
+        ]
+    },
+
+    {
+        label: 'Self Help',
+        terms: [
+            'self help',
+            'self-help',
+            'personal development',
+            'personal growth'
+        ]
+    },
+
+    {
+        label: 'Business / Economics',
+        terms: [
+            'business',
+            'economics',
+            'finance',
+            'management',
+            'entrepreneurship'
+        ]
+    },
+
+    {
+        label: 'Travel',
+        terms: [
+            'travel',
+            'travel writing',
+            'travel literature'
+        ]
+    },
+
+    {
+        label: 'Cooking',
+        terms: [
+            'cooking',
+            'cookbooks',
+            'cookbook',
+            'food writing',
+            'food & drink',
+            'food and drink',
+            'recipes',
+            'recipe books'
+        ]
+    },
+
+    {
+        label: "Children's",
+        terms: [
+            "children's",
+            'children',
+            'juvenile literature',
+            'juvenile fiction'
+        ]
+    },
+
+    {
+        label: 'Young Adult',
+        terms: [
+            'young adult',
+            'young adult fiction',
+            'ya fiction'
+        ]
+    },
+
+    {
+        label: 'Poetry',
+        terms: [
+            'poetry',
+            'poems',
+            'poems & poetry'
+        ]
+    },
+
+    {
+        label: 'Drama',
+        terms: [
+            'drama',
+            'plays',
+            'theater',
+            'theatre'
+        ]
+    },
+
+    {
+        label: 'Humour',
+        terms: [
+            'humor',
+            'humour',
+            'comedy',
+            'humorous fiction'
+        ]
+    },
+
+    {
+        label: 'Music',
+        terms: [
+            'music',
+            'music history'
+        ]
+    },
+
+    {
+        label: 'Art',
+        terms: [
+            'art',
+            'art history',
+            'visual arts'
+        ]
+    },
+
+    {
+        label: 'Essays',
+        terms: [
+            'essays',
+            'essay'
+        ]
+    },
+
+    {
+        label: 'Short Stories',
+        terms: [
+            'short stories',
+            'short story',
+            'short fiction'
+        ]
+    }
+
+];
+
+
+/*
+ * These are metadata subjects we deliberately DO NOT treat as genres
+ * when they appear only in Open Library's subject list.
+ */
+const NON_GENRE_SUBJECTS = [
+
+    'england',
+    'scotland',
+    'wales',
+    'ireland',
+    'australia',
+    'united states',
+    'united kingdom',
+    'new york',
+    'london',
+
+    'families',
+    'family',
+    'women',
+    'men',
+    'friendship',
+    'relationships',
+
+    '20th century',
+    '21st century',
+    '19th century',
+    '18th century',
+
+    'fiction',
+    'literature',
+    'literary collections',
+
+    'general',
+
+    'social life and customs',
+    'social conditions',
+    'historical conditions',
+
+    'large type books',
+
+    'accessible book',
+    'protected daisy',
+
+    'book and reading',
+    'books and reading',
+
+    'authors',
+    'novels',
+
+    'characters',
+    'imaginary places',
+    'imaginary characters',
+
+    'translations',
+
+    'places',
+    'geography',
+
+    'collections',
+
+    'juvenile',
+    'young adults'
 
 ];
 
@@ -1380,6 +1811,10 @@ function normaliseGenre(value) {
             ' '
         )
         .replace(
+            /[^\w\s']/g,
+            ' '
+        )
+        .replace(
             /\s+/g,
             ' '
         )
@@ -1409,6 +1844,430 @@ function splitGenres(value) {
                 item.trim()
         )
         .filter(Boolean);
+}
+
+
+/*
+ * Convert a metadata value into one of our controlled genre names.
+ */
+function matchGenreRule(
+    value
+) {
+
+    const normal =
+        normaliseGenre(
+            value
+        );
+
+
+    if (!normal) {
+        return null;
+    }
+
+
+    for (
+        const rule
+        of GENRE_RULES
+    ) {
+
+        for (
+            const term
+            of rule.terms
+        ) {
+
+            const normalTerm =
+                normaliseGenre(
+                    term
+                );
+
+
+            if (
+                normal ===
+                normalTerm
+            ) {
+                return rule.label;
+            }
+        }
+    }
+
+
+    return null;
+}
+
+
+/*
+ * More flexible matching for Google Books categories.
+ *
+ * Examples:
+ *
+ * Fiction / Mystery & Detective
+ * Fiction > Thrillers
+ * Juvenile Fiction / Fantasy
+ *
+ * We intentionally don't use this loose matching for Open Library
+ * subjects because OL subjects are much noisier.
+ */
+function matchGoogleGenre(
+    value
+) {
+
+    const normal =
+        normaliseGenre(
+            value
+        );
+
+
+    if (!normal) {
+        return null;
+    }
+
+
+    /*
+     * Exact matches first.
+     */
+
+    const exact =
+        matchGenreRule(
+            value
+        );
+
+
+    if (exact) {
+        return exact;
+    }
+
+
+    /*
+     * Category paths can contain useful genre components.
+     */
+
+    for (
+        const rule
+        of GENRE_RULES
+    ) {
+
+        for (
+            const term
+            of rule.terms
+        ) {
+
+            const normalTerm =
+                normaliseGenre(
+                    term
+                );
+
+
+            if (
+                normal.includes(
+                    normalTerm
+                )
+            ) {
+
+                /*
+                 * Prevent a broad "history" / "science" style
+                 * substring from causing nonsense matches.
+                 */
+                if (
+                    normalTerm.length >= 5
+                ) {
+                    return rule.label;
+                }
+            }
+        }
+    }
+
+
+    return null;
+}
+
+
+/*
+ * Cooking is special.
+ *
+ * Open Library frequently uses "Cooking" as a subject attached to
+ * novels for incidental reasons. We only accept Cooking when:
+ *
+ * 1. Google Books explicitly classifies it as Cooking / Food & Drink,
+ * OR
+ * 2. The title strongly indicates that the book is actually a
+ *    cookbook/recipe/cooking book.
+ */
+function isClearlyCookingBook(
+    title,
+    googleCategories
+) {
+
+    const titleText =
+        normaliseGenre(
+            title
+        );
+
+
+    const categoryText =
+        (
+            Array.isArray(
+                googleCategories
+            )
+                ? googleCategories
+                : []
+        )
+            .map(
+                category =>
+                    normaliseGenre(category)
+            )
+            .join(' ');
+
+
+    const titleLooksLikeCooking =
+        /\b(cookbook|cookbooks|recipes|recipe book|cooking|baking|bake)\b/
+            .test(titleText);
+
+
+    const categoryLooksLikeCooking =
+        /\b(cooking|cookbooks|cookbook|food and drink|food drink|recipes)\b/
+            .test(categoryText);
+
+
+    return (
+        titleLooksLikeCooking ||
+        categoryLooksLikeCooking
+    );
+}
+
+
+/*
+ * This is the main genre extraction function.
+ *
+ * It combines:
+ *
+ *   Open Library subjects
+ *   Google Books categories
+ *
+ * but treats them differently.
+ *
+ * Google categories = stronger signal
+ * Open Library subjects = supporting signal only
+ */
+function extractGenres(
+    title,
+    subjects = [],
+    googleCategories = []
+) {
+
+    const results = [];
+
+    const seen =
+        new Set();
+
+
+    function addGenre(
+        genre
+    ) {
+
+        if (!genre) {
+            return;
+        }
+
+
+        if (
+            seen.has(
+                genre
+            )
+        ) {
+            return;
+        }
+
+
+        seen.add(
+            genre
+        );
+
+        results.push(
+            genre
+        );
+    }
+
+
+    /*
+     * First process Google Books categories.
+     *
+     * These are our strongest automatic genre source.
+     */
+
+    if (
+        Array.isArray(
+            googleCategories
+        )
+    ) {
+
+        googleCategories.forEach(
+            category => {
+
+                const genre =
+                    matchGoogleGenre(
+                        category
+                    );
+
+
+                if (
+                    genre === 'Cooking' &&
+                    !isClearlyCookingBook(
+                        title,
+                        googleCategories
+                    )
+                ) {
+                    return;
+                }
+
+
+                addGenre(
+                    genre
+                );
+            }
+        );
+    }
+
+
+    /*
+     * Now process Open Library subjects.
+     *
+     * Only exact/strong genre subjects are accepted.
+     * We deliberately do NOT loosely match them.
+     */
+
+    if (
+        Array.isArray(
+            subjects
+        )
+    ) {
+
+        subjects.forEach(
+            subject => {
+
+                const normal =
+                    normaliseGenre(
+                        subject
+                    );
+
+
+                if (!normal) {
+                    return;
+                }
+
+
+                if (
+                    NON_GENRE_SUBJECTS.includes(
+                        normal
+                    )
+                ) {
+                    return;
+                }
+
+
+                const genre =
+                    matchGenreRule(
+                        subject
+                    );
+
+
+                if (
+                    !genre
+                ) {
+                    return;
+                }
+
+
+                /*
+                 * Cooking from Open Library alone is not enough.
+                 */
+
+                if (
+                    genre === 'Cooking' &&
+                    !isClearlyCookingBook(
+                        title,
+                        googleCategories
+                    )
+                ) {
+                    return;
+                }
+
+
+                addGenre(
+                    genre
+                );
+            }
+        );
+    }
+
+
+    /*
+     * If the metadata explicitly says something is fiction but
+     * doesn't provide a useful subgenre, we don't save "Fiction"
+     * as a genre. The Vault is more useful with actual genres.
+     */
+
+
+    return results;
+}
+
+
+/*
+ * Used for display / editing existing values.
+ */
+function getCleanGenreString(
+    value
+) {
+
+    const genres =
+        splitGenres(
+            value
+        );
+
+
+    const results = [];
+
+    const seen =
+        new Set();
+
+
+    genres.forEach(
+        genre => {
+
+            const matched =
+                matchGenreRule(
+                    genre
+                );
+
+
+            const label =
+                matched ||
+                genre.trim();
+
+
+            const key =
+                normaliseGenre(
+                    label
+                );
+
+
+            if (
+                !key ||
+                seen.has(key)
+            ) {
+                return;
+            }
+
+
+            seen.add(key);
+
+            results.push(
+                label
+            );
+        }
+    );
+
+
+    return results.join(', ');
 }
 
 
@@ -1456,7 +2315,6 @@ function getGenreIconData(
      * "Fantasy fiction"
      * "Science fiction novels"
      * "Historical mystery"
-     * etc.
      */
 
     for (
@@ -2228,9 +3086,11 @@ async function executeSearch(q) {
 
 
         /*
-         * Open Library remains the primary visible search source,
-         * but we now retain ALL useful subjects instead of only
-         * subject[0].
+         * Open Library remains the primary visible search source.
+         *
+         * We still retrieve subjects, but they now go through the
+         * controlled genre extraction system rather than being
+         * blindly stored as genres.
          */
 
         for (
@@ -2278,38 +3138,26 @@ async function executeSearch(q) {
                 )
                     ? doc.subject
                         .filter(Boolean)
-                        .slice(0, 12)
+                        .slice(0, 30)
                     : [];
 
-
-            /*
-             * Google categories can supplement Open Library.
-             */
 
             const googleCategories =
                 bestGoogle.item?.volumeInfo
                     ?.categories || [];
 
 
+            /*
+             * NEW:
+             * Clean and combine multiple genre signals.
+             */
+
             const genres =
-                [
-                    ...subjects,
-                    ...googleCategories
-                ];
-
-
-            const uniqueGenres =
-                [
-                    ...new Set(
-                        genres
-                            .map(
-                                x =>
-                                    String(x)
-                                        .trim()
-                            )
-                            .filter(Boolean)
-                    )
-                ];
+                extractGenres(
+                    title,
+                    subjects,
+                    googleCategories
+                );
 
 
             let cover = '';
@@ -2344,7 +3192,8 @@ async function executeSearch(q) {
                 detectMediaType(
                     title,
                     [
-                        ...uniqueGenres,
+                        ...subjects,
+                        ...googleCategories,
                         seriesName
                     ]
                 );
@@ -2359,8 +3208,12 @@ async function executeSearch(q) {
                 coverUrl:
                     cover,
 
+                /*
+                 * Multiple genres are stored in one field,
+                 * separated by commas.
+                 */
                 genre:
-                    uniqueGenres.join(', '),
+                    genres.join(', '),
 
                 releaseYear:
                     doc.first_publish_year ||
@@ -2413,6 +3266,20 @@ async function executeSearch(q) {
                         : [];
 
 
+                /*
+                 * Google Books is the only source here, so its
+                 * category information can be used directly through
+                 * the same controlled genre system.
+                 */
+
+                const genres =
+                    extractGenres(
+                        info.title || '',
+                        [],
+                        categories
+                    );
+
+
                 let cover =
                     info.imageLinks
                         ?.thumbnail ||
@@ -2451,7 +3318,7 @@ async function executeSearch(q) {
                         cover,
 
                     genre:
-                        categories.join(', '),
+                        genres.join(', '),
 
                     releaseYear:
                         info.publishedDate
@@ -2775,17 +3642,112 @@ async function submitForm() {
 
     try {
 
-        const series =
-            seriesInput.value.trim() ||
-            null;
+        const enteredSeries =
+            seriesInput.value.trim();
 
 
-        const seriesNum =
+        const enteredSeriesNum =
             seriesNumInput.value !== ''
                 ? parseFloat(
                     seriesNumInput.value
                 )
                 : null;
+
+
+        /*
+         * NEW EDIT PROTECTION
+         *
+         * When editing an existing book:
+         *
+         * - If the Series field hasn't actually changed,
+         *   preserve the original database value.
+         *
+         * - If the Book # hasn't actually changed,
+         *   preserve the original database value.
+         *
+         * This prevents an ordinary edit/save from accidentally
+         * wiping existing series information.
+         *
+         * If the user deliberately changes or clears a field,
+         * that deliberate change is respected.
+         */
+
+        let series =
+            enteredSeries ||
+            null;
+
+
+        let seriesNum =
+            enteredSeriesNum;
+
+
+        if (editingId) {
+
+            const originalSeries =
+                String(
+                    editingOriginalSeries ||
+                    ''
+                ).trim();
+
+
+            const currentSeries =
+                enteredSeries;
+
+
+            const seriesChanged =
+                currentSeries !==
+                originalSeries;
+
+
+            if (!seriesChanged) {
+
+                series =
+                    originalSeries ||
+                    null;
+            }
+
+
+            const originalNum =
+                (
+                    editingOriginalSeriesNum === null ||
+                    editingOriginalSeriesNum === undefined ||
+                    editingOriginalSeriesNum === ''
+                )
+                    ? null
+                    : Number(
+                        editingOriginalSeriesNum
+                    );
+
+
+            const currentNum =
+                enteredSeriesNum;
+
+
+            const bothNull =
+                originalNum === null &&
+                currentNum === null;
+
+
+            const sameNumber =
+                originalNum !== null &&
+                currentNum !== null &&
+                Number(originalNum) ===
+                Number(currentNum);
+
+
+            const seriesNumberChanged =
+                !bothNull &&
+                !sameNumber;
+
+
+            if (
+                !seriesNumberChanged
+            ) {
+
+                seriesNum =
+                    originalNum;
+            }
+        }
 
 
         const cover =
@@ -2946,6 +3908,10 @@ async function submitForm() {
 function resetForm() {
 
     editingId = null;
+
+    editingOriginalSeries = null;
+
+    editingOriginalSeriesNum = null;
 
     selectedMediaType =
         'Novel';
@@ -3665,8 +4631,6 @@ function createCard(book) {
                 </p>
 
 
-                <!-- GENRE ICONS -->
-
                 <div class="w-full mt-1.5">
                     ${renderGenreIcons(book.genre)}
                 </div>
@@ -3675,8 +4639,6 @@ function createCard(book) {
 
         </div>
 
-
-        <!-- TYPE / STATUS -->
 
         <div class="px-2.5 pb-2 mt-1 flex items-center justify-between gap-1 border-t border-slate-800/80 pt-1.5">
 
@@ -3884,6 +4846,34 @@ function editL(id) {
 
     editingId =
         book.id;
+
+
+    /*
+     * NEW:
+     * Capture the original series values.
+     *
+     * submitForm() uses these to distinguish:
+     *
+     * "I didn't change this field"
+     *
+     * from
+     *
+     * "I deliberately changed/cleared this field".
+     */
+
+    editingOriginalSeries =
+        book.series ||
+        null;
+
+
+    editingOriginalSeriesNum =
+        (
+            book.series_num !== null &&
+            book.series_num !== undefined &&
+            book.series_num !== ''
+        )
+            ? Number(book.series_num)
+            : null;
 
 
     const dashboard =
@@ -5170,11 +6160,6 @@ document
 
             reader.onload =
                 async function(e) {
-
-                    /*
-                     * This keeps the existing simple importer but
-                     * supports the new media_type column.
-                     */
 
                     const rows =
                         e.target.result
