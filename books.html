@@ -1909,54 +1909,38 @@ function matchGenreRule(
  */
 function matchGoogleGenre(value) {
 
-    const normal =
-        normaliseGenre(value);
+    const raw = String(value || '').trim();
 
-
-    if (!normal) {
+    if (!raw) {
         return null;
     }
 
 
     /*
-     * Exact matches always win. This is important for values such as
-     * "Science Fiction" so that they can never fall through to the
-     * broader "Science" rule.
+     * Google Books frequently returns hierarchical categories such as:
+     *   Fiction / Mystery & Detective
+     *   Juvenile Fiction / Fantasy
+     *
+     * IMPORTANT: split the RAW value first. normaliseGenre() converts
+     * slashes to spaces, which would otherwise destroy the hierarchy.
      */
+    const components = raw
+        .split(/\s*(?:\/|>|\||:)\s*/)
+        .map(part => part.trim())
+        .filter(Boolean);
 
-    const exact =
-        matchGenreRule(value);
 
+    /* Exact whole-category matches first. */
+    const exact = matchGenreRule(raw);
 
     if (exact) {
         return exact;
     }
 
 
-    /*
-     * Google Books often returns hierarchical categories such as:
-     *
-     *   Fiction / Mystery & Detective
-     *   Fiction > Thrillers
-     *   Juvenile Fiction / Fantasy
-     *
-     * Match complete category components rather than arbitrary
-     * substrings. This prevents "science" from matching inside
-     * "science fiction" and avoids unrelated words in category paths.
-     */
-
-    const components =
-        normal
-            .split(/\s*(?:\/|>|\||:)\s*/)
-            .map(part => part.trim())
-            .filter(Boolean);
-
-
+    /* Then match individual category components. */
     for (const component of components) {
-
-        const componentMatch =
-            matchGenreRule(component);
-
+        const componentMatch = matchGenreRule(component);
 
         if (componentMatch) {
             return componentMatch;
@@ -1965,22 +1949,21 @@ function matchGoogleGenre(value) {
 
 
     /*
-     * Some feeds flatten the hierarchy into text without a clear
-     * separator. Only use phrase-boundary matching for multi-word
-     * genre terms. Single-word genres require an actual component.
+     * Some Google feeds flatten category text without separators.
+     * Only allow multi-word genre phrases here so that a word such as
+     * "science" cannot accidentally match "Science Fiction".
      */
+    const normal = normaliseGenre(raw);
 
     for (const rule of GENRE_RULES) {
-
         for (const term of rule.terms) {
+            const normalTerm = normaliseGenre(term);
 
-            const normalTerm =
-                normaliseGenre(term);
-
-
-            if (normalTerm.includes(' ') &&
-                new RegExp(`(^|\\s)${normalTerm.replace(/\s+/g, '\\\\s+')}($|\\s)`).test(normal)) {
-                return rule.label;
+            if (normalTerm.includes(' ')) {
+                const escaped = normalTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+                if (new RegExp(`(^|\\s)${escaped}($|\\s)`).test(normal)) {
+                    return rule.label;
+                }
             }
         }
     }
@@ -2877,35 +2860,61 @@ function extractOpenLibrarySeries(doc) {
 
 async function getOpenLibraryWorkSeries(doc) {
 
-    const key =
-        String(doc?.key || '').trim();
-
+    let key = String(doc?.key || '').trim();
 
     if (!key) {
         return '';
     }
 
 
-    let workKey = key;
-
-
-    /* Search results can expose either a work key or an edition key. */
-    if (workKey.startsWith('/books/')) {
-        return '';
-    }
-
-
-    if (!workKey.startsWith('/works/')) {
-        return '';
+    /*
+     * Open Library search normally returns a bare work key such as
+     * "OL82586W", while direct API URLs use "/works/OL82586W".
+     * The previous code only accepted the latter, which meant the
+     * deep series lookup silently failed for normal search results.
+     */
+    if (/^OL\d+W$/.test(key)) {
+        key = `/works/${key}`;
+    } else if (/^OL\d+M$/.test(key)) {
+        key = `/books/${key}`;
     }
 
 
     try {
 
-        const response =
-            await fetch(
+        let workKey = key;
+
+        /* Resolve an edition to its parent work when necessary. */
+        if (workKey.startsWith('/books/')) {
+            const editionResponse = await fetch(
                 `https://openlibrary.org${workKey}.json`
             );
+
+            if (!editionResponse.ok) {
+                return '';
+            }
+
+            const edition = await editionResponse.json();
+            workKey = String(edition?.works?.[0]?.key || '').trim();
+
+            if (!workKey) {
+                return '';
+            }
+
+            if (/^OL\d+W$/.test(workKey)) {
+                workKey = `/works/${workKey}`;
+            }
+        }
+
+
+        if (!workKey.startsWith('/works/')) {
+            return '';
+        }
+
+
+        const response = await fetch(
+            `https://openlibrary.org${workKey}.json`
+        );
 
 
         if (!response.ok) {
@@ -2913,9 +2922,7 @@ async function getOpenLibraryWorkSeries(doc) {
         }
 
 
-        const work =
-            await response.json();
-
+        const work = await response.json();
 
         return extractOpenLibrarySeries(work);
 
@@ -2995,6 +3002,27 @@ function scoreGoogleBook(
 
     if (authorScore === 1) {
         score += 8;
+    }
+
+
+    /* Prefer an otherwise matching Google edition that actually has
+       useful genre metadata. This stops a generic "Juvenile Fiction"
+       edition from beating a matching edition classified as Fantasy,
+       Mystery, Crime, etc. */
+    const categories = Array.isArray(info.categories)
+        ? info.categories
+        : [];
+
+    const categoryGenres = categories
+        .map(category => matchGoogleGenre(category))
+        .filter(Boolean);
+
+    if (categoryGenres.length) {
+        score += 6;
+    }
+
+    if (categoryGenres.some(genre => genre !== 'Young Adult')) {
+        score += 4;
     }
 
 
