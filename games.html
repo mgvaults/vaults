@@ -189,18 +189,19 @@
 
                     <div class="flex flex-col gap-3 relative flex-1 justify-center">
 
-                        <input
-                            id="titleInput"
-                            type="text"
-                            oninput="searchGames(this.value)"
-                            placeholder="Search for game title..."
-                            class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm"
-                        >
-
-                        <div
-                            id="searchResults"
-                            class="hidden absolute top-[60px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"
-                        ></div>
+                        <div class="relative w-full">
+                            <input
+                                id="titleInput"
+                                type="text"
+                                oninput="searchGames(this.value)"
+                                placeholder="Search for game title..."
+                                class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm"
+                            >
+                            <div
+                                id="searchResults"
+                                class="hidden absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"
+                            ></div>
+                        </div>
 
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
 
