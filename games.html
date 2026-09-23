@@ -238,7 +238,7 @@
                             </div>
                         </div>
 
-                        <div class="flex gap-3 text-white relative">
+                        <div class="flex flex-col sm:flex-row gap-3 text-white relative">
 
                             <div class="flex-1 relative">
 
@@ -257,10 +257,19 @@
                                 ></div>
                             </div>
 
+                            <div class="w-full sm:w-1/3 relative">
+                                <input
+                                    id="completedYearsInput"
+                                    type="text"
+                                    placeholder="Finished Years (e.g. 2017, 2023)"
+                                    class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic"
+                                >
+                            </div>
+
                             <button
                                 onclick="submitForm()"
                                 id="submitBtn"
-                                class="bg-indigo-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-indigo-500 transition"
+                                class="bg-indigo-600 px-8 py-3 sm:py-0 rounded-2xl font-black uppercase text-xs text-white hover:bg-indigo-500 transition"
                             >
                                 Commit
                             </button>
@@ -465,6 +474,24 @@
 
                     return aPriority - bPriority;
                 });
+        }
+
+        /* ============================================================
+           COMPLETION YEARS HELPER
+           ============================================================ */
+
+        function getCompletionYears(game) {
+            if (!game || !game.completed_years) return [];
+            if (Array.isArray(game.completed_years)) {
+                return game.completed_years.map(y => String(y).trim()).filter(Boolean);
+            }
+            if (typeof game.completed_years === 'string') {
+                return game.completed_years
+                    .split(',')
+                    .map(y => y.trim())
+                    .filter(Boolean);
+            }
+            return [];
         }
 
         /* ============================================================
@@ -759,6 +786,7 @@
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
             const sIn = document.getElementById('seriesInput');
+            const cYIn = document.getElementById('completedYearsInput');
 
             if (!tIn.value.trim()) return;
 
@@ -769,11 +797,12 @@
                 const genre = tIn.dataset.genre || '';
                 const releaseDate = parseReleaseDate(tIn.dataset.release);
                 const series = sIn.value.trim() || null;
+                const completedYears = cYIn.value.trim() || null;
 
                 let defaultStatus =
                     currentViewMode === 'wishlist'
                         ? 'Wishlist'
-                        : 'Backlog';
+                        : (currentViewMode === 'archive' ? 'Finished' : 'Backlog');
 
                 if (editingId) {
 
@@ -788,7 +817,8 @@
                         release_date:
                             releaseDate !== null
                                 ? releaseDate
-                                : cur.release_date
+                                : cur.release_date,
+                        completed_years: completedYears
                     };
 
                     if (series && series !== cur.series) {
@@ -831,6 +861,12 @@
                         }
                     }
 
+                    // Default completion year if status is Finished and none specified
+                    const finalCompletedYears =
+                        (defaultStatus === 'Finished' && !completedYears)
+                            ? String(new Date().getFullYear())
+                            : completedYears;
+
                     const { error } = await supabaseClient
                         .from('games')
                         .insert([{
@@ -841,7 +877,8 @@
                             genre: genre || 'Game',
                             release_date: releaseDate,
                             status: defaultStatus,
-                            sort_order: next
+                            sort_order: next,
+                            completed_years: finalCompletedYears
                         }]);
 
                     if (error) throw error;
@@ -877,6 +914,7 @@
             delete tIn.dataset.release;
 
             document.getElementById('seriesInput').value = '';
+            document.getElementById('completedYearsInput').value = '';
 
             document.getElementById('searchResults').classList.add('hidden');
             document.getElementById('searchResults').innerHTML = '';
@@ -1011,7 +1049,7 @@
                             g.series.toLowerCase().includes(fA))
                     )
                     .forEach(g =>
-                        cols.alt.appendChild(createCard(g))
+                        cols.alt.appendChild(createArchiveCard(g))
                     );
 
             } else if (currentViewMode === 'wishlist') {
@@ -1174,7 +1212,7 @@
         }
 
         /* ============================================================
-           STANDARD VERTICAL CARD
+           STANDARD VERTICAL CARD (QUEUE & WISHLIST)
            ============================================================ */
 
         function createCard(game) {
@@ -1386,6 +1424,97 @@
         }
 
         /* ============================================================
+           ARCHIVE TROPHY CABINET CARD (FINISHED GAMES)
+           ============================================================ */
+
+        function createArchiveCard(game) {
+
+            const hasSeries =
+                Boolean(game.series && game.series.trim() !== '');
+
+            const sortedPlatforms =
+                sortPlatforms(
+                    (game.platform || '').split(',')
+                );
+
+            const platB =
+                sortedPlatforms.map(p => {
+
+                    const i = PLAT_MAP[p];
+
+                    return i
+                        ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>`
+                        : '';
+
+                }).join(' ');
+
+            const years = getCompletionYears(game);
+            const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
+
+            const div = document.createElement('div');
+            div.dataset.id = game.id;
+            div.dataset.series = game.series || '';
+
+            div.className = "game-card flex flex-col justify-between w-full relative";
+
+            div.innerHTML = `
+                <div>
+                    <!-- Top Accent Bar -->
+                    <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
+
+                    <div class="p-2 pb-1 flex flex-col items-center relative">
+                        <!-- Poster Image -->
+                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden group" title="${game.title.replace(/"/g, '&quot;')}">
+                            <img
+                                src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
+                                alt="${game.title}"
+                                class="w-full h-auto object-cover"
+                            >
+                            <button
+                                onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})'
+                                title="Edit Game"
+                                class="absolute top-1.5 right-1.5 bg-slate-900/80 hover:bg-amber-500 text-white hover:text-slate-900 p-1.5 rounded-lg text-xs transition shadow-md"
+                            >✏️</button>
+                        </div>
+
+                        <!-- Trophy & Completed Years -->
+                        <div class="w-full mt-2 flex items-center justify-center gap-1 bg-amber-950/40 border border-amber-500/30 text-amber-400 rounded-lg py-1 px-2 text-center">
+                            <span class="text-xs">🏆</span>
+                            <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Metadata: Platform Badges & Status Dropdown -->
+                <div class="px-2 pb-2 mt-1 flex flex-col gap-1.5 border-t border-slate-800/80 pt-1.5">
+
+                    <div class="platform-display flex flex-wrap gap-1 justify-center min-w-0">
+                        ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
+                    </div>
+
+                    <select
+                        onchange="updateStatus(${game.id}, this.value)"
+                        class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-full text-center"
+                    >
+                        <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                        <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                        <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                        <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                        <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                        <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                        <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                        <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                        <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                        <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
+                    </select>
+
+                </div>
+            `;
+
+            return div;
+        }
+
+        /* ============================================================
            VIEW SWITCHING
            ============================================================ */
 
@@ -1534,6 +1663,9 @@
 
             document.getElementById('seriesInput').value =
                 g.series || '';
+
+            document.getElementById('completedYearsInput').value =
+                getCompletionYears(g).join(', ');
         }
 
         function exitEditMode() {
@@ -1644,11 +1776,19 @@
 
         async function updateStatus(id, s) {
 
+            const cur = allGames.find(g => g.id === id);
+            let payload = { status: s };
+
+            if (s === 'Finished') {
+                const existingYears = getCompletionYears(cur);
+                if (existingYears.length === 0) {
+                    payload.completed_years = String(new Date().getFullYear());
+                }
+            }
+
             await supabaseClient
                 .from('games')
-                .update({
-                    status: s
-                })
+                .update(payload)
                 .eq('id', id);
 
             loadGames();
