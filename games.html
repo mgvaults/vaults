@@ -1423,7 +1423,7 @@
             return div;
         }
 
-        /* ============================================================
+/* ============================================================
    ARCHIVE TROPHY CABINET CARD (FINISHED GAMES)
    ============================================================ */
 
@@ -1455,7 +1455,7 @@ function createArchiveCard(game) {
     div.dataset.id = game.id;
     div.dataset.series = game.series || '';
 
-    div.className = "game-card flex flex-col justify-between w-full relative";
+    div.className = "game-card flex flex-col w-full relative";
 
     div.innerHTML = `
         <div>
@@ -1489,7 +1489,7 @@ function createArchiveCard(game) {
         </div>
 
         <!-- Bottom Metadata: Platform Badges (Left) & Status Dropdown (Right) -->
-        <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
+        <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 pt-1">
 
             <div class="platform-display flex-1 min-w-0 flex flex-wrap gap-1">
                 ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
