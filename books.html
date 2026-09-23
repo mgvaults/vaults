@@ -163,7 +163,7 @@
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
     <!-- =========================================================
-         AUTH
+         AUTH SCREEN
     ========================================================== -->
 
     <div id="authScreen">
@@ -199,14 +199,14 @@
 
 
     <!-- =========================================================
-         MAIN APP
+         MAIN APPLICATION
     ========================================================== -->
 
     <div id="mainApp" style="display:none;">
 
         <div class="max-w-7xl mx-auto">
 
-            <!-- HEADER -->
+            <!-- HEADER NAVIGATION -->
 
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
 
@@ -320,6 +320,7 @@
                     type="file"
                     id="csvFile"
                     accept=".csv"
+                    onchange="importCSV(event)"
                     class="hidden">
 
             </header>
@@ -332,6 +333,8 @@
             <div
                 id="dashboardTop"
                 class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
+
+                <!-- CURRENTLY READING -->
 
                 <div
                     id="activeSessionBox"
@@ -348,6 +351,8 @@
 
                 </div>
 
+
+                <!-- SEARCH AND ADD INPUT AREA -->
 
                 <div
                     id="inputArea"
@@ -382,7 +387,7 @@
                         </div>
 
 
-                        <!-- SEARCH -->
+                        <!-- SEARCH INPUT -->
 
                         <input
                             id="titleInput"
@@ -398,7 +403,7 @@
                         </div>
 
 
-                        <!-- MEDIA TYPE -->
+                        <!-- MEDIA TYPE SELECTOR -->
 
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
 
@@ -461,7 +466,7 @@
                         </div>
 
 
-                        <!-- AUTHOR / SERIES -->
+                        <!-- AUTHOR AND SERIES INPUTS -->
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
@@ -491,7 +496,7 @@
                         </div>
 
 
-                        <!-- SERIES NUMBER / COMMIT -->
+                        <!-- SERIES NUMBER AND SUBMIT BUTTON -->
 
                         <div class="flex gap-3 text-white relative">
 
@@ -518,7 +523,9 @@
             </div>
 
 
-            <!-- QUEUE -->
+            <!-- =====================================================
+                 QUEUE / BOOKSHELF VIEW
+            ====================================================== -->
 
             <div id="queueView">
 
@@ -564,7 +571,9 @@
             </div>
 
 
-            <!-- ARCHIVE -->
+            <!-- =====================================================
+                 FINISHED ARCHIVE VIEW
+            ====================================================== -->
 
             <div
                 id="altView"
@@ -597,7 +606,9 @@
             </div>
 
 
-            <!-- WISHLIST -->
+            <!-- =====================================================
+                 WISHLIST VIEW
+            ====================================================== -->
 
             <div
                 id="wishlistView"
@@ -710,7 +721,7 @@
 <script>
 
 /* ================================================================
-   SUPABASE
+   SUPABASE INITIALIZATION
 ================================================================ */
 
 const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
@@ -725,7 +736,7 @@ const supabaseClient =
 
 
 /* ================================================================
-   STATE
+   GLOBAL APPLICATION STATE
 ================================================================ */
 
 let allBooks = [];
@@ -750,7 +761,7 @@ let selectedMediaType = 'Novel';
 
 
 /* ================================================================
-   MEDIA TYPES
+   MEDIA TYPES CONFIGURATION
 ================================================================ */
 
 const MEDIA_TYPES = {
@@ -794,299 +805,199 @@ const MEDIA_TYPES = {
 
 
 /* ================================================================
-   GENRE ICONS
+   GENRE ICONS MAPPING
 ================================================================ */
 
 const GENRE_ICONS = [
 
     {
-        names: [
-            'science fiction',
-            'sci fi',
-            'sci-fi',
-            'scifi',
-            'sf'
-        ],
+        names: ['science fiction', 'sci fi', 'sci-fi', 'scifi', 'sf'],
         icon: '🚀',
         label: 'Science Fiction'
     },
 
     {
-        names: [
-            'fantasy'
-        ],
+        names: ['fantasy'],
         icon: '🧙',
         label: 'Fantasy'
     },
 
     {
-        names: [
-            'mystery',
-            'detective',
-            'detective fiction',
-            'whodunit'
-        ],
+        names: ['mystery', 'detective', 'detective fiction', 'whodunit'],
         icon: '🕵️',
         label: 'Mystery'
     },
 
     {
-        names: [
-            'cozy mystery',
-            'cosy mystery',
-            'cozy mysteries',
-            'cosy mysteries'
-        ],
+        names: ['cozy mystery', 'cosy mystery', 'cozy mysteries', 'cosy mysteries'],
         icon: '☕',
         label: 'Cozy Mystery'
     },
 
     {
-        names: [
-            'thriller',
-            'suspense'
-        ],
+        names: ['thriller', 'suspense'],
         icon: '🔪',
         label: 'Thriller'
     },
 
     {
-        names: [
-            'horror',
-            'ghost stories',
-            'occult'
-        ],
+        names: ['horror', 'ghost stories', 'occult'],
         icon: '👻',
         label: 'Horror'
     },
 
     {
-        names: [
-            'romance',
-            'love stories'
-        ],
+        names: ['romance', 'love stories'],
         icon: '❤️',
         label: 'Romance'
     },
 
     {
-        names: [
-            'adventure'
-        ],
+        names: ['adventure'],
         icon: '🗺️',
         label: 'Adventure'
     },
 
     {
-        names: [
-            'action'
-        ],
+        names: ['action'],
         icon: '⚔️',
         label: 'Action'
     },
 
     {
-        names: [
-            'crime',
-            'criminal fiction'
-        ],
+        names: ['crime', 'criminal fiction'],
         icon: '🕶️',
         label: 'Crime'
     },
 
     {
-        names: [
-            'historical',
-            'historical fiction',
-            'history'
-        ],
+        names: ['historical', 'historical fiction', 'history'],
         icon: '🏛️',
         label: 'Historical'
     },
 
     {
-        names: [
-            'biography'
-        ],
+        names: ['biography'],
         icon: '👤',
         label: 'Biography'
     },
 
     {
-        names: [
-            'autobiography',
-            'memoir'
-        ],
+        names: ['autobiography', 'memoir'],
         icon: '🪞',
         label: 'Memoir / Autobiography'
     },
 
     {
-        names: [
-            'philosophy'
-        ],
+        names: ['philosophy'],
         icon: '🤔',
         label: 'Philosophy'
     },
 
     {
-        names: [
-            'psychology'
-        ],
+        names: ['psychology'],
         icon: '🧠',
         label: 'Psychology'
     },
 
     {
-        names: [
-            'science'
-        ],
+        names: ['science'],
         icon: '🔬',
         label: 'Science'
     },
 
     {
-        names: [
-            'technology',
-            'computers',
-            'computer science'
-        ],
+        names: ['technology', 'computers', 'computer science'],
         icon: '💻',
         label: 'Technology'
     },
 
     {
-        names: [
-            'politics',
-            'political'
-        ],
+        names: ['politics', 'political'],
         icon: '🏛️',
         label: 'Politics'
     },
 
     {
-        names: [
-            'religion',
-            'religious'
-        ],
+        names: ['religion', 'religious'],
         icon: '🙏',
         label: 'Religion'
     },
 
     {
-        names: [
-            'self help',
-            'self-help'
-        ],
+        names: ['self help', 'self-help'],
         icon: '🌱',
         label: 'Self Help'
     },
 
     {
-        names: [
-            'business',
-            'economics',
-            'finance'
-        ],
+        names: ['business', 'economics', 'finance'],
         icon: '💼',
         label: 'Business / Economics'
     },
 
     {
-        names: [
-            'travel'
-        ],
+        names: ['travel'],
         icon: '✈️',
         label: 'Travel'
     },
 
     {
-        names: [
-            'cooking',
-            'cookbooks',
-            'food'
-        ],
+        names: ['cooking', 'cookbooks', 'food'],
         icon: '🍳',
         label: 'Cooking'
     },
 
     {
-        names: [
-            'children',
-            "children's",
-            'juvenile'
-        ],
+        names: ['children', "children's", 'juvenile'],
         icon: '🧸',
         label: "Children's"
     },
 
     {
-        names: [
-            'young adult',
-            'young adult fiction'
-        ],
+        names: ['young adult', 'young adult fiction'],
         icon: '🎓',
         label: 'Young Adult'
     },
 
     {
-        names: [
-            'poetry'
-        ],
+        names: ['poetry'],
         icon: '📝',
         label: 'Poetry'
     },
 
     {
-        names: [
-            'drama',
-            'plays'
-        ],
+        names: ['drama', 'plays'],
         icon: '🎭',
         label: 'Drama'
     },
 
     {
-        names: [
-            'humor',
-            'humour',
-            'comedy'
-        ],
+        names: ['humor', 'humour', 'comedy'],
         icon: '😂',
         label: 'Humour'
     },
 
     {
-        names: [
-            'music'
-        ],
+        names: ['music'],
         icon: '🎵',
         label: 'Music'
     },
 
     {
-        names: [
-            'art',
-            'art history'
-        ],
+        names: ['art', 'art history'],
         icon: '🎨',
         label: 'Art'
     },
 
     {
-        names: [
-            'essays',
-            'essay'
-        ],
+        names: ['essays', 'essay'],
         icon: '📑',
         label: 'Essays'
     },
 
     {
-        names: [
-            'short stories',
-            'short story'
-        ],
+        names: ['short stories', 'short story'],
         icon: '📄',
         label: 'Short Stories'
     }
@@ -1098,419 +1009,189 @@ const GENRE_ICONS = [
    GENRE METADATA RULES
 ================================================================ */
 
-/*
- * These are deliberately more restrictive than GENRE_ICONS.
- *
- * Open Library "subjects" are broad library metadata and can contain
- * things such as:
- *
- *   Cooking
- *   England
- *   Families
- *   Women
- *   20th century
- *
- * Those are NOT automatically treated as genres.
- *
- * Google Books "categories" are generally stronger genre signals.
- */
-
 const GENRE_RULES = [
 
     {
         label: 'Science Fiction',
-        terms: [
-            'science fiction',
-            'sci fi',
-            'sci-fi',
-            'science-fiction',
-            'scifi'
-        ]
+        terms: ['science fiction', 'sci fi', 'sci-fi', 'science-fiction', 'scifi']
     },
 
     {
         label: 'Fantasy',
-        terms: [
-            'fantasy'
-        ]
+        terms: ['fantasy']
     },
 
     {
         label: 'Cozy Mystery',
-        terms: [
-            'cozy mystery',
-            'cosy mystery',
-            'cozy mysteries',
-            'cosy mysteries',
-            'cozy & traditional mysteries',
-            'cozy and traditional mysteries'
-        ]
+        terms: ['cozy mystery', 'cosy mystery', 'cozy mysteries', 'cosy mysteries', 'cozy & traditional mysteries', 'cozy and traditional mysteries']
     },
 
     {
         label: 'Mystery',
-        terms: [
-            'mystery',
-            'mysteries',
-            'mystery & detective',
-            'mystery and detective',
-            'mystery & detective fiction',
-            'detective',
-            'detective fiction',
-            'detective stories',
-            'whodunit',
-            'whodunits'
-        ]
+        terms: ['mystery', 'mysteries', 'mystery & detective', 'mystery and detective', 'mystery & detective fiction', 'detective', 'detective fiction', 'detective stories', 'whodunit', 'whodunits']
     },
 
     {
         label: 'Crime',
-        terms: [
-            'crime',
-            'crime fiction',
-            'criminal fiction',
-            'crime & mystery',
-            'crime and mystery',
-            'crime & thriller',
-            'crime and thriller'
-        ]
+        terms: ['crime', 'crime fiction', 'criminal fiction', 'crime & mystery', 'crime and mystery', 'crime & thriller', 'crime and thriller']
     },
 
     {
         label: 'Thriller',
-        terms: [
-            'thriller',
-            'thrillers',
-            'suspense',
-            'suspense fiction',
-            'mystery thriller',
-            'psychological thriller',
-            'legal thriller',
-            'political thriller',
-            'spy thriller',
-            'techno thriller'
-        ]
+        terms: ['thriller', 'thrillers', 'suspense', 'suspense fiction', 'mystery thriller', 'psychological thriller', 'legal thriller', 'political thriller', 'spy thriller', 'techno thriller']
     },
 
     {
         label: 'Horror',
-        terms: [
-            'horror',
-            'horror fiction',
-            'ghost stories',
-            'ghost story',
-            'occult fiction',
-            'supernatural horror'
-        ]
+        terms: ['horror', 'horror fiction', 'ghost stories', 'ghost story', 'occult fiction', 'supernatural horror']
     },
 
     {
         label: 'Romance',
-        terms: [
-            'romance',
-            'romance fiction',
-            'romantic fiction',
-            'love stories'
-        ]
+        terms: ['romance', 'romance fiction', 'romantic fiction', 'love stories']
     },
 
     {
         label: 'Adventure',
-        terms: [
-            'adventure',
-            'adventure fiction'
-        ]
+        terms: ['adventure', 'adventure fiction']
     },
 
     {
         label: 'Action',
-        terms: [
-            'action',
-            'action fiction'
-        ]
+        terms: ['action', 'action fiction']
     },
 
     {
         label: 'Historical',
-        terms: [
-            'historical fiction',
-            'historical novel',
-            'historical novels',
-            'historical'
-        ]
+        terms: ['historical fiction', 'historical novel', 'historical novels', 'historical']
     },
 
     {
         label: 'Biography',
-        terms: [
-            'biography',
-            'biographies'
-        ]
+        terms: ['biography', 'biographies']
     },
 
     {
         label: 'Memoir / Autobiography',
-        terms: [
-            'memoir',
-            'memoirs',
-            'autobiography',
-            'autobiographies'
-        ]
+        terms: ['memoir', 'memoirs', 'autobiography', 'autobiographies']
     },
 
     {
         label: 'Philosophy',
-        terms: [
-            'philosophy',
-            'philosophical'
-        ]
+        terms: ['philosophy', 'philosophical']
     },
 
     {
         label: 'Psychology',
-        terms: [
-            'psychology',
-            'psychological'
-        ]
+        terms: ['psychology', 'psychological']
     },
 
     {
         label: 'Science',
-        terms: [
-            'science',
-            'natural science',
-            'popular science'
-        ]
+        terms: ['science', 'natural science', 'popular science']
     },
 
     {
         label: 'Technology',
-        terms: [
-            'technology',
-            'computers',
-            'computer science',
-            'information technology'
-        ]
+        terms: ['technology', 'computers', 'computer science', 'information technology']
     },
 
     {
         label: 'Politics',
-        terms: [
-            'politics',
-            'political',
-            'political science'
-        ]
+        terms: ['politics', 'political', 'political science']
     },
 
     {
         label: 'Religion',
-        terms: [
-            'religion',
-            'religious',
-            'christianity',
-            'christian fiction',
-            'islam',
-            'judaism'
-        ]
+        terms: ['religion', 'religious', 'christianity', 'christian fiction', 'islam', 'judaism']
     },
 
     {
         label: 'Self Help',
-        terms: [
-            'self help',
-            'self-help',
-            'personal development',
-            'personal growth'
-        ]
+        terms: ['self help', 'self-help', 'personal development', 'personal growth']
     },
 
     {
         label: 'Business / Economics',
-        terms: [
-            'business',
-            'economics',
-            'finance',
-            'management',
-            'entrepreneurship'
-        ]
+        terms: ['business', 'economics', 'finance', 'management', 'entrepreneurship']
     },
 
     {
         label: 'Travel',
-        terms: [
-            'travel',
-            'travel writing',
-            'travel literature'
-        ]
+        terms: ['travel', 'travel writing', 'travel literature']
     },
 
     {
         label: 'Cooking',
-        terms: [
-            'cooking',
-            'cookbooks',
-            'cookbook',
-            'food writing',
-            'food & drink',
-            'food and drink',
-            'recipes',
-            'recipe books'
-        ]
+        terms: ['cooking', 'cookbooks', 'cookbook', 'food writing', 'food & drink', 'food and drink', 'recipes', 'recipe books']
     },
 
     {
         label: "Children's",
-        terms: [
-            "children's",
-            'children',
-            'juvenile literature',
-            'juvenile fiction'
-        ]
+        terms: ["children's", 'children', 'juvenile literature', 'juvenile fiction']
     },
 
     {
         label: 'Young Adult',
-        terms: [
-            'young adult',
-            'young adult fiction',
-            'ya fiction'
-        ]
+        terms: ['young adult', 'young adult fiction', 'ya fiction']
     },
 
     {
         label: 'Poetry',
-        terms: [
-            'poetry',
-            'poems',
-            'poems & poetry'
-        ]
+        terms: ['poetry', 'poems', 'poems & poetry']
     },
 
     {
         label: 'Drama',
-        terms: [
-            'drama',
-            'plays',
-            'theater',
-            'theatre'
-        ]
+        terms: ['drama', 'plays', 'theater', 'theatre']
     },
 
     {
         label: 'Humour',
-        terms: [
-            'humor',
-            'humour',
-            'comedy',
-            'humorous fiction'
-        ]
+        terms: ['humor', 'humour', 'comedy', 'humorous fiction']
     },
 
     {
         label: 'Music',
-        terms: [
-            'music',
-            'music history'
-        ]
+        terms: ['music', 'music history']
     },
 
     {
         label: 'Art',
-        terms: [
-            'art',
-            'art history',
-            'visual arts'
-        ]
+        terms: ['art', 'art history', 'visual arts']
     },
 
     {
         label: 'Essays',
-        terms: [
-            'essays',
-            'essay'
-        ]
+        terms: ['essays', 'essay']
     },
 
     {
         label: 'Short Stories',
-        terms: [
-            'short stories',
-            'short story',
-            'short fiction'
-        ]
+        terms: ['short stories', 'short story', 'short fiction']
     }
 
 ];
 
 
-/*
- * These are metadata subjects we deliberately DO NOT treat as genres
- * when they appear only in Open Library's subject list.
- */
 const NON_GENRE_SUBJECTS = [
 
-    'england',
-    'scotland',
-    'wales',
-    'ireland',
-    'australia',
-    'united states',
-    'united kingdom',
-    'new york',
-    'london',
-
-    'families',
-    'family',
-    'women',
-    'men',
-    'friendship',
-    'relationships',
-
-    '20th century',
-    '21st century',
-    '19th century',
-    '18th century',
-
-    'fiction',
-    'literature',
-    'literary collections',
-
-    'general',
-
-    'social life and customs',
-    'social conditions',
-    'historical conditions',
-
-    'large type books',
-
-    'accessible book',
-    'protected daisy',
-
-    'book and reading',
-    'books and reading',
-
-    'authors',
-    'novels',
-
-    'characters',
-    'imaginary places',
-    'imaginary characters',
-
-    'translations',
-
-    'places',
-    'geography',
-
-    'collections',
-
-    'juvenile',
-    'young adults'
+    'england', 'scotland', 'wales', 'ireland', 'australia', 'united states', 'united kingdom', 'new york', 'london',
+    'families', 'family', 'women', 'men', 'friendship', 'relationships',
+    '20th century', '21st century', '19th century', '18th century',
+    'fiction', 'literature', 'literary collections', 'general',
+    'social life and customs', 'social conditions', 'historical conditions',
+    'large type books', 'accessible book', 'protected daisy',
+    'book and reading', 'books and reading', 'authors', 'novels',
+    'characters', 'imaginary places', 'imaginary characters',
+    'translations', 'places', 'geography', 'collections',
+    'juvenile', 'young adults'
 
 ];
 
 
 /* ================================================================
-   TOOLBOX
+   TOOLBOX MENU CONTROL
 ================================================================ */
 
 function toggleToolboxMenu(e) {
@@ -1540,7 +1221,7 @@ function closeToolboxMenu() {
 
 
 /* ================================================================
-   AUTH
+   AUTHENTICATION MANAGEMENT
 ================================================================ */
 
 async function initAuth() {
@@ -1630,7 +1311,7 @@ function showAuth() {
 
 
 /* ================================================================
-   LOAD BOOKS
+   DATA LOADING
 ================================================================ */
 
 async function loadBooks() {
@@ -1672,7 +1353,7 @@ async function loadBooks() {
 
 
 /* ================================================================
-   MEDIA TYPE
+   MEDIA TYPE HELPERS
 ================================================================ */
 
 function toggleType(type) {
@@ -1748,39 +1429,27 @@ function detectMediaType(
             .toLowerCase();
 
 
-    if (
-        /\bmanga\b/.test(text)
-    ) {
+    if (/\bmanga\b/.test(text)) {
         return 'Manga';
     }
 
 
-    if (
-        /graphic novel/.test(text)
-    ) {
+    if (/graphic novel/.test(text)) {
         return 'Graphic Novel';
     }
 
 
-    if (
-        /\bcomic\b/.test(text) ||
-        /comic book/.test(text)
-    ) {
+    if (/\bcomic\b/.test(text) || /comic book/.test(text)) {
         return 'Comic';
     }
 
 
-    if (
-        /short stor/.test(text)
-    ) {
+    if (/short stor/.test(text)) {
         return 'Short Story';
     }
 
 
-    if (
-        /\bantholog/.test(text) ||
-        /collection of stories/.test(text)
-    ) {
+    if (/\bantholog/.test(text) || /collection of stories/.test(text)) {
         return 'Anthology';
     }
 
@@ -1790,7 +1459,7 @@ function detectMediaType(
 
 
 /* ================================================================
-   GENRE HELPERS
+   GENRE HELPERS AND MATCHERS
 ================================================================ */
 
 function normaliseGenre(value) {
@@ -1798,93 +1467,41 @@ function normaliseGenre(value) {
     return String(value || '')
         .toLowerCase()
         .normalize('NFD')
-        .replace(
-            /[\u0300-\u036f]/g,
-            ''
-        )
-        .replace(
-            /[&/]+/g,
-            ' '
-        )
-        .replace(
-            /[-]+/g,
-            ' '
-        )
-        .replace(
-            /[^\w\s']/g,
-            ' '
-        )
-        .replace(
-            /\s+/g,
-            ' '
-        )
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[&/]+/g, ' ')
+        .replace(/[-]+/g, ' ')
+        .replace(/[^\w\s']/g, ' ')
+        .replace(/\s+/g, ' ')
         .trim();
 }
 
 
 function splitGenres(value) {
 
-    if (
-        Array.isArray(value)
-    ) {
-        return value
-            .flatMap(
-                item =>
-                    splitGenres(item)
-            );
+    if (Array.isArray(value)) {
+        return value.flatMap(item => splitGenres(item));
     }
 
 
     return String(value || '')
-        .split(
-            /[,;|]+/
-        )
-        .map(
-            item =>
-                item.trim()
-        )
+        .split(/[,;|]+/)
+        .map(item => item.trim())
         .filter(Boolean);
 }
 
 
-/*
- * Convert a metadata value into one of our controlled genre names.
- */
-function matchGenreRule(
-    value
-) {
+function matchGenreRule(value) {
 
-    const normal =
-        normaliseGenre(
-            value
-        );
+    const normal = normaliseGenre(value);
+
+    if (!normal) return null;
 
 
-    if (!normal) {
-        return null;
-    }
+    for (const rule of GENRE_RULES) {
 
+        for (const term of rule.terms) {
 
-    for (
-        const rule
-        of GENRE_RULES
-    ) {
-
-        for (
-            const term
-            of rule.terms
-        ) {
-
-            const normalTerm =
-                normaliseGenre(
-                    term
-                );
-
-
-            if (
-                normal ===
-                normalTerm
-            ) {
+            if (normal === normaliseGenre(term)) {
                 return rule.label;
             }
         }
@@ -1895,72 +1512,44 @@ function matchGenreRule(
 }
 
 
-/*
- * More flexible matching for Google Books categories.
- *
- * Examples:
- *
- * Fiction / Mystery & Detective
- * Fiction > Thrillers
- * Juvenile Fiction / Fantasy
- *
- * We intentionally don't use this loose matching for Open Library
- * subjects because OL subjects are much noisier.
- */
 function matchGoogleGenre(value) {
 
     const raw = String(value || '').trim();
 
-    if (!raw) {
-        return null;
-    }
+    if (!raw) return null;
 
 
-    /*
-     * Google Books frequently returns hierarchical categories such as:
-     *   Fiction / Mystery & Detective
-     *   Juvenile Fiction / Fantasy
-     *
-     * IMPORTANT: split the RAW value first. normaliseGenre() converts
-     * slashes to spaces, which would otherwise destroy the hierarchy.
-     */
     const components = raw
         .split(/\s*(?:\/|>|\||:)\s*/)
         .map(part => part.trim())
         .filter(Boolean);
 
 
-    /* Exact whole-category matches first. */
     const exact = matchGenreRule(raw);
 
-    if (exact) {
-        return exact;
-    }
+    if (exact) return exact;
 
 
-    /* Then match individual category components. */
     for (const component of components) {
+
         const componentMatch = matchGenreRule(component);
 
-        if (componentMatch) {
-            return componentMatch;
-        }
+        if (componentMatch) return componentMatch;
     }
 
 
-    /*
-     * Some Google feeds flatten category text without separators.
-     * Only allow multi-word genre phrases here so that a word such as
-     * "science" cannot accidentally match "Science Fiction".
-     */
     const normal = normaliseGenre(raw);
 
     for (const rule of GENRE_RULES) {
+
         for (const term of rule.terms) {
+
             const normalTerm = normaliseGenre(term);
 
             if (normalTerm.includes(' ')) {
+
                 const escaped = normalTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+
                 if (new RegExp(`(^|\\s)${escaped}($|\\s)`).test(normal)) {
                     return rule.label;
                 }
@@ -1973,367 +1562,136 @@ function matchGoogleGenre(value) {
 }
 
 
-/*
- * Cooking is special.
- *
- * Open Library frequently uses "Cooking" as a subject attached to
- * novels for incidental reasons. We only accept Cooking when:
- *
- * 1. Google Books explicitly classifies it as Cooking / Food & Drink,
- * OR
- * 2. The title strongly indicates that the book is actually a
- *    cookbook/recipe/cooking book.
- */
-function isClearlyCookingBook(
-    title,
-    googleCategories
-) {
+function isClearlyCookingBook(title, googleCategories) {
 
-    const titleText =
-        normaliseGenre(
-            title
-        );
+    const titleText = normaliseGenre(title);
+
+    const categoryText = (Array.isArray(googleCategories) ? googleCategories : [])
+        .map(category => normaliseGenre(category))
+        .join(' ');
 
 
-    const categoryText =
-        (
-            Array.isArray(
-                googleCategories
-            )
-                ? googleCategories
-                : []
-        )
-            .map(
-                category =>
-                    normaliseGenre(category)
-            )
-            .join(' ');
+    const titleLooksLikeCooking = /\b(cookbook|cookbooks|recipes|recipe book|cooking|baking|bake)\b/.test(titleText);
+
+    const categoryLooksLikeCooking = /\b(cooking|cookbooks|cookbook|food and drink|food drink|recipes)\b/.test(categoryText);
 
 
-    const titleLooksLikeCooking =
-        /\b(cookbook|cookbooks|recipes|recipe book|cooking|baking|bake)\b/
-            .test(titleText);
-
-
-    const categoryLooksLikeCooking =
-        /\b(cooking|cookbooks|cookbook|food and drink|food drink|recipes)\b/
-            .test(categoryText);
-
-
-    return (
-        titleLooksLikeCooking ||
-        categoryLooksLikeCooking
-    );
+    return (titleLooksLikeCooking || categoryLooksLikeCooking);
 }
 
 
-/*
- * This is the main genre extraction function.
- *
- * It combines:
- *
- *   Open Library subjects
- *   Google Books categories
- *
- * but treats them differently.
- *
- * Google categories = stronger signal
- * Open Library subjects = supporting signal only
- */
-function extractGenres(
-    title,
-    subjects = [],
-    googleCategories = []
-) {
+function extractGenres(title, subjects = [], googleCategories = []) {
 
     const results = [];
 
-    const seen =
-        new Set();
+    const seen = new Set();
 
 
-    function addGenre(
-        genre
-    ) {
+    function addGenre(genre) {
 
-        if (!genre) {
-            return;
-        }
+        if (!genre || seen.has(genre)) return;
 
+        seen.add(genre);
 
-        if (
-            seen.has(
-                genre
-            )
-        ) {
-            return;
-        }
-
-
-        seen.add(
-            genre
-        );
-
-        results.push(
-            genre
-        );
+        results.push(genre);
     }
 
 
-    /*
-     * First process Google Books categories.
-     *
-     * These are our strongest automatic genre source.
-     */
+    if (Array.isArray(googleCategories)) {
 
-    if (
-        Array.isArray(
-            googleCategories
-        )
-    ) {
+        googleCategories.forEach(category => {
 
-        googleCategories.forEach(
-            category => {
+            const genre = matchGoogleGenre(category);
 
-                const genre =
-                    matchGoogleGenre(
-                        category
-                    );
-
-
-                if (
-                    genre === 'Cooking' &&
-                    !isClearlyCookingBook(
-                        title,
-                        googleCategories
-                    )
-                ) {
-                    return;
-                }
-
-
-                addGenre(
-                    genre
-                );
+            if (genre === 'Cooking' && !isClearlyCookingBook(title, googleCategories)) {
+                return;
             }
-        );
+
+            addGenre(genre);
+        });
     }
 
 
-    /*
-     * Now process Open Library subjects.
-     *
-     * Only exact/strong genre subjects are accepted.
-     * We deliberately do NOT loosely match them.
-     */
+    if (Array.isArray(subjects)) {
 
-    if (
-        Array.isArray(
-            subjects
-        )
-    ) {
+        subjects.forEach(subject => {
 
-        subjects.forEach(
-            subject => {
+            const normal = normaliseGenre(subject);
 
-                const normal =
-                    normaliseGenre(
-                        subject
-                    );
+            if (!normal || NON_GENRE_SUBJECTS.includes(normal)) return;
 
 
-                if (!normal) {
-                    return;
-                }
+            const genre = matchGenreRule(subject);
+
+            if (!genre) return;
 
 
-                if (
-                    NON_GENRE_SUBJECTS.includes(
-                        normal
-                    )
-                ) {
-                    return;
-                }
-
-
-                const genre =
-                    matchGenreRule(
-                        subject
-                    );
-
-
-                if (
-                    !genre
-                ) {
-                    return;
-                }
-
-
-                /*
-                 * Cooking from Open Library alone is not enough.
-                 */
-
-                if (
-                    genre === 'Cooking' &&
-                    !isClearlyCookingBook(
-                        title,
-                        googleCategories
-                    )
-                ) {
-                    return;
-                }
-
-
-                addGenre(
-                    genre
-                );
+            if (genre === 'Cooking' && !isClearlyCookingBook(title, googleCategories)) {
+                return;
             }
-        );
+
+            addGenre(genre);
+        });
     }
-
-
-    /*
-     * If the metadata explicitly says something is fiction but
-     * doesn't provide a useful subgenre, we don't save "Fiction"
-     * as a genre. The Vault is more useful with actual genres.
-     */
 
 
     return results;
 }
 
 
-/*
- * Used for display / editing existing values.
- */
-function getCleanGenreString(
-    value
-) {
+function getCleanGenreString(value) {
 
-    const genres =
-        splitGenres(
-            value
-        );
-
+    const genres = splitGenres(value);
 
     const results = [];
 
-    const seen =
-        new Set();
+    const seen = new Set();
 
 
-    genres.forEach(
-        genre => {
+    genres.forEach(genre => {
 
-            const matched =
-                matchGenreRule(
-                    genre
-                );
+        const matched = matchGenreRule(genre);
 
+        const label = matched || genre.trim();
 
-            const label =
-                matched ||
-                genre.trim();
+        const key = normaliseGenre(label);
 
 
-            const key =
-                normaliseGenre(
-                    label
-                );
+        if (!key || seen.has(key)) return;
 
+        seen.add(key);
 
-            if (
-                !key ||
-                seen.has(key)
-            ) {
-                return;
-            }
-
-
-            seen.add(key);
-
-            results.push(
-                label
-            );
-        }
-    );
+        results.push(label);
+    });
 
 
     return results.join(', ');
 }
 
 
-function getGenreIconData(
-    genre
-) {
+function getGenreIconData(genre) {
 
-    const normal =
-        normaliseGenre(
-            genre
-        );
+    const normal = normaliseGenre(genre);
+
+    if (!normal) return null;
 
 
-    if (!normal) {
-        return null;
+    for (const entry of GENRE_ICONS) {
+
+        if (entry.names.some(name => normal === normaliseGenre(name))) {
+            return entry;
+        }
     }
 
 
-    /*
-     * Direct matching first.
-     */
+    for (const entry of GENRE_ICONS) {
 
-    for (
-        const entry
-        of GENRE_ICONS
-    ) {
-
-        if (
-            entry.names.some(
-                name =>
-                    normal ===
-                    normaliseGenre(name)
-            )
-        ) {
-
+        if (entry.names.some(name => {
+            const n = normaliseGenre(name);
+            return (normal.includes(n) || n.includes(normal));
+        })) {
             return entry;
         }
-
-    }
-
-
-    /*
-     * Then partial matching. This catches things such as:
-     *
-     * "Fantasy fiction"
-     * "Science fiction novels"
-     * "Historical mystery"
-     */
-
-    for (
-        const entry
-        of GENRE_ICONS
-    ) {
-
-        if (
-            entry.names.some(
-                name => {
-
-                    const n =
-                        normaliseGenre(
-                            name
-                        );
-
-                    return (
-                        normal.includes(n) ||
-                        n.includes(normal)
-                    );
-                }
-            )
-        ) {
-
-            return entry;
-        }
-
     }
 
 
@@ -2341,62 +1699,27 @@ function getGenreIconData(
 }
 
 
-function renderGenreIcons(
-    genreValue
-) {
+function renderGenreIcons(genreValue) {
 
-    const genres =
-        splitGenres(
-            genreValue
-        );
+    const genres = splitGenres(genreValue);
 
+    const seen = new Set();
 
-    const seen =
-        new Set();
+    const icons = [];
 
 
-    const icons =
-        [];
+    for (const genre of genres) {
+
+        const data = getGenreIconData(genre);
+
+        if (!data || seen.has(data.label)) continue;
 
 
-    for (
-        const genre
-        of genres
-    ) {
-
-        const data =
-            getGenreIconData(
-                genre
-            );
-
-
-        if (!data) {
-            continue;
-        }
-
-
-        if (
-            seen.has(
-                data.label
-            )
-        ) {
-            continue;
-        }
-
-
-        seen.add(
-            data.label
-        );
-
+        seen.add(data.label);
 
         icons.push({
-
-            icon:
-                data.icon,
-
-            label:
-                data.label
-
+            icon: data.icon,
+            label: data.label
         });
     }
 
@@ -2405,9 +1728,7 @@ function renderGenreIcons(
 
         return `
             <div class="genre-icons">
-                <span
-                    class="genre-icon opacity-40"
-                    title="Genre not specified">
+                <span class="genre-icon opacity-40" title="Genre not specified">
                     📚
                 </span>
             </div>
@@ -2419,17 +1740,11 @@ function renderGenreIcons(
         <div class="genre-icons">
             ${
                 icons
-                    .map(
-                        item => `
-                            <span
-                                class="genre-icon"
-                                title="${escapeHtml(
-                                    item.label
-                                )}">
-                                ${item.icon}
-                            </span>
-                        `
-                    )
+                    .map(item => `
+                        <span class="genre-icon" title="${escapeHtml(item.label)}">
+                            ${item.icon}
+                        </span>
+                    `)
                     .join('')
             }
         </div>
@@ -2438,98 +1753,50 @@ function renderGenreIcons(
 
 
 /* ================================================================
-   GENERAL HELPERS
+   GENERAL HELPER FUNCTIONS
 ================================================================ */
 
 function parseReleaseYear(val) {
 
-    if (
-        val === undefined ||
-        val === null ||
-        val === 'null' ||
-        val === 'undefined' ||
-        val === ''
-    ) {
+    if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') {
         return 'TBA';
     }
 
 
-    if (
-        typeof val === 'number' &&
-        val > 1000 &&
-        val < 3000
-    ) {
+    if (typeof val === 'number' && val > 1000 && val < 3000) {
         return val.toString();
     }
 
 
-    if (
-        typeof val === 'string' &&
-        /^\d{4}$/.test(
-            val.trim()
-        )
-    ) {
+    if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) {
         return val.trim();
     }
 
 
-    if (
-        typeof val === 'string' &&
-        val.includes('-')
-    ) {
+    if (typeof val === 'string' && val.includes('-')) {
 
-        const yearPart =
-            val.split('-')[0];
+        const yearPart = val.split('-')[0];
 
-
-        if (
-            yearPart.length === 4 &&
-            !isNaN(yearPart)
-        ) {
+        if (yearPart.length === 4 && !isNaN(yearPart)) {
             return yearPart;
         }
     }
 
 
-    const num =
-        Number(val);
+    const num = Number(val);
 
+    if (!isNaN(num) && num > 0) {
 
-    if (
-        !isNaN(num) &&
-        num > 0
-    ) {
+        let timestamp = num;
 
-        let timestamp =
-            num;
-
-
-        if (
-            timestamp >
-            32503680000
-        ) {
-            timestamp =
-                Math.floor(
-                    timestamp / 1000
-                );
+        if (timestamp > 32503680000) {
+            timestamp = Math.floor(timestamp / 1000);
         }
 
+        const dateObj = new Date(timestamp * 1000);
 
-        const dateObj =
-            new Date(
-                timestamp * 1000
-            );
-
-
-        if (
-            !isNaN(
-                dateObj.getFullYear()
-            )
-        ) {
-
-            return dateObj
-                .getFullYear()
-                .toString();
+        if (!isNaN(dateObj.getFullYear())) {
+            return dateObj.getFullYear().toString();
         }
     }
 
@@ -2538,19 +1805,37 @@ function parseReleaseYear(val) {
 }
 
 
+function parseFinishedYear(book) {
+
+    if (book.finished_year) {
+        return String(book.finished_year);
+    }
+
+    if (book.finished_date) {
+        const d = new Date(book.finished_date);
+        if (!isNaN(d.getFullYear())) {
+            return String(d.getFullYear());
+        }
+    }
+
+    if (book.updated_at) {
+        const d = new Date(book.updated_at);
+        if (!isNaN(d.getFullYear())) {
+            return String(d.getFullYear());
+        }
+    }
+
+    return parseReleaseYear(book.release_year);
+}
+
+
 function normalizeText(value) {
 
     return String(value || '')
         .toLowerCase()
         .normalize('NFD')
-        .replace(
-            /[\u0300-\u036f]/g,
-            ''
-        )
-        .replace(
-            /[^a-z0-9]+/g,
-            ' '
-        )
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, ' ')
         .trim();
 }
 
@@ -2568,140 +1853,66 @@ function escapeHtml(value) {
 
 function titleSimilarity(a, b) {
 
-    const na =
-        normalizeText(a);
+    const na = normalizeText(a);
 
-    const nb =
-        normalizeText(b);
+    const nb = normalizeText(b);
 
 
-    if (!na || !nb) {
-        return 0;
-    }
+    if (!na || !nb) return 0;
+
+    if (na === nb) return 1;
+
+    if (na.includes(nb) || nb.includes(na)) return 0.85;
 
 
-    if (na === nb) {
-        return 1;
-    }
+    const aWords = new Set(na.split(/\s+/));
+
+    const bWords = new Set(nb.split(/\s+/));
 
 
-    if (
-        na.includes(nb) ||
-        nb.includes(na)
-    ) {
-        return 0.85;
-    }
+    const intersection = [...aWords].filter(x => bWords.has(x)).length;
+
+    const union = new Set([...aWords, ...bWords]).size;
 
 
-    const aWords =
-        new Set(
-            na.split(/\s+/)
-        );
-
-    const bWords =
-        new Set(
-            nb.split(/\s+/)
-        );
-
-
-    const intersection =
-        [...aWords]
-            .filter(
-                x =>
-                    bWords.has(x)
-            )
-            .length;
-
-
-    const union =
-        new Set([
-            ...aWords,
-            ...bWords
-        ]).size;
-
-
-    return union
-        ? intersection / union
-        : 0;
+    return union ? intersection / union : 0;
 }
 
 
-function authorSimilarity(
-    bookAuthor,
-    apiAuthors
-) {
+function authorSimilarity(bookAuthor, apiAuthors) {
 
-    const target =
-        normalizeText(
-            bookAuthor
-        );
+    const target = normalizeText(bookAuthor);
 
-
-    if (
-        !target ||
-        !Array.isArray(apiAuthors) ||
-        !apiAuthors.length
-    ) {
-        return 0;
-    }
+    if (!target || !Array.isArray(apiAuthors) || !apiAuthors.length) return 0;
 
 
     let best = 0;
 
 
-    apiAuthors.forEach(
-        author => {
+    apiAuthors.forEach(author => {
 
-            const candidate =
-                normalizeText(
-                    author
-                );
+        const candidate = normalizeText(author);
 
+        if (!candidate) return;
 
-            if (!candidate) {
-                return;
-            }
-
-
-            if (
-                candidate === target
-            ) {
-
-                best = 1;
-                return;
-            }
-
-
-            const targetParts =
-                target.split(/\s+/);
-
-            const candidateParts =
-                candidate.split(/\s+/);
-
-
-            const overlap =
-                targetParts.filter(
-                    x =>
-                        candidateParts
-                            .includes(x)
-                ).length;
-
-
-            const score =
-                overlap /
-                Math.max(
-                    targetParts.length,
-                    candidateParts.length
-                );
-
-
-            best =
-                Math.max(
-                    best,
-                    score
-                );
+        if (candidate === target) {
+            best = 1;
+            return;
         }
-    );
+
+
+        const targetParts = target.split(/\s+/);
+
+        const candidateParts = candidate.split(/\s+/);
+
+
+        const overlap = targetParts.filter(x => candidateParts.includes(x)).length;
+
+        const score = overlap / Math.max(targetParts.length, candidateParts.length);
+
+
+        best = Math.max(best, score);
+    });
 
 
     return best;
@@ -2709,27 +1920,17 @@ function authorSimilarity(
 
 
 /* ================================================================
-   GOOGLE BOOKS
+   GOOGLE BOOKS METADATA EXTRACTION
 ================================================================ */
 
 function extractGoogleSeriesInfo(item) {
 
-    const info =
-        item?.volumeInfo ||
-        item ||
-        {};
+    const info = item?.volumeInfo || item || {};
+
+    const seriesInfo = info.seriesInfo;
 
 
-    const seriesInfo =
-        info.seriesInfo;
-
-
-    if (
-        !seriesInfo ||
-        !Array.isArray(
-            seriesInfo.volumeSeries
-        )
-    ) {
+    if (!seriesInfo || !Array.isArray(seriesInfo.volumeSeries)) {
 
         return {
             seriesId: '',
@@ -2740,28 +1941,14 @@ function extractGoogleSeriesInfo(item) {
     }
 
 
-    const candidates =
-        seriesInfo.volumeSeries
-            .filter(
-                series => {
+    const candidates = seriesInfo.volumeSeries.filter(series => {
 
-                    if (!series) {
-                        return false;
-                    }
+        if (!series) return false;
 
+        const order = Number(series.orderNumber);
 
-                    const order =
-                        Number(
-                            series.orderNumber
-                        );
-
-
-                    return (
-                        Number.isFinite(order) &&
-                        order >= 0
-                    );
-                }
-            );
+        return (Number.isFinite(order) && order >= 0);
+    });
 
 
     if (!candidates.length) {
@@ -2769,83 +1956,45 @@ function extractGoogleSeriesInfo(item) {
         return {
             seriesId: '',
             order: null,
-            displayNumber:
-                seriesInfo.bookDisplayNumber ||
-                '',
-            shortTitle:
-                seriesInfo.shortSeriesBookTitle ||
-                ''
+            displayNumber: seriesInfo.bookDisplayNumber || '',
+            shortTitle: seriesInfo.shortSeriesBookTitle || ''
         };
     }
 
 
-    const selected =
-        candidates.find(
-            s =>
-                String(
-                    s.seriesBookType || ''
-                )
-                    .toLowerCase()
-                    .includes('single')
-        ) ||
-        candidates[0];
+    const selected = candidates.find(s => String(s.seriesBookType || '').toLowerCase().includes('single')) || candidates[0];
 
 
     return {
-
-        seriesId:
-            selected.seriesId || '',
-
-        order:
-            Number(
-                selected.orderNumber
-            ),
-
-        displayNumber:
-            seriesInfo.bookDisplayNumber ||
-            '',
-
-        shortTitle:
-            seriesInfo.shortSeriesBookTitle ||
-            ''
-
+        seriesId: selected.seriesId || '',
+        order: Number(selected.orderNumber),
+        displayNumber: seriesInfo.bookDisplayNumber || '',
+        shortTitle: seriesInfo.shortSeriesBookTitle || ''
     };
 }
 
 
 /* ================================================================
-   OPEN LIBRARY
+   OPEN LIBRARY METADATA EXTRACTION
 ================================================================ */
 
 function extractOpenLibrarySeries(doc) {
 
-    if (!doc) {
-        return '';
-    }
+    if (!doc) return '';
 
 
-    const source =
-        doc.series;
+    const source = doc.series;
 
 
     if (Array.isArray(source)) {
 
-        const values =
-            source
-                .map(value => {
-
-                    if (typeof value === 'string') {
-                        return value;
-                    }
-
-                    return value?.name || value?.title || '';
-                })
-                .filter(Boolean);
+        const values = source.map(value => {
+            if (typeof value === 'string') return value;
+            return value?.name || value?.title || '';
+        }).filter(Boolean);
 
 
-        if (values.length) {
-            return values[0];
-        }
+        if (values.length) return values[0];
     }
 
 
@@ -2862,17 +2011,9 @@ async function getOpenLibraryWorkSeries(doc) {
 
     let key = String(doc?.key || '').trim();
 
-    if (!key) {
-        return '';
-    }
+    if (!key) return '';
 
 
-    /*
-     * Open Library search normally returns a bare work key such as
-     * "OL82586W", while direct API URLs use "/works/OL82586W".
-     * The previous code only accepted the latter, which meant the
-     * deep series lookup silently failed for normal search results.
-     */
     if (/^OL\d+W$/.test(key)) {
         key = `/works/${key}`;
     } else if (/^OL\d+M$/.test(key)) {
@@ -2884,22 +2025,19 @@ async function getOpenLibraryWorkSeries(doc) {
 
         let workKey = key;
 
-        /* Resolve an edition to its parent work when necessary. */
         if (workKey.startsWith('/books/')) {
-            const editionResponse = await fetch(
-                `https://openlibrary.org${workKey}.json`
-            );
 
-            if (!editionResponse.ok) {
-                return '';
-            }
+            const editionResponse = await fetch(`https://openlibrary.org${workKey}.json`);
+
+            if (!editionResponse.ok) return '';
+
 
             const edition = await editionResponse.json();
+
             workKey = String(edition?.works?.[0]?.key || '').trim();
 
-            if (!workKey) {
-                return '';
-            }
+            if (!workKey) return '';
+
 
             if (/^OL\d+W$/.test(workKey)) {
                 workKey = `/works/${workKey}`;
@@ -2907,19 +2045,12 @@ async function getOpenLibraryWorkSeries(doc) {
         }
 
 
-        if (!workKey.startsWith('/works/')) {
-            return '';
-        }
+        if (!workKey.startsWith('/works/')) return '';
 
 
-        const response = await fetch(
-            `https://openlibrary.org${workKey}.json`
-        );
+        const response = await fetch(`https://openlibrary.org${workKey}.json`);
 
-
-        if (!response.ok) {
-            return '';
-        }
+        if (!response.ok) return '';
 
 
         const work = await response.json();
@@ -2928,10 +2059,7 @@ async function getOpenLibraryWorkSeries(doc) {
 
     } catch (error) {
 
-        console.warn(
-            'Open Library work lookup failed:',
-            error
-        );
+        console.warn('Open Library work lookup failed:', error);
 
         return '';
     }
@@ -2939,118 +2067,59 @@ async function getOpenLibraryWorkSeries(doc) {
 
 
 /* ================================================================
-   GOOGLE SEARCH MATCHING
+   GOOGLE SEARCH CANDIDATE MATCHING
 ================================================================ */
 
-function scoreGoogleBook(
-    title,
-    author,
-    item,
-    existingSeries = ''
-) {
+function scoreGoogleBook(title, author, item, existingSeries = '') {
 
-    const info =
-        item?.volumeInfo || {};
+    const info = item?.volumeInfo || {};
+
+    const titleScore = titleSimilarity(title, info.title || '');
+
+    const authorScore = authorSimilarity(author, info.authors || []);
 
 
-    const titleScore =
-        titleSimilarity(
-            title,
-            info.title || ''
-        );
+    if (titleScore < 0.45) return -1;
 
 
-    const authorScore =
-        authorSimilarity(
-            author,
-            info.authors || []
-        );
+    let score = (titleScore * 30) + (authorScore * 20);
+
+    const seriesInfo = extractGoogleSeriesInfo(item);
 
 
-    /* Reject obvious title mismatches instead of letting metadata
-       such as a series number make the wrong book win. */
-    if (titleScore < 0.45) {
-        return -1;
-    }
+    if (seriesInfo.order !== null) score += 15;
+
+    if (existingSeries && seriesInfo.seriesId) score += 5;
+
+    if (titleScore === 1) score += 10;
+
+    if (authorScore === 1) score += 8;
 
 
-    let score =
-        (titleScore * 30) +
-        (authorScore * 20);
+    const categories = Array.isArray(info.categories) ? info.categories : [];
+
+    const categoryGenres = categories.map(category => matchGoogleGenre(category)).filter(Boolean);
 
 
-    const seriesInfo =
-        extractGoogleSeriesInfo(item);
+    if (categoryGenres.length) score += 6;
 
-
-    if (seriesInfo.order !== null) {
-        score += 15;
-    }
-
-
-    /* A search that explicitly included the user's existing series is
-       already a useful signal, but only when the title/author also fit. */
-    if (existingSeries && seriesInfo.seriesId) {
-        score += 5;
-    }
-
-
-    if (titleScore === 1) {
-        score += 10;
-    }
-
-
-    if (authorScore === 1) {
-        score += 8;
-    }
-
-
-    /* Prefer an otherwise matching Google edition that actually has
-       useful genre metadata. This stops a generic "Juvenile Fiction"
-       edition from beating a matching edition classified as Fantasy,
-       Mystery, Crime, etc. */
-    const categories = Array.isArray(info.categories)
-        ? info.categories
-        : [];
-
-    const categoryGenres = categories
-        .map(category => matchGoogleGenre(category))
-        .filter(Boolean);
-
-    if (categoryGenres.length) {
-        score += 6;
-    }
-
-    if (categoryGenres.some(genre => genre !== 'Young Adult')) {
-        score += 4;
-    }
+    if (categoryGenres.some(genre => genre !== 'Young Adult')) score += 4;
 
 
     return score;
 }
 
 
-function findBestGoogleBook(
-    title,
-    author,
-    items,
-    existingSeries = ''
-) {
+function findBestGoogleBook(title, author, items, existingSeries = '') {
 
     let best = null;
+
     let bestScore = -1;
 
 
     for (const item of items || []) {
 
-        const score =
-            scoreGoogleBook(
-                title,
-                author,
-                item,
-                existingSeries
-            );
-
+        const score = scoreGoogleBook(title, author, item, existingSeries);
 
         if (score > bestScore) {
             bestScore = score;
@@ -3066,26 +2135,17 @@ function findBestGoogleBook(
 }
 
 
-async function searchGoogleBooksCandidates(
-    title,
-    author = '',
-    existingSeries = '',
-    isbn = ''
-) {
+async function searchGoogleBooksCandidates(title, author = '', existingSeries = '', isbn = '') {
 
     const queries = [];
 
 
-    if (isbn) {
-        queries.push(`isbn:${isbn}`);
-    }
+    if (isbn) queries.push(`isbn:${isbn}`);
 
 
-    const safeTitle =
-        String(title || '').trim();
+    const safeTitle = String(title || '').trim();
 
-    const safeAuthor =
-        String(author || '').trim();
+    const safeAuthor = String(author || '').trim();
 
 
     if (safeTitle && safeAuthor) {
@@ -3099,14 +2159,10 @@ async function searchGoogleBooksCandidates(
     }
 
 
-    if (safeTitle) {
-        queries.push(`intitle:"${safeTitle}"`);
-    }
+    if (safeTitle) queries.push(`intitle:"${safeTitle}"`);
 
 
-    const uniqueQueries =
-        [...new Set(queries)];
-
+    const uniqueQueries = [...new Set(queries)];
 
     const items = [];
 
@@ -3115,26 +2171,19 @@ async function searchGoogleBooksCandidates(
 
         try {
 
-            const response =
-                await fetch(
-                    `https://www.googleapis.com/books/v1/volumes?` +
-                    `q=${encodeURIComponent(query)}` +
-                    `&maxResults=10` +
-                    `&projection=full`
-                );
+            const response = await fetch(
+                `https://www.googleapis.com/books/v1/volumes?` +
+                `q=${encodeURIComponent(query)}` +
+                `&maxResults=10` +
+                `&projection=full`
+            );
+
+            if (!response.ok) continue;
 
 
-            if (!response.ok) {
-                continue;
-            }
-
-
-            const data =
-                await response.json();
-
+            const data = await response.json();
 
             for (const item of data.items || []) {
-
                 if (!items.some(existing => existing.id && existing.id === item.id)) {
                     items.push(item);
                 }
@@ -3142,58 +2191,34 @@ async function searchGoogleBooksCandidates(
 
         } catch (error) {
 
-            console.warn(
-                'Google Books candidate lookup failed:',
-                query,
-                error
-            );
+            console.warn('Google Books candidate lookup failed:', query, error);
         }
 
-
-        /* The first exact title+author query is normally sufficient.
-           Continue only while the candidate pool is small. */
-        if (items.length >= 15) {
-            break;
-        }
+        if (items.length >= 15) break;
     }
 
 
-    return findBestGoogleBook(
-        title,
-        author,
-        items,
-        existingSeries
-    );
+    return findBestGoogleBook(title, author, items, existingSeries);
 }
 
 
 /* ================================================================
-   SEARCH
+   SEARCH EXECUTION
 ================================================================ */
 
 function searchBooks(q) {
 
-    clearTimeout(
-        searchDebounce
-    );
+    clearTimeout(searchDebounce);
 
-
-    searchDebounce =
-        setTimeout(
-            () => executeSearch(q),
-            350
-        );
+    searchDebounce = setTimeout(() => executeSearch(q), 350);
 }
 
 
 async function executeSearch(q) {
 
-    const resultsBox =
-        document.getElementById('searchResults');
+    const resultsBox = document.getElementById('searchResults');
 
-
-    const query =
-        String(q || '').trim();
+    const query = String(q || '').trim();
 
 
     if (query.length < 2) {
@@ -3204,6 +2229,7 @@ async function executeSearch(q) {
 
 
     resultsBox.classList.remove('hidden');
+
     resultsBox.innerHTML = `
         <div class="p-4 text-sm text-slate-400">
             Searching books and series...
@@ -3220,163 +2246,98 @@ async function executeSearch(q) {
             `&fields=key,title,author_name,cover_i,subject,first_publish_year,series`;
 
 
-        const googleSearch =
-            searchGoogleBooksCandidates(
-                query,
-                '',
-                '',
-                /^\d{10}|^\d{13}$/.test(query.replace(/[-\s]/g, ''))
-                    ? query.replace(/[-\s]/g, '')
-                    : ''
-            );
+        const googleSearch = searchGoogleBooksCandidates(
+            query,
+            '',
+            '',
+            /^\d{10}|^\d{13}$/.test(query.replace(/[-\s]/g, '')) ? query.replace(/[-\s]/g, '') : ''
+        );
 
 
-        const olPromise =
-            fetch(openLibraryUrl)
-                .then(async response =>
-                    response.ok
-                        ? (await response.json()).docs || []
-                        : []
-                )
-                .catch(error => {
-                    console.warn('Open Library search failed:', error);
-                    return [];
-                });
+        const olPromise = fetch(openLibraryUrl)
+            .then(async response => response.ok ? (await response.json()).docs || [] : [])
+            .catch(error => {
+                console.warn('Open Library search failed:', error);
+                return [];
+            });
 
 
-        const [olDocs, broadGoogle] =
-            await Promise.all([
-                olPromise,
-                googleSearch
-            ]);
+        const [olDocs, broadGoogle] = await Promise.all([olPromise, googleSearch]);
 
 
-        const results =
-            await Promise.all(
-                olDocs.map(async doc => {
+        const results = await Promise.all(
+            olDocs.map(async doc => {
 
-                    const title =
-                        doc.title || '';
+                const title = doc.title || '';
 
-                    const author =
-                        Array.isArray(doc.author_name)
-                            ? doc.author_name.join(', ')
-                            : 'Unknown';
+                const author = Array.isArray(doc.author_name) ? doc.author_name.join(', ') : 'Unknown';
 
 
-                    let bestGoogle =
-                        await searchGoogleBooksCandidates(
-                            title,
-                            author
-                        );
+                let bestGoogle = await searchGoogleBooksCandidates(title, author);
 
 
-                    /* If the targeted lookup found nothing useful, use the
-                       broad search candidates as a fallback. */
-                    if (!bestGoogle.item || bestGoogle.score < 35) {
-                        bestGoogle =
-                            findBestGoogleBook(
-                                title,
-                                author,
-                                broadGoogle.item ? [broadGoogle.item] : []
-                            );
-                    }
+                if (!bestGoogle.item || bestGoogle.score < 35) {
+                    bestGoogle = findBestGoogleBook(title, author, broadGoogle.item ? [broadGoogle.item] : []);
+                }
 
 
-                    const googleSeries =
-                        bestGoogle.item
-                            ? extractGoogleSeriesInfo(bestGoogle.item)
-                            : null;
+                const googleSeries = bestGoogle.item ? extractGoogleSeriesInfo(bestGoogle.item) : null;
+
+                let seriesName = extractOpenLibrarySeries(doc);
 
 
-                    let seriesName =
-                        extractOpenLibrarySeries(doc);
+                if (!seriesName) {
+                    seriesName = await getOpenLibraryWorkSeries(doc);
+                }
 
 
-                    if (!seriesName) {
-                        seriesName =
-                            await getOpenLibraryWorkSeries(doc);
-                    }
+                const subjects = Array.isArray(doc.subject) ? doc.subject.filter(Boolean).slice(0, 30) : [];
+
+                const googleCategories = bestGoogle.item?.volumeInfo?.categories || [];
+
+                const genres = extractGenres(title, subjects, googleCategories);
 
 
-                    const subjects =
-                        Array.isArray(doc.subject)
-                            ? doc.subject.filter(Boolean).slice(0, 30)
-                            : [];
+                let cover = '';
+
+                if (doc.cover_i) {
+                    cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
+                }
+
+                if (!cover) {
+                    cover = bestGoogle.item?.volumeInfo?.imageLinks?.thumbnail || '';
+                }
+
+                cover = cover.replace('http://', 'https://');
 
 
-                    const googleCategories =
-                        bestGoogle.item?.volumeInfo?.categories || [];
+                const mediaType = detectMediaType(title, [...subjects, ...googleCategories, seriesName]);
 
 
-                    const genres =
-                        extractGenres(
-                            title,
-                            subjects,
-                            googleCategories
-                        );
+                return {
+                    title,
+                    author,
+                    coverUrl: cover,
+                    genre: genres.join(', '),
+                    releaseYear: doc.first_publish_year || '',
+                    series: seriesName,
+                    seriesNum: (googleSeries && googleSeries.order !== null) ? googleSeries.order : null,
+                    mediaType
+                };
+            })
+        );
 
 
-                    let cover = '';
-
-                    if (doc.cover_i) {
-                        cover =
-                            `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
-                    }
-
-                    if (!cover) {
-                        cover =
-                            bestGoogle.item?.volumeInfo?.imageLinks?.thumbnail || '';
-                    }
-
-                    cover =
-                        cover.replace('http://', 'https://');
-
-
-                    const mediaType =
-                        detectMediaType(
-                            title,
-                            [
-                                ...subjects,
-                                ...googleCategories,
-                                seriesName
-                            ]
-                        );
-
-
-                    return {
-                        title,
-                        author,
-                        coverUrl: cover,
-                        genre: genres.join(', '),
-                        releaseYear: doc.first_publish_year || '',
-                        series: seriesName,
-                        seriesNum:
-                            googleSeries && googleSeries.order !== null
-                                ? googleSeries.order
-                                : null,
-                        mediaType
-                    };
-                })
-            );
-
-
-        /* Google-only fallback when Open Library returns no results. */
         if (!results.length) {
 
             const googleItems = [];
 
-            if (broadGoogle.item) {
-                googleItems.push(broadGoogle.item);
-            }
+            if (broadGoogle.item) googleItems.push(broadGoogle.item);
 
-            /* The broad helper deliberately returns only the best item.
-               Run a direct title search as the complete fallback list. */
-            const directGoogle =
-                await searchGoogleBooksCandidates(query);
 
-            if (directGoogle.item &&
-                !googleItems.some(item => item.id === directGoogle.item.id)) {
+            const directGoogle = await searchGoogleBooksCandidates(query);
+
+            if (directGoogle.item && !googleItems.some(item => item.id === directGoogle.item.id)) {
                 googleItems.push(directGoogle.item);
             }
 
@@ -3384,11 +2345,17 @@ async function executeSearch(q) {
             for (const item of googleItems) {
 
                 const info = item.volumeInfo || {};
+
                 const seriesInfo = extractGoogleSeriesInfo(item);
+
                 const categories = Array.isArray(info.categories) ? info.categories : [];
+
                 const genres = extractGenres(info.title || '', [], categories);
+
                 let cover = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || '';
+
                 cover = cover.replace('http://', 'https://');
+
 
                 results.push({
                     title: info.title || '',
@@ -3417,71 +2384,66 @@ async function executeSearch(q) {
         }
 
 
-        resultsBox.innerHTML =
-            results.map((item, index) => {
+        resultsBox.innerHTML = results.map((item, index) => {
 
-                const typeData = getMediaTypeData(item.mediaType);
-                const genrePreview = renderGenreIcons(item.genre);
+            const typeData = getMediaTypeData(item.mediaType);
 
-                const seriesText = item.series
-                    ? `
-                        <div class="text-[10px] text-amber-300 font-bold mt-1">
-                            ⚡ ${escapeHtml(item.series)}
-                            ${
-                                item.seriesNum !== null &&
-                                item.seriesNum !== undefined
-                                    ? ` #${item.seriesNum}`
-                                    : ''
-                            }
-                        </div>
-                    `
-                    : `
-                        <div class="text-[10px] text-slate-500 mt-1">
-                            Series information not found
-                        </div>
-                    `;
+            const genrePreview = renderGenreIcons(item.genre);
 
-                return `
-                    <div
-                        onclick="selectBookResult(${index})"
-                        class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white transition-colors">
-
-                        ${
-                            item.coverUrl
-                                ? `
-                                    <img
-                                        src="${escapeHtml(item.coverUrl)}"
-                                        onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
-                                        class="w-10 h-14 object-cover rounded shadow bg-slate-900">
-                                `
-                                : `
-                                    <div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">
-                                        No Cover
-                                    </div>
-                                `
-                        }
-
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-bold text-white truncate">
-                                ${escapeHtml(item.title)}
-                            </p>
-                            <p class="text-xs text-amber-400 font-bold uppercase mt-0.5 truncate">
-                                ${escapeHtml(item.author || 'Unknown')}
-                                •
-                                ${escapeHtml(item.releaseYear || 'TBA')}
-                            </p>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-[9px] bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-slate-300 font-bold">
-                                    ${typeData.icon}
-                                    ${escapeHtml(typeData.short)}
-                                </span>
-                                ${genrePreview}
-                            </div>
-                            ${seriesText}
-                        </div>
+            const seriesText = item.series
+                ? `
+                    <div class="text-[10px] text-amber-300 font-bold mt-1">
+                        ⚡ ${escapeHtml(item.series)}
+                        ${(item.seriesNum !== null && item.seriesNum !== undefined) ? ` #${item.seriesNum}` : ''}
+                    </div>
+                `
+                : `
+                    <div class="text-[10px] text-slate-500 mt-1">
+                        Series information not found
                     </div>
                 `;
-            }).join('');
+
+            return `
+                <div
+                    onclick="selectBookResult(${index})"
+                    class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white transition-colors">
+
+                    ${
+                        item.coverUrl
+                            ? `
+                                <img
+                                    src="${escapeHtml(item.coverUrl)}"
+                                    onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
+                                    class="w-10 h-14 object-cover rounded shadow bg-slate-900">
+                            `
+                            : `
+                                <div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">
+                                    No Cover
+                                </div>
+                            `
+                    }
+
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-bold text-white truncate">
+                            ${escapeHtml(item.title)}
+                        </p>
+                        <p class="text-xs text-amber-400 font-bold uppercase mt-0.5 truncate">
+                            ${escapeHtml(item.author || 'Unknown')}
+                            •
+                            ${escapeHtml(item.releaseYear || 'TBA')}
+                        </p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[9px] bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-slate-300 font-bold">
+                                ${typeData.icon}
+                                ${escapeHtml(typeData.short)}
+                            </span>
+                            ${genrePreview}
+                        </div>
+                        ${seriesText}
+                    </div>
+                </div>
+            `;
+        }).join('');
 
 
     } catch (error) {
@@ -3499,13 +2461,9 @@ async function executeSearch(q) {
 
 function selectBookResult(index) {
 
-    const book =
-        currentSearchResults[index];
+    const book = currentSearchResults[index];
 
-
-    if (!book) {
-        return;
-    }
+    if (!book) return;
 
 
     selectBook(
@@ -3532,141 +2490,75 @@ function selectBook(
     mediaType = 'Novel'
 ) {
 
-    const titleInput =
-        document.getElementById(
-            'titleInput'
-        );
+    const titleInput = document.getElementById('titleInput');
+
+    const seriesInput = document.getElementById('seriesInput');
+
+    const seriesNumInput = document.getElementById('seriesNumInput');
 
 
-    const seriesInput =
-        document.getElementById(
-            'seriesInput'
-        );
+    titleInput.value = title || '';
 
-
-    const seriesNumInput =
-        document.getElementById(
-            'seriesNumInput'
-        );
-
-
-    titleInput.value =
-        title || '';
-
-
-    document.getElementById(
-        'authorInput'
-    ).value =
-        author || '';
+    document.getElementById('authorInput').value = author || '';
 
 
     if (cover) {
-
-        titleInput.dataset.img =
-            cover;
-
+        titleInput.dataset.img = cover;
     } else {
-
         delete titleInput.dataset.img;
     }
 
 
     if (genre) {
-
-        titleInput.dataset.genre =
-            genre;
-
+        titleInput.dataset.genre = genre;
     } else {
-
         delete titleInput.dataset.genre;
     }
 
 
     if (releaseYear) {
-
-        titleInput.dataset.release =
-            releaseYear;
-
+        titleInput.dataset.release = releaseYear;
     } else {
-
         delete titleInput.dataset.release;
     }
 
 
-    seriesInput.value =
-        series || '';
+    seriesInput.value = series || '';
+
+    seriesNumInput.value = (seriesNum !== null && seriesNum !== undefined) ? seriesNum : '';
+
+    titleInput.dataset.mediaType = mediaType || 'Novel';
 
 
-    seriesNumInput.value =
-        (
-            seriesNum !== null &&
-            seriesNum !== undefined
-        )
-            ? seriesNum
-            : '';
+    toggleType(mediaType || 'Novel');
 
 
-    titleInput.dataset.mediaType =
-        mediaType || 'Novel';
-
-
-    toggleType(
-        mediaType || 'Novel'
-    );
-
-
-    document.getElementById(
-        'searchResults'
-    ).classList.add('hidden');
-
+    document.getElementById('searchResults').classList.add('hidden');
 
     seriesInput.focus();
 }
 
 
 /* ================================================================
-   SAVE
+   FORM SUBMISSION AND SAVING
 ================================================================ */
 
 async function submitForm() {
 
-    const titleInput =
-        document.getElementById(
-            'titleInput'
-        );
+    const titleInput = document.getElementById('titleInput');
+
+    const authorInput = document.getElementById('authorInput');
+
+    const seriesInput = document.getElementById('seriesInput');
+
+    const seriesNumInput = document.getElementById('seriesNumInput');
+
+    const submitButton = document.getElementById('submitBtn');
 
 
-    const authorInput =
-        document.getElementById(
-            'authorInput'
-        );
+    const title = titleInput.value.trim();
 
-
-    const seriesInput =
-        document.getElementById(
-            'seriesInput'
-        );
-
-
-    const seriesNumInput =
-        document.getElementById(
-            'seriesNumInput'
-        );
-
-
-    const submitButton =
-        document.getElementById(
-            'submitBtn'
-        );
-
-
-    const title =
-        titleInput.value.trim();
-
-
-    if (!title) {
-        return;
-    }
+    if (!title) return;
 
 
     submitButton.disabled = true;
@@ -3674,237 +2566,93 @@ async function submitForm() {
 
     try {
 
-        const enteredSeries =
-            seriesInput.value.trim();
+        const enteredSeries = seriesInput.value.trim();
+
+        const enteredSeriesNum = seriesNumInput.value !== '' ? parseFloat(seriesNumInput.value) : null;
 
 
-        const enteredSeriesNum =
-            seriesNumInput.value !== ''
-                ? parseFloat(
-                    seriesNumInput.value
-                )
-                : null;
+        let series = enteredSeries || null;
 
-
-        /*
-         * NEW EDIT PROTECTION
-         *
-         * When editing an existing book:
-         *
-         * - If the Series field hasn't actually changed,
-         *   preserve the original database value.
-         *
-         * - If the Book # hasn't actually changed,
-         *   preserve the original database value.
-         *
-         * This prevents an ordinary edit/save from accidentally
-         * wiping existing series information.
-         *
-         * If the user deliberately changes or clears a field,
-         * that deliberate change is respected.
-         */
-
-        let series =
-            enteredSeries ||
-            null;
-
-
-        let seriesNum =
-            enteredSeriesNum;
+        let seriesNum = enteredSeriesNum;
 
 
         if (editingId) {
 
-            const originalSeries =
-                String(
-                    editingOriginalSeries ||
-                    ''
-                ).trim();
+            const originalSeries = String(editingOriginalSeries || '').trim();
 
+            const currentSeries = enteredSeries;
 
-            const currentSeries =
-                enteredSeries;
-
-
-            const seriesChanged =
-                currentSeries !==
-                originalSeries;
-
-
-            if (!seriesChanged) {
-
-                series =
-                    originalSeries ||
-                    null;
+            if (currentSeries === originalSeries) {
+                series = originalSeries || null;
             }
 
 
-            const originalNum =
-                (
-                    editingOriginalSeriesNum === null ||
-                    editingOriginalSeriesNum === undefined ||
-                    editingOriginalSeriesNum === ''
-                )
-                    ? null
-                    : Number(
-                        editingOriginalSeriesNum
-                    );
+            const originalNum = (editingOriginalSeriesNum === null || editingOriginalSeriesNum === undefined || editingOriginalSeriesNum === '')
+                ? null
+                : Number(editingOriginalSeriesNum);
+
+            const currentNum = enteredSeriesNum;
 
 
-            const currentNum =
-                enteredSeriesNum;
-
-
-            const bothNull =
-                originalNum === null &&
-                currentNum === null;
-
-
-            const sameNumber =
-                originalNum !== null &&
-                currentNum !== null &&
-                Number(originalNum) ===
-                Number(currentNum);
-
-
-            const seriesNumberChanged =
-                !bothNull &&
-                !sameNumber;
-
-
-            if (
-                !seriesNumberChanged
-            ) {
-
-                seriesNum =
-                    originalNum;
+            if (originalNum === currentNum || (originalNum !== null && currentNum !== null && Number(originalNum) === Number(currentNum))) {
+                seriesNum = originalNum;
             }
         }
 
 
-        const cover =
-            titleInput.dataset.img ||
-            '';
+        const cover = titleInput.dataset.img || '';
 
+        const genre = titleInput.dataset.genre || '';
 
-        const genre =
-            titleInput.dataset.genre ||
-            '';
+        const releaseYear = titleInput.dataset.release || '';
 
-
-        const releaseYear =
-            titleInput.dataset.release ||
-            '';
-
-
-        const mediaType =
-            selectedMediaType ||
-            titleInput.dataset.mediaType ||
-            'Novel';
+        const mediaType = selectedMediaType || titleInput.dataset.mediaType || 'Novel';
 
 
         if (editingId) {
 
-            const currentBook =
-                allBooks.find(
-                    book =>
-                        book.id ===
-                        editingId
-                );
-
+            const currentBook = allBooks.find(book => book.id === editingId);
 
             const payload = {
-
                 title,
-
-                author:
-                    authorInput.value.trim() ||
-                    'Unknown',
-
+                author: authorInput.value.trim() || 'Unknown',
                 series,
-
-                series_num:
-                    seriesNum,
-
-                cover_url:
-                    cover ||
-                    currentBook?.cover_url ||
-                    '',
-
-                genre:
-                    genre ||
-                    currentBook?.genre ||
-                    '',
-
-                release_year:
-                    releaseYear ||
-                    currentBook?.release_year ||
-                    '',
-
-                media_type:
-                    mediaType
-
+                series_num: seriesNum,
+                cover_url: cover || currentBook?.cover_url || '',
+                genre: genre || currentBook?.genre || '',
+                release_year: releaseYear || currentBook?.release_year || '',
+                media_type: mediaType
             };
 
 
-            const { error } =
-                await supabaseClient
-                    .from('books')
-                    .update(payload)
-                    .eq(
-                        'id',
-                        editingId
-                    );
+            const { error } = await supabaseClient
+                .from('books')
+                .update(payload)
+                .eq('id', editingId);
 
 
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
         } else {
 
-            const status =
-                currentViewMode ===
-                'wishlist'
-                    ? 'Wishlist'
-                    : 'To Read';
+            const status = currentViewMode === 'wishlist' ? 'Wishlist' : 'To Read';
+
+            const { error } = await supabaseClient
+                .from('books')
+                .insert([{
+                    title,
+                    author: authorInput.value.trim() || 'Unknown',
+                    series,
+                    series_num: seriesNum,
+                    cover_url: cover,
+                    genre,
+                    release_year: releaseYear,
+                    media_type: mediaType,
+                    status
+                }]);
 
 
-            const { error } =
-                await supabaseClient
-                    .from('books')
-                    .insert([{
-
-                        title,
-
-                        author:
-                            authorInput.value.trim() ||
-                            'Unknown',
-
-                        series,
-
-                        series_num:
-                            seriesNum,
-
-                        cover_url:
-                            cover,
-
-                        genre,
-
-                        release_year:
-                            releaseYear,
-
-                        media_type:
-                            mediaType,
-
-                        status
-
-                    }]);
-
-
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
         }
 
 
@@ -3915,24 +2663,13 @@ async function submitForm() {
 
     } catch (error) {
 
-        console.error(
-            'Save failed:',
-            error
-        );
+        console.error('Save failed:', error);
 
-
-        alert(
-            'Error saving book: ' +
-            (
-                error.message ||
-                'Unknown error'
-            )
-        );
+        alert('Error saving book: ' + (error.message || 'Unknown error'));
 
     } finally {
 
-        submitButton.disabled =
-            false;
+        submitButton.disabled = false;
     }
 }
 
@@ -3945,15 +2682,10 @@ function resetForm() {
 
     editingOriginalSeriesNum = null;
 
-    selectedMediaType =
-        'Novel';
+    selectedMediaType = 'Novel';
 
 
-    const titleInput =
-        document.getElementById(
-            'titleInput'
-        );
-
+    const titleInput = document.getElementById('titleInput');
 
     titleInput.value = '';
 
@@ -3963,284 +2695,118 @@ function resetForm() {
     delete titleInput.dataset.mediaType;
 
 
-    document.getElementById(
-        'authorInput'
-    ).value = '';
+    document.getElementById('authorInput').value = '';
 
+    document.getElementById('seriesInput').value = '';
 
-    document.getElementById(
-        'seriesInput'
-    ).value = '';
-
-
-    document.getElementById(
-        'seriesNumInput'
-    ).value = '';
+    document.getElementById('seriesNumInput').value = '';
 
 
     toggleType('Novel');
 
 
-    document.getElementById(
-        'searchResults'
-    ).innerHTML = '';
+    document.getElementById('searchResults').innerHTML = '';
+
+    document.getElementById('searchResults').classList.add('hidden');
+
+    document.getElementById('seriesResults').innerHTML = '';
+
+    document.getElementById('seriesResults').classList.add('hidden');
 
 
-    document.getElementById(
-        'searchResults'
-    ).classList.add('hidden');
+    document.getElementById('submitBtn').innerText = 'Commit';
 
+    document.getElementById('formModeLabel').innerText = 'Search';
 
-    document.getElementById(
-        'seriesResults'
-    ).innerHTML = '';
+    document.getElementById('cancelEdit').classList.add('hidden');
 
-
-    document.getElementById(
-        'seriesResults'
-    ).classList.add('hidden');
-
-
-    document.getElementById(
-        'submitBtn'
-    ).innerText =
-        'Commit';
-
-
-    document.getElementById(
-        'formModeLabel'
-    ).innerText =
-        'Search';
-
-
-    document.getElementById(
-        'cancelEdit'
-    ).classList.add('hidden');
-
-
-    document.getElementById(
-        'deleteSelectedBtn'
-    ).classList.add('hidden');
+    document.getElementById('deleteSelectedBtn').classList.add('hidden');
 }
 
 
 /* ================================================================
-   RENDER
+   RENDER COLLECTION VIEWS
 ================================================================ */
 
 function render() {
 
-    const filterMain =
-        document.getElementById(
-            'filterMain'
-        )?.value
-        ?.toLowerCase() ||
-        '';
+    const filterMain = document.getElementById('filterMain')?.value?.toLowerCase() || '';
 
+    const filterAlt = document.getElementById('filterAlt')?.value?.toLowerCase() || '';
 
-    const filterAlt =
-        document.getElementById(
-            'filterAlt'
-        )?.value
-        ?.toLowerCase() ||
-        '';
+    const filterWishlist = document.getElementById('filterWishlist')?.value?.toLowerCase() || '';
 
-
-    const filterWishlist =
-        document.getElementById(
-            'filterWishlist'
-        )?.value
-        ?.toLowerCase() ||
-        '';
-
-
-    const sortBy =
-        document.getElementById(
-            'sortSelect'
-        )?.value ||
-        'title';
+    const sortBy = document.getElementById('sortSelect')?.value || 'title';
 
 
     const columns = {
-
-        reading:
-            document.getElementById(
-                'col-reading'
-            ),
-
-        main:
-            document.getElementById(
-                'col-main'
-            ),
-
-        alt:
-            document.getElementById(
-                'col-alt'
-            ),
-
-        wishlist:
-            document.getElementById(
-                'col-wishlist'
-            )
-
+        reading: document.getElementById('col-reading'),
+        main: document.getElementById('col-main'),
+        alt: document.getElementById('col-alt'),
+        wishlist: document.getElementById('col-wishlist')
     };
 
 
-    Object.values(columns)
-        .forEach(column => {
-
-            if (column) {
-                column.innerHTML = '';
-            }
-
-        });
+    Object.values(columns).forEach(column => {
+        if (column) column.innerHTML = '';
+    });
 
 
-    const sorted =
-        [...allBooks].sort(
-            (a, b) => {
+    const sorted = [...allBooks].sort((a, b) => {
 
-                const aAuthor =
-                    (
-                        a.author ||
-                        ''
-                    ).toLowerCase();
+        const aAuthor = (a.author || '').toLowerCase();
 
+        const bAuthor = (b.author || '').toLowerCase();
 
-                const bAuthor =
-                    (
-                        b.author ||
-                        ''
-                    ).toLowerCase();
+        const aSeries = (a.series || '').trim();
+
+        const bSeries = (b.series || '').trim();
+
+        const aNum = Number(a.series_num) || 0;
+
+        const bNum = Number(b.series_num) || 0;
 
 
-                const aSeries =
-                    (
-                        a.series ||
-                        ''
-                    ).trim();
+        if (sortBy === 'author') {
+
+            const authorCompare = aAuthor.localeCompare(bAuthor);
+
+            if (authorCompare !== 0) return authorCompare;
+        }
 
 
-                const bSeries =
-                    (
-                        b.series ||
-                        ''
-                    ).trim();
+        if (aSeries && bSeries && normalizeText(aSeries) === normalizeText(bSeries)) {
+            return (aNum - bNum);
+        }
 
 
-                const aNum =
-                    Number(
-                        a.series_num
-                    ) || 0;
+        if (aSeries && !bSeries) return -1;
+
+        if (!aSeries && bSeries) return 1;
 
 
-                const bNum =
-                    Number(
-                        b.series_num
-                    ) || 0;
+        const aKey = aSeries || a.title || '';
+
+        const bKey = bSeries || b.title || '';
+
+        const keyCompare = aKey.localeCompare(bKey);
 
 
-                if (
-                    sortBy === 'author'
-                ) {
-
-                    const authorCompare =
-                        aAuthor.localeCompare(
-                            bAuthor
-                        );
+        if (keyCompare !== 0) return keyCompare;
 
 
-                    if (
-                        authorCompare !== 0
-                    ) {
-                        return authorCompare;
-                    }
-                }
+        return (aNum - bNum);
+    });
 
 
-                if (
-                    aSeries &&
-                    bSeries &&
-                    normalizeText(aSeries) ===
-                    normalizeText(bSeries)
-                ) {
+    if (currentViewMode === 'queue') {
 
-                    return (
-                        aNum -
-                        bNum
-                    );
-                }
-
-
-                if (
-                    aSeries &&
-                    !bSeries
-                ) {
-                    return -1;
-                }
-
-
-                if (
-                    !aSeries &&
-                    bSeries
-                ) {
-                    return 1;
-                }
-
-
-                const aKey =
-                    aSeries ||
-                    a.title ||
-                    '';
-
-
-                const bKey =
-                    bSeries ||
-                    b.title ||
-                    '';
-
-
-                const keyCompare =
-                    aKey.localeCompare(
-                        bKey
-                    );
-
-
-                if (
-                    keyCompare !== 0
-                ) {
-                    return keyCompare;
-                }
-
-
-                return (
-                    aNum -
-                    bNum
-                );
-            }
-        );
-
-
-    if (
-        currentViewMode === 'queue'
-    ) {
-
-        const reading =
-            sorted.filter(
-                book =>
-                    book.status ===
-                    'Reading'
-            );
+        const reading = sorted.filter(book => book.status === 'Reading');
 
 
         if (reading.length) {
 
-            reading.forEach(
-                book =>
-                    columns.reading.appendChild(
-                        createActiveCard(book)
-                    )
-            );
+            reading.forEach(book => columns.reading.appendChild(createActiveCard(book)));
 
         } else {
 
@@ -4253,52 +2819,18 @@ function render() {
 
 
         sorted
-            .filter(
-                book =>
-                    ![
-                        'Reading',
-                        'Finished',
-                        'Wishlist',
-                        'Not Interested'
-                    ].includes(
-                        book.status
-                    )
-            )
+            .filter(book => !['Reading', 'Finished', 'Wishlist', 'Not Interested'].includes(book.status))
             .filter(book => {
 
-                const title =
-                    (
-                        book.title ||
-                        ''
-                    ).toLowerCase();
+                const title = (book.title || '').toLowerCase();
 
+                const author = (book.author || '').toLowerCase();
 
-                const author =
-                    (
-                        book.author ||
-                        ''
-                    ).toLowerCase();
+                const series = (book.series || '').toLowerCase();
 
+                const genre = (book.genre || '').toLowerCase();
 
-                const series =
-                    (
-                        book.series ||
-                        ''
-                    ).toLowerCase();
-
-
-                const genre =
-                    (
-                        book.genre ||
-                        ''
-                    ).toLowerCase();
-
-
-                const mediaType =
-                    (
-                        book.media_type ||
-                        'Novel'
-                    ).toLowerCase();
+                const mediaType = (book.media_type || 'Novel').toLowerCase();
 
 
                 return (
@@ -4309,37 +2841,17 @@ function render() {
                     mediaType.includes(filterMain)
                 );
             })
-            .forEach(
-                book =>
-                    columns.main.appendChild(
-                        createCard(book)
-                    )
-            );
+            .forEach(book => columns.main.appendChild(createCard(book)));
 
-    } else if (
-        currentViewMode === 'archive'
-    ) {
+    } else if (currentViewMode === 'archive') {
 
         sorted
-            .filter(
-                book =>
-                    book.status ===
-                    'Finished'
-            )
+            .filter(book => book.status === 'Finished')
             .filter(book => {
 
-                const title =
-                    (
-                        book.title ||
-                        ''
-                    ).toLowerCase();
+                const title = (book.title || '').toLowerCase();
 
-
-                const author =
-                    (
-                        book.author ||
-                        ''
-                    ).toLowerCase();
+                const author = (book.author || '').toLowerCase();
 
 
                 return (
@@ -4347,35 +2859,17 @@ function render() {
                     author.includes(filterAlt)
                 );
             })
-            .forEach(
-                book =>
-                    columns.alt.appendChild(
-                        createCard(book)
-                    )
-            );
+            .forEach(book => columns.alt.appendChild(createArchiveCard(book)));
 
     } else {
 
         sorted
-            .filter(
-                book =>
-                    book.status ===
-                    'Wishlist'
-            )
+            .filter(book => book.status === 'Wishlist')
             .filter(book => {
 
-                const title =
-                    (
-                        book.title ||
-                        ''
-                    ).toLowerCase();
+                const title = (book.title || '').toLowerCase();
 
-
-                const author =
-                    (
-                        book.author ||
-                        ''
-                    ).toLowerCase();
+                const author = (book.author || '').toLowerCase();
 
 
                 return (
@@ -4383,77 +2877,45 @@ function render() {
                     author.includes(filterWishlist)
                 );
             })
-            .forEach(
-                book =>
-                    columns.wishlist.appendChild(
-                        createCard(book)
-                    )
-            );
+            .forEach(book => columns.wishlist.appendChild(createCard(book)));
     }
 }
 
 
 /* ================================================================
-   SERIES DISPLAY
+   SERIES DISPLAY LABEL HELPER
 ================================================================ */
 
 function getSeriesLabel(book) {
 
-    const series =
-        (
-            book.series ||
-            ''
-        ).trim();
+    const series = (book.series || '').trim();
 
+    if (!series) return '';
 
-    if (!series) {
-        return '';
-    }
-
-
-    if (
-        book.series_num === null ||
-        book.series_num === undefined ||
-        book.series_num === ''
-    ) {
+    if (book.series_num === null || book.series_num === undefined || book.series_num === '') {
         return series;
     }
-
 
     return `${series} #${Number(book.series_num)}`;
 }
 
 
 /* ================================================================
-   ACTIVE CARD
+   ACTIVE READING CARD COMPONENT
 ================================================================ */
 
 function createActiveCard(book) {
 
-    const div =
-        document.createElement('div');
+    const div = document.createElement('div');
+
+    const hasSeries = Boolean(book.series && book.series.trim());
+
+    const releaseYear = parseReleaseYear(book.release_year);
+
+    const cover = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
 
 
-    const hasSeries =
-        Boolean(
-            book.series &&
-            book.series.trim()
-        );
-
-
-    const releaseYear =
-        parseReleaseYear(
-            book.release_year
-        );
-
-
-    const cover =
-        book.cover_url ||
-        'https://via.placeholder.com/150x225?text=No+Cover';
-
-
-    div.className =
-        'flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full';
+    div.className = 'flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full';
 
 
     div.innerHTML = `
@@ -4542,66 +3004,35 @@ function createActiveCard(book) {
 
 
 /* ================================================================
-   NORMAL CARD
+   STANDARD BOOK CARD COMPONENT (QUEUE & WISHLIST)
 ================================================================ */
 
 function createCard(book) {
 
-    const div =
-        document.createElement('div');
+    const div = document.createElement('div');
+
+    const hasSeries = Boolean(book.series && book.series.trim());
+
+    const releaseYear = parseReleaseYear(book.release_year);
+
+    const cover = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
 
 
-    const hasSeries =
-        Boolean(
-            book.series &&
-            book.series.trim()
-        );
+    const topBar = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
+
+    const badge = hasSeries ? 'bg-amber-600/20 text-amber-400 border-amber-500/30' : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
 
 
-    const releaseYear =
-        parseReleaseYear(
-            book.release_year
-        );
+    const mediaType = book.media_type || 'Novel';
+
+    const typeData = getMediaTypeData(mediaType);
 
 
-    const cover =
-        book.cover_url ||
-        'https://via.placeholder.com/150x225?text=No+Cover';
+    div.dataset.id = book.id;
 
+    div.dataset.series = book.series || '';
 
-    const topBar =
-        hasSeries
-            ? 'bg-amber-500'
-            : 'bg-cyan-500';
-
-
-    const badge =
-        hasSeries
-            ? 'bg-amber-600/20 text-amber-400 border-amber-500/30'
-            : 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
-
-
-    const mediaType =
-        book.media_type ||
-        'Novel';
-
-
-    const typeData =
-        getMediaTypeData(
-            mediaType
-        );
-
-
-    div.dataset.id =
-        book.id;
-
-
-    div.dataset.series =
-        book.series || '';
-
-
-    div.className =
-        'book-card flex flex-col justify-between w-full';
+    div.className = 'book-card flex flex-col justify-between w-full';
 
 
     div.innerHTML = `
@@ -4723,133 +3154,192 @@ function createCard(book) {
 
 
 /* ================================================================
+   FINISHED ARCHIVE CARD COMPONENT
+================================================================ */
+
+function createArchiveCard(book) {
+
+    const div = document.createElement('div');
+
+    const hasSeries = Boolean(book.series && book.series.trim());
+
+    const finishedYear = parseFinishedYear(book);
+
+    const cover = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
+
+
+    const topBar = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
+
+    const mediaType = book.media_type || 'Novel';
+
+    const typeData = getMediaTypeData(mediaType);
+
+
+    div.dataset.id = book.id;
+
+    div.className = 'book-card flex flex-col justify-between w-full';
+
+
+    div.innerHTML = `
+
+        <div>
+
+            <div class="h-1.5 w-full ${topBar}"></div>
+
+            <div class="p-2.5 pb-1 flex flex-col items-center">
+
+                <div class="book-poster-container shadow-inner">
+
+                    <img
+                        src="${escapeHtml(cover)}"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
+                        alt="${escapeHtml(book.title)}">
+
+                </div>
+
+
+                <div class="flex justify-between items-center w-full mt-2 mb-1 px-1">
+
+                    <span class="text-xs text-emerald-400 font-bold">
+                        ${finishedYear}
+                    </span>
+
+                    <button
+                        onclick="editL(${book.id})"
+                        title="Edit"
+                        class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">
+                        ✏️
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="px-2.5 pb-2 mt-1 flex items-center justify-between gap-1 border-t border-slate-800/80 pt-1.5">
+
+            <span
+                class="type-badge shadow-sm"
+                title="${escapeHtml(mediaType)}">
+
+                ${typeData.icon}
+                ${escapeHtml(typeData.short)}
+
+            </span>
+
+
+            <select
+                onchange="updateStatus(${book.id}, this.value)"
+                class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+
+                <option
+                    value="To Read"
+                    ${book.status === 'To Read' ? 'selected' : ''}>
+                    To Read 📚
+                </option>
+
+                <option
+                    value="Reading"
+                    ${book.status === 'Reading' ? 'selected' : ''}>
+                    Reading 📖
+                </option>
+
+                <option
+                    value="Wishlist"
+                    ${book.status === 'Wishlist' ? 'selected' : ''}>
+                    Wishlist 🪄
+                </option>
+
+                <option
+                    value="Finished"
+                    ${book.status === 'Finished' ? 'selected' : ''}>
+                    Finished 🏆
+                </option>
+
+            </select>
+
+        </div>
+    `;
+
+
+    return div;
+}
+
+
+/* ================================================================
    VIEW SWITCHING
 ================================================================ */
 
 function toggleView(v) {
 
-    currentViewMode =
-        v;
+    currentViewMode = v;
 
 
-    const dashboard =
-        document.getElementById(
-            'dashboardTop'
-        );
+    const dashboard = document.getElementById('dashboardTop');
+
+    const queue = document.getElementById('queueView');
+
+    const reading = document.getElementById('activeSessionBox');
+
+    const input = document.getElementById('inputArea');
+
+    const archive = document.getElementById('altView');
+
+    const wishlist = document.getElementById('wishlistView');
 
 
-    const queue =
-        document.getElementById(
-            'queueView'
-        );
+    if (v === 'queue') {
+
+        dashboard.style.display = 'grid';
+
+        queue.style.display = 'block';
+
+        reading.style.display = 'flex';
 
 
-    const reading =
-        document.getElementById(
-            'activeSessionBox'
-        );
+        input.classList.remove('lg:col-span-12');
+
+        input.classList.add('lg:col-span-7');
 
 
-    const input =
-        document.getElementById(
-            'inputArea'
-        );
+        archive.style.display = 'none';
+
+        wishlist.style.display = 'none';
+
+    } else if (v === 'wishlist') {
+
+        dashboard.style.display = 'grid';
+
+        reading.style.display = 'none';
 
 
-    const archive =
-        document.getElementById(
-            'altView'
-        );
+        input.classList.remove('lg:col-span-7');
+
+        input.classList.add('lg:col-span-12');
 
 
-    const wishlist =
-        document.getElementById(
-            'wishlistView'
-        );
+        queue.style.display = 'none';
 
+        archive.style.display = 'none';
 
-    if (
-        v === 'queue'
-    ) {
-
-        dashboard.style.display =
-            'grid';
-
-        queue.style.display =
-            'block';
-
-        reading.style.display =
-            'flex';
-
-
-        input.classList.remove(
-            'lg:col-span-12'
-        );
-
-        input.classList.add(
-            'lg:col-span-7'
-        );
-
-
-        archive.style.display =
-            'none';
-
-        wishlist.style.display =
-            'none';
-
-    } else if (
-        v === 'wishlist'
-    ) {
-
-        dashboard.style.display =
-            'grid';
-
-        reading.style.display =
-            'none';
-
-
-        input.classList.remove(
-            'lg:col-span-7'
-        );
-
-        input.classList.add(
-            'lg:col-span-12'
-        );
-
-
-        queue.style.display =
-            'none';
-
-        archive.style.display =
-            'none';
-
-        wishlist.style.display =
-            'block';
+        wishlist.style.display = 'block';
 
     } else {
 
-        dashboard.style.display =
-            'none';
+        dashboard.style.display = 'none';
 
-        queue.style.display =
-            'none';
+        queue.style.display = 'none';
 
-        wishlist.style.display =
-            'none';
+        wishlist.style.display = 'none';
 
-        archive.style.display =
-            'block';
+        archive.style.display = 'block';
 
 
-        document.getElementById(
-            'altTitle'
-        ).innerText =
-            'Finished Archive 🏆';
+        document.getElementById('altTitle').innerText = 'Finished Archive 🏆';
 
-        document.getElementById(
-            'altTitle'
-        ).style.color =
-            '#34d399';
+        document.getElementById('altTitle').style.color = '#34d399';
     }
 
 
@@ -4858,93 +3348,42 @@ function toggleView(v) {
 
 
 /* ================================================================
-   EDIT
+   EDIT ITEM IN FORM
 ================================================================ */
 
 function editL(id) {
 
-    const book =
-        allBooks.find(
-            b =>
-                Number(b.id) ===
-                Number(id)
-        );
+    const book = allBooks.find(b => Number(b.id) === Number(id));
+
+    if (!book) return;
 
 
-    if (!book) {
-        return;
-    }
+    editingId = book.id;
+
+    editingOriginalSeries = book.series || null;
+
+    editingOriginalSeriesNum = (book.series_num !== null && book.series_num !== undefined && book.series_num !== '')
+        ? Number(book.series_num)
+        : null;
 
 
-    editingId =
-        book.id;
+    const dashboard = document.getElementById('dashboardTop');
+
+    const reading = document.getElementById('activeSessionBox');
+
+    const input = document.getElementById('inputArea');
 
 
-    /*
-     * NEW:
-     * Capture the original series values.
-     *
-     * submitForm() uses these to distinguish:
-     *
-     * "I didn't change this field"
-     *
-     * from
-     *
-     * "I deliberately changed/cleared this field".
-     */
-
-    editingOriginalSeries =
-        book.series ||
-        null;
+    dashboard.style.display = 'grid';
 
 
-    editingOriginalSeriesNum =
-        (
-            book.series_num !== null &&
-            book.series_num !== undefined &&
-            book.series_num !== ''
-        )
-            ? Number(book.series_num)
-            : null;
+    if (currentViewMode !== 'queue') {
 
+        reading.style.display = 'none';
 
-    const dashboard =
-        document.getElementById(
-            'dashboardTop'
-        );
+        input.classList.remove('lg:col-span-7');
 
-
-    const reading =
-        document.getElementById(
-            'activeSessionBox'
-        );
-
-
-    const input =
-        document.getElementById(
-            'inputArea'
-        );
-
-
-    dashboard.style.display =
-        'grid';
-
-
-    if (
-        currentViewMode !== 'queue'
-    ) {
-
-        reading.style.display =
-            'none';
-
-
-        input.classList.remove(
-            'lg:col-span-7'
-        );
-
-        input.classList.add(
-            'lg:col-span-12'
-        );
+        input.classList.add('lg:col-span-12');
     }
 
 
@@ -4954,75 +3393,34 @@ function editL(id) {
     });
 
 
-    const titleInput =
-        document.getElementById(
-            'titleInput'
-        );
+    const titleInput = document.getElementById('titleInput');
+
+    titleInput.value = book.title || '';
+
+    titleInput.dataset.img = book.cover_url || '';
+
+    titleInput.dataset.genre = book.genre || '';
+
+    titleInput.dataset.release = book.release_year || '';
+
+    titleInput.dataset.mediaType = book.media_type || 'Novel';
 
 
-    titleInput.value =
-        book.title || '';
+    toggleType(book.media_type || 'Novel');
 
 
-    titleInput.dataset.img =
-        book.cover_url || '';
+    document.getElementById('authorInput').value = book.author || '';
+
+    document.getElementById('seriesInput').value = book.series || '';
+
+    document.getElementById('seriesNumInput').value = (book.series_num !== null && book.series_num !== undefined) ? book.series_num : '';
 
 
-    titleInput.dataset.genre =
-        book.genre || '';
+    document.getElementById('formModeLabel').innerText = 'Updating: ' + book.title;
 
+    document.getElementById('cancelEdit').classList.remove('hidden');
 
-    titleInput.dataset.release =
-        book.release_year || '';
-
-
-    titleInput.dataset.mediaType =
-        book.media_type || 'Novel';
-
-
-    toggleType(
-        book.media_type || 'Novel'
-    );
-
-
-    document.getElementById(
-        'authorInput'
-    ).value =
-        book.author || '';
-
-
-    document.getElementById(
-        'seriesInput'
-    ).value =
-        book.series || '';
-
-
-    document.getElementById(
-        'seriesNumInput'
-    ).value =
-        (
-            book.series_num !== null &&
-            book.series_num !== undefined
-        )
-            ? book.series_num
-            : '';
-
-
-    document.getElementById(
-        'formModeLabel'
-    ).innerText =
-        'Updating: ' +
-        book.title;
-
-
-    document.getElementById(
-        'cancelEdit'
-    ).classList.remove('hidden');
-
-
-    document.getElementById(
-        'deleteSelectedBtn'
-    ).classList.remove('hidden');
+    document.getElementById('deleteSelectedBtn').classList.remove('hidden');
 }
 
 
@@ -5030,45 +3428,26 @@ function exitEditMode() {
 
     resetForm();
 
-    toggleView(
-        currentViewMode
-    );
+    toggleView(currentViewMode);
 }
 
 
 async function deleteSelectedFromForm() {
 
-    if (!editingId) {
-        return;
-    }
+    if (!editingId) return;
 
 
-    if (
-        !confirm(
-            'Are you sure you want to delete this book?'
-        )
-    ) {
-        return;
-    }
+    if (!confirm('Are you sure you want to delete this book?')) return;
 
 
-    const { error } =
-        await supabaseClient
-            .from('books')
-            .delete()
-            .eq(
-                'id',
-                editingId
-            );
+    const { error } = await supabaseClient
+        .from('books')
+        .delete()
+        .eq('id', editingId);
 
 
     if (error) {
-
-        alert(
-            'Delete failed: ' +
-            error.message
-        );
-
+        alert('Delete failed: ' + error.message);
         return;
     }
 
@@ -5079,30 +3458,16 @@ async function deleteSelectedFromForm() {
 }
 
 
-async function updateStatus(
-    id,
-    status
-) {
+async function updateStatus(id, status) {
 
-    const { error } =
-        await supabaseClient
-            .from('books')
-            .update({
-                status
-            })
-            .eq(
-                'id',
-                id
-            );
+    const { error } = await supabaseClient
+        .from('books')
+        .update({ status })
+        .eq('id', id);
 
 
     if (error) {
-
-        alert(
-            'Status update failed: ' +
-            error.message
-        );
-
+        alert('Status update failed: ' + error.message);
         return;
     }
 
@@ -5112,75 +3477,42 @@ async function updateStatus(
 
 
 /* ================================================================
-   SERIES DROPDOWN
+   SERIES DROPDOWN FILTER
 ================================================================ */
 
 function filterSeriesDropdown(value) {
 
-    const box =
-        document.getElementById(
-            'seriesResults'
-        );
+    const box = document.getElementById('seriesResults');
+
+    const search = String(value || '').toLowerCase().trim();
 
 
-    const search =
-        String(value || '')
-            .toLowerCase()
-            .trim();
+    const series = [...new Set(
+        allBooks
+            .map(book => (book.series || '').trim())
+            .filter(Boolean)
+    )];
 
 
-    const series =
-        [
-            ...new Set(
-                allBooks
-                    .map(
-                        book =>
-                            (
-                                book.series ||
-                                ''
-                            ).trim()
-                    )
-                    .filter(Boolean)
-            )
-        ];
+    const filtered = series.filter(item => item.toLowerCase().includes(search));
 
 
-    const filtered =
-        series.filter(
-            item =>
-                item
-                    .toLowerCase()
-                    .includes(search)
-        );
-
-
-    if (
-        !filtered.length
-    ) {
-
+    if (!filtered.length) {
         box.classList.add('hidden');
-
         return;
     }
 
 
-    box.innerHTML =
-        filtered
-            .map(
-                (item, index) => `
-                    <div
-                        onclick="selectSeriesByIndex(${index})"
-                        class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate">
-                        ${escapeHtml(item)}
-                    </div>
-                `
-            )
-            .join('');
+    box.innerHTML = filtered.map((item, index) => `
+        <div
+            onclick="selectSeriesByIndex(${index})"
+            class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate">
+            ${escapeHtml(item)}
+        </div>
+    `).join('');
 
 
-    window.currentSeriesOptions =
-        filtered;
-
+    window.currentSeriesOptions = filtered;
 
     box.classList.remove('hidden');
 }
@@ -5188,87 +3520,53 @@ function filterSeriesDropdown(value) {
 
 function selectSeriesByIndex(index) {
 
-    const series =
-        window.currentSeriesOptions?.[index];
+    const series = window.currentSeriesOptions?.[index];
+
+    if (!series) return;
 
 
-    if (!series) {
-        return;
-    }
+    document.getElementById('seriesInput').value = series;
 
-
-    document.getElementById(
-        'seriesInput'
-    ).value =
-        series;
-
-
-    document.getElementById(
-        'seriesResults'
-    ).classList.add('hidden');
+    document.getElementById('seriesResults').classList.add('hidden');
 }
 
 
 /* ================================================================
-   SERIES REPAIR
+   SERIES REPAIR TOOLS
 ================================================================ */
 
 function openRepairModal() {
 
-    if (repairRunning) {
-        return;
-    }
+    if (repairRunning) return;
 
 
-    const modal =
-        document.getElementById(
-            'repairModal'
-        );
+    const modal = document.getElementById('repairModal');
 
+    const summary = document.getElementById('repairSummary');
 
-    const summary =
-        document.getElementById(
-            'repairSummary'
-        );
+    const results = document.getElementById('repairResults');
 
-
-    const results =
-        document.getElementById(
-            'repairResults'
-        );
-
-
-    const button =
-        document.getElementById(
-            'startRepairBtn'
-        );
+    const button = document.getElementById('startRepairBtn');
 
 
     summary.innerHTML = `
-
         <div class="bg-amber-950/30 border border-amber-500/20 rounded-2xl p-4">
-
             <div class="text-sm text-white font-bold">
                 ${allBooks.length} books will be checked.
             </div>
-
             <div class="text-xs text-slate-400 mt-2 leading-relaxed">
                 Open Library will be used for series names and Google Books
                 will be used for reliable numerical series order where available.
             </div>
-
             <div class="text-xs text-emerald-400 font-bold mt-3">
                 ✓ Existing series names will be preserved.
             </div>
-
             <div class="text-xs text-emerald-400 font-bold mt-1">
                 ✓ Existing series numbers can be corrected when reliable metadata exists.
             </div>
-
             <div class="text-xs text-slate-500 mt-1">
                 Books without reliable series metadata will be left alone.
             </div>
-
         </div>
     `;
 
@@ -5279,8 +3577,7 @@ function openRepairModal() {
 
     button.disabled = false;
 
-    button.innerText =
-        'Start Repair';
+    button.innerText = 'Start Repair';
 
 
     modal.classList.remove('hidden');
@@ -5291,16 +3588,10 @@ function openRepairModal() {
 
 function closeRepairModal() {
 
-    if (repairRunning) {
-        return;
-    }
+    if (repairRunning) return;
 
 
-    const modal =
-        document.getElementById(
-            'repairModal'
-        );
-
+    const modal = document.getElementById('repairModal');
 
     modal.classList.add('hidden');
 
@@ -5310,28 +3601,18 @@ function closeRepairModal() {
 
 function repairDelay(ms) {
 
-    return new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                ms
-            )
-    );
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-/* ================================================================
-   OPEN LIBRARY REPAIR
-================================================================ */
 
 async function getOpenLibraryRepairMatch(book) {
 
     const title = String(book.title || '').trim();
+
     const author = String(book.author || '').trim();
 
-    if (!title) {
-        return null;
-    }
+
+    if (!title) return null;
 
 
     const queries = [];
@@ -5345,6 +3626,7 @@ async function getOpenLibraryRepairMatch(book) {
 
 
     let best = null;
+
     let bestScore = -1;
 
 
@@ -5352,815 +3634,322 @@ async function getOpenLibraryRepairMatch(book) {
 
         for (const query of [...new Set(queries)]) {
 
-            const response =
-                await fetch(
-                    `https://openlibrary.org/search.json?` +
-                    `q=${encodeURIComponent(query)}` +
-                    `&limit=8` +
-                    `&fields=key,title,author_name,first_publish_year,series`
-                );
+            const response = await fetch(
+                `https://openlibrary.org/search.json?` +
+                `q=${encodeURIComponent(query)}` +
+                `&limit=8` +
+                `&fields=key,title,author_name,first_publish_year,series`
+            );
 
-            if (!response.ok) {
-                continue;
-            }
+            if (!response.ok) continue;
+
 
             const data = await response.json();
+
 
             for (const doc of data.docs || []) {
 
                 const titleScore = titleSimilarity(title, doc.title || '');
+
                 const authorScore = authorSimilarity(author, doc.author_name || []);
 
-                if (titleScore < 0.45) {
-                    continue;
-                }
 
-                let score =
-                    (titleScore * 30) +
-                    (authorScore * 20);
+                if (titleScore < 0.45) continue;
+
+
+                let score = (titleScore * 30) + (authorScore * 20);
 
                 let series = extractOpenLibrarySeries(doc);
 
-                if (series) {
-                    score += 20;
-                }
+
+                if (series) score += 20;
+
 
                 if (!series) {
                     series = await getOpenLibraryWorkSeries(doc);
-                    if (series) {
-                        score += 20;
-                    }
+                    if (series) score += 20;
                 }
 
-                if (titleScore === 1) {
-                    score += 10;
-                }
-
-                if (authorScore === 1) {
-                    score += 8;
-                }
 
                 if (score > bestScore) {
                     bestScore = score;
-                    best = { doc, series };
+                    best = {
+                        doc,
+                        series,
+                        score
+                    };
                 }
             }
 
-            if (bestScore >= 70 && best?.series) {
-                break;
-            }
+            if (best && best.score > 50) break;
         }
-
-        if (!best || bestScore < 30) {
-            return null;
-        }
-
-        return {
-            series: best.series || '',
-            score: bestScore
-        };
 
     } catch (error) {
 
-        console.warn(
-            'Open Library repair lookup failed:',
-            error
-        );
-
-        return null;
+        console.warn('Repair Open Library search error:', error);
     }
+
+
+    return best;
 }
 
-
-/* ================================================================
-   GOOGLE BOOKS REPAIR
-================================================================ */
-
-async function getGoogleRepairMatch(book) {
-
-    const title = String(book.title || '').trim();
-    const author = String(book.author || '').trim();
-    const existingSeries = String(book.series || '').trim();
-
-    if (!title) {
-        return null;
-    }
-
-    const best =
-        await searchGoogleBooksCandidates(
-            title,
-            author,
-            existingSeries
-        );
-
-    if (!best.item || best.score < 30) {
-        return null;
-    }
-
-
-    let bestItem = best.item;
-
-
-    if (bestItem.id) {
-
-        try {
-
-            const volumeResponse =
-                await fetch(
-                    `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(bestItem.id)}?projection=full`
-                );
-
-            if (volumeResponse.ok) {
-                const complete = await volumeResponse.json();
-                if (complete) {
-                    bestItem = complete;
-                }
-            }
-
-        } catch (error) {
-            console.warn('Google volume detail lookup failed:', error);
-        }
-    }
-
-
-    const seriesInfo =
-        extractGoogleSeriesInfo(bestItem);
-
-
-    return {
-        order: seriesInfo.order,
-        seriesId: seriesInfo.seriesId,
-        score: best.score
-    };
-}
-
-
-/* ================================================================
-   REPAIR ONE BOOK
-================================================================ */
-
-async function repairOneBook(book) {
-
-    const cacheKey =
-        [
-            normalizeText(book.title),
-            normalizeText(book.author),
-            normalizeText(book.series)
-        ].join('|');
-
-
-    if (
-        repairCache.has(cacheKey)
-    ) {
-
-        return repairCache.get(
-            cacheKey
-        );
-    }
-
-
-    const [
-        openLibrary,
-        google
-    ] =
-        await Promise.all([
-
-            getOpenLibraryRepairMatch(book),
-
-            getGoogleRepairMatch(book)
-
-        ]);
-
-
-    const detectedSeries =
-        openLibrary?.series ||
-        '';
-
-
-    const detectedOrder =
-        google?.order !== null &&
-        google?.order !== undefined &&
-        Number.isFinite(
-            Number(
-                google.order
-            )
-        )
-            ? Number(
-                google.order
-            )
-            : null;
-
-
-    const result = {
-
-        detectedSeries,
-
-        detectedOrder,
-
-        openLibraryScore:
-            openLibrary?.score ||
-            0,
-
-        googleScore:
-            google?.score ||
-            0,
-
-        googleSeriesId:
-            google?.seriesId ||
-            ''
-
-    };
-
-
-    repairCache.set(
-        cacheKey,
-        result
-    );
-
-
-    return result;
-}
-
-
-/* ================================================================
-   START REPAIR
-================================================================ */
 
 async function startSeriesRepair() {
 
-    if (repairRunning) {
-        return;
-    }
-
-
-    if (!allBooks.length) {
-
-        alert(
-            'There are no books to repair.'
-        );
-
-        return;
-    }
+    if (repairRunning) return;
 
 
     repairRunning = true;
 
 
-    const startButton =
-        document.getElementById(
-            'startRepairBtn'
-        );
+    const resultsBox = document.getElementById('repairResults');
+
+    const button = document.getElementById('startRepairBtn');
 
 
-    const summary =
-        document.getElementById(
-            'repairSummary'
-        );
+    button.disabled = true;
+
+    button.innerText = 'Repairing...';
+
+    resultsBox.classList.remove('hidden');
+
+    resultsBox.innerHTML = '';
 
 
-    const results =
-        document.getElementById(
-            'repairResults'
-        );
+    let updatedCount = 0;
 
 
-    startButton.disabled = true;
+    for (let i = 0; i < allBooks.length; i++) {
 
-    startButton.innerText =
-        'Repairing...';
-
-
-    results.classList.remove('hidden');
-
-    results.innerHTML = '';
+        const book = allBooks[i];
 
 
-    let checked = 0;
+        const statusRow = document.createElement('div');
 
-    let updated = 0;
+        statusRow.className = 'repair-row py-3 text-xs text-slate-300 flex justify-between items-center';
 
-    let seriesAdded = 0;
-
-    let numbersCorrected = 0;
-
-    let unchanged = 0;
-
-    let noReliableData = 0;
-
-    let errors = 0;
-
-
-    function updateSummary() {
-
-        summary.innerHTML = `
-
-            <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
-
-                <div class="bg-slate-900 rounded-xl p-3 text-center">
-                    <div class="text-lg font-black text-white">${checked}</div>
-                    <div class="text-[9px] text-slate-500 uppercase font-bold">Checked</div>
-                </div>
-
-                <div class="bg-slate-900 rounded-xl p-3 text-center">
-                    <div class="text-lg font-black text-amber-400">${seriesAdded}</div>
-                    <div class="text-[9px] text-slate-500 uppercase font-bold">Series Added</div>
-                </div>
-
-                <div class="bg-slate-900 rounded-xl p-3 text-center">
-                    <div class="text-lg font-black text-emerald-400">${numbersCorrected}</div>
-                    <div class="text-[9px] text-slate-500 uppercase font-bold">Numbers Fixed</div>
-                </div>
-
-                <div class="bg-slate-900 rounded-xl p-3 text-center">
-                    <div class="text-lg font-black text-slate-300">${unchanged}</div>
-                    <div class="text-[9px] text-slate-500 uppercase font-bold">No Change</div>
-                </div>
-
-                <div class="bg-slate-900 rounded-xl p-3 text-center">
-                    <div class="text-lg font-black text-slate-500">${noReliableData}</div>
-                    <div class="text-[9px] text-slate-500 uppercase font-bold">No Data</div>
-                </div>
-
-                <div class="bg-slate-900 rounded-xl p-3 text-center">
-                    <div class="text-lg font-black text-red-400">${errors}</div>
-                    <div class="text-[9px] text-slate-500 uppercase font-bold">Errors</div>
-                </div>
-
+        statusRow.innerHTML = `
+            <div>
+                <span class="font-bold text-white">${escapeHtml(book.title)}</span>
+                <span class="text-slate-400">by ${escapeHtml(book.author || 'Unknown')}</span>
             </div>
+            <span class="text-amber-400 italic">Checking...</span>
         `;
-    }
 
 
-    updateSummary();
+        resultsBox.appendChild(statusRow);
 
+        resultsBox.scrollTop = resultsBox.scrollHeight;
 
-    try {
 
-        for (
-            const book
-            of allBooks
-        ) {
+        await repairDelay(150);
 
-            checked++;
 
+        try {
 
-            const row =
-                document.createElement(
-                    'div'
-                );
+            const olMatch = await getOpenLibraryRepairMatch(book);
 
+            const googleMatch = await searchGoogleBooksCandidates(
+                book.title,
+                book.author,
+                book.series || olMatch?.series || ''
+            );
 
-            row.className =
-                'repair-row py-3';
 
+            const googleSeries = googleMatch.item ? extractGoogleSeriesInfo(googleMatch.item) : null;
 
-            row.innerHTML = `
 
-                <div class="flex justify-between gap-4">
+            let newSeries = book.series || olMatch?.series || '';
 
-                    <div class="min-w-0">
+            let newSeriesNum = book.series_num;
 
-                        <div class="text-xs text-white font-bold truncate">
-                            ${escapeHtml(book.title)}
-                        </div>
 
-                        <div class="text-[10px] text-slate-500 truncate">
-                            ${escapeHtml(book.author || 'Unknown')}
-                        </div>
-
-                    </div>
-
-                    <div class="text-[10px] text-amber-400 font-bold shrink-0">
-                        Checking...
-                    </div>
-
-                </div>
-            `;
-
-
-            results.appendChild(row);
-
-            results.scrollTop =
-                results.scrollHeight;
-
-
-            try {
-
-                const metadata =
-                    await repairOneBook(
-                        book
-                    );
-
-
-                if (!metadata) {
-
-                    noReliableData++;
-
-
-                    row.innerHTML += `
-                        <div class="text-[10px] text-slate-500 mt-1">
-                            No reliable metadata found.
-                        </div>
-                    `;
-
-
-                    continue;
-                }
-
-
-                const update = {};
-
-
-                const existingSeries =
-                    String(
-                        book.series ||
-                        ''
-                    ).trim();
-
-
-                const existingNumber =
-                    (
-                        book.series_num !== null &&
-                        book.series_num !== undefined &&
-                        book.series_num !== ''
-                    )
-                        ? Number(book.series_num)
-                        : null;
-
-
-                if (
-                    !existingSeries &&
-                    metadata.detectedSeries
-                ) {
-
-                    update.series =
-                        metadata.detectedSeries;
-
-                    seriesAdded++;
-                }
-
-
-                const usableSeries =
-                    existingSeries ||
-                    metadata.detectedSeries;
-
-
-                if (
-                    usableSeries &&
-                    metadata.detectedOrder !== null
-                ) {
-
-                    if (
-                        existingNumber === null ||
-                        existingNumber !==
-                        metadata.detectedOrder
-                    ) {
-
-                        update.series_num =
-                            metadata.detectedOrder;
-
-                        numbersCorrected++;
-                    }
-                }
-
-
-                if (
-                    Object.keys(update).length
-                ) {
-
-                    const { error } =
-                        await supabaseClient
-                            .from('books')
-                            .update(update)
-                            .eq(
-                                'id',
-                                book.id
-                            );
-
-
-                    if (error) {
-                        throw error;
-                    }
-
-
-                    Object.assign(
-                        book,
-                        update
-                    );
-
-
-                    updated++;
-
-
-                    const changes = [];
-
-
-                    if (update.series) {
-
-                        changes.push(
-                            `Series: ${escapeHtml(update.series)}`
-                        );
-                    }
-
-
-                    if (
-                        update.series_num !==
-                        undefined
-                    ) {
-
-                        changes.push(
-                            `Number: ${escapeHtml(String(update.series_num))}`
-                        );
-                    }
-
-
-                    row.innerHTML += `
-                        <div class="text-[10px] text-emerald-400 font-bold mt-1">
-                            ✓ ${changes.join(' • ')}
-                        </div>
-                    `;
-
-                } else {
-
-                    unchanged++;
-
-
-                    row.innerHTML += `
-                        <div class="text-[10px] text-slate-500 mt-1">
-                            ✓ No change required
-                        </div>
-                    `;
-                }
-
-
-            } catch (error) {
-
-                errors++;
-
-
-                console.error(
-                    'Repair failed for:',
-                    book.title,
-                    error
-                );
-
-
-                row.innerHTML += `
-                    <div class="text-[10px] text-red-400 font-bold mt-1">
-                        ✕ ${escapeHtml(error.message || 'Lookup failed')}
-                    </div>
-                `;
+            if (googleSeries && googleSeries.order !== null) {
+                newSeriesNum = googleSeries.order;
             }
 
 
-            updateSummary();
+            const seriesChanged = newSeries !== (book.series || '');
+
+            const numberChanged = newSeriesNum !== book.series_num;
 
 
-            await repairDelay(350);
-        }
+            if (seriesChanged || numberChanged) {
+
+                const { error } = await supabaseClient
+                    .from('books')
+                    .update({
+                        series: newSeries || null,
+                        series_num: newSeriesNum
+                    })
+                    .eq('id', book.id);
 
 
-        await loadBooks();
+                if (!error) {
 
+                    updatedCount++;
 
-        startButton.innerText =
-            'Repair Complete';
+                    statusRow.querySelector('span:last-child').className = 'text-emerald-400 font-bold';
 
+                    statusRow.querySelector('span:last-child').innerText = '✓ Updated';
 
-        summary.innerHTML += `
+                } else {
 
-            <div class="mt-3 bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-400 font-bold">
-                Repair finished. ${updated} book(s) were updated.
-                ${numbersCorrected} series number(s) were corrected.
-            </div>
-        `;
+                    statusRow.querySelector('span:last-child').className = 'text-red-400 font-bold';
 
+                    statusRow.querySelector('span:last-child').innerText = 'Failed';
+                }
 
-    } finally {
+            } else {
 
-        repairRunning = false;
+                statusRow.querySelector('span:last-child').className = 'text-slate-500';
 
-        startButton.disabled = false;
+                statusRow.querySelector('span:last-child').innerText = 'No Change';
+            }
 
+        } catch (err) {
 
-        if (
-            startButton.innerText ===
-            'Repairing...'
-        ) {
+            console.error('Repair error for book:', book.title, err);
 
-            startButton.innerText =
-                'Start Repair';
+            statusRow.querySelector('span:last-child').className = 'text-red-400 font-bold';
+
+            statusRow.querySelector('span:last-child').innerText = 'Error';
         }
     }
+
+
+    repairRunning = false;
+
+    button.disabled = false;
+
+    button.innerText = 'Done';
+
+
+    await loadBooks();
 }
 
 
 /* ================================================================
-   CSV
+   CSV IMPORT AND TEMPLATE EXPORT
 ================================================================ */
 
 function downloadTemplate() {
 
-    const csv =
-        [
-            'title,author,series,series_num,genre,media_type,status,cover_url',
-            'Dune,Frank Herbert,Dune Chronicles,1,"Science Fiction, Fantasy",Novel,To Read,https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg'
-        ].join('\n');
+    const headers = ['Title', 'Author', 'Series', 'Series Number', 'Genre', 'Release Year', 'Media Type', 'Status'];
+
+    const sampleRow = ['Dune', 'Frank Herbert', 'Dune', '1', 'Science Fiction', '1965', 'Novel', 'To Read'];
 
 
-    const blob =
-        new Blob(
-            [csv],
-            {
-                type: 'text/csv'
-            }
-        );
+    const csvContent = 'data:text/csv;charset=utf-8,' +
+        [headers.join(','), sampleRow.join(',')].join('\n');
 
 
-    const link =
-        document.createElement('a');
+    const encodedUri = encodeURI(csvContent);
 
+    const link = document.createElement('a');
 
-    link.href =
-        URL.createObjectURL(blob);
+    link.setAttribute('href', encodedUri);
 
+    link.setAttribute('download', 'vault_books_template.csv');
 
-    link.download =
-        'books_template.csv';
+    document.body.appendChild(link);
 
 
     link.click();
 
-
-    URL.revokeObjectURL(
-        link.href
-    );
+    document.body.removeChild(link);
 }
 
 
-document
-    .getElementById('csvFile')
-    .addEventListener(
-        'change',
-        function(event) {
+async function importCSV(event) {
 
-            const file =
-                event.target.files[0];
+    const file = event.target.files[0];
+
+    if (!file) return;
 
 
-            if (!file) {
-                return;
-            }
+    const reader = new FileReader();
 
 
-            const reader =
-                new FileReader();
+    reader.onload = async function (e) {
+
+        const text = e.target.result;
+
+        const lines = text.split('\n').filter(line => line.trim() !== '');
 
 
-            reader.onload =
-                async function(e) {
-
-                    const rows =
-                        e.target.result
-                            .split(/\r?\n/)
-                            .slice(1);
-
-
-                    const books =
-                        rows
-                            .map(row => {
-
-                                const columns =
-                                    row
-                                        .split(',')
-                                        .map(
-                                            value =>
-                                                value.trim()
-                                        );
-
-
-                                if (!columns[0]) {
-                                    return null;
-                                }
-
-
-                                return {
-
-                                    title:
-                                        columns[0],
-
-                                    author:
-                                        columns[1] ||
-                                        'Unknown',
-
-                                    series:
-                                        columns[2] ||
-                                        null,
-
-                                    series_num:
-                                        columns[3]
-                                            ? parseFloat(columns[3])
-                                            : null,
-
-                                    genre:
-                                        columns[4] ||
-                                        '',
-
-                                    media_type:
-                                        columns[5] ||
-                                        'Novel',
-
-                                    status:
-                                        columns[6] ||
-                                        'To Read',
-
-                                    cover_url:
-                                        columns[7] ||
-                                        ''
-
-                                };
-                            })
-                            .filter(Boolean);
-
-
-                    if (!books.length) {
-                        return;
-                    }
-
-
-                    const { error } =
-                        await supabaseClient
-                            .from('books')
-                            .insert(books);
-
-
-                    if (error) {
-
-                        alert(
-                            'CSV import failed: ' +
-                            error.message
-                        );
-
-                        return;
-                    }
-
-
-                    await loadBooks();
-
-                    event.target.value = '';
-                };
-
-
-            reader.readAsText(file);
+        if (lines.length < 2) {
+            alert('CSV file is empty or missing data.');
+            return;
         }
-    );
+
+
+        const rows = lines.slice(1).map(line => {
+            return line.split(',').map(cell => cell.trim().replace(/^"(.*)"$/, '$1'));
+        });
+
+
+        const newBooks = rows.map(cols => ({
+            title: cols[0] || 'Untitled',
+            author: cols[1] || 'Unknown',
+            series: cols[2] || null,
+            series_num: cols[3] ? parseFloat(cols[3]) : null,
+            genre: cols[4] || '',
+            release_year: cols[5] || '',
+            media_type: cols[6] || 'Novel',
+            status: cols[7] || 'To Read'
+        }));
+
+
+        const { error } = await supabaseClient
+            .from('books')
+            .insert(newBooks);
+
+
+        if (error) {
+            alert('CSV Import failed: ' + error.message);
+        } else {
+            alert(`Successfully imported ${newBooks.length} books!`);
+            await loadBooks();
+        }
+
+
+        event.target.value = '';
+    };
+
+
+    reader.readAsText(file);
+}
 
 
 /* ================================================================
-   GLOBAL CLICK HANDLER
+   INITIALIZATION
 ================================================================ */
 
-document.addEventListener(
-    'click',
-    function(event) {
+document.addEventListener('DOMContentLoaded', () => {
 
-        if (
-            !event.target.closest('#seriesInput') &&
-            !event.target.closest('#seriesResults')
-        ) {
-
-            document
-                .getElementById('seriesResults')
-                .classList.add('hidden');
-        }
+    initAuth();
 
 
-        if (
-            !event.target.closest('#titleInput') &&
-            !event.target.closest('#searchResults')
-        ) {
+    document.addEventListener('click', (e) => {
 
-            document
-                .getElementById('searchResults')
-                .classList.add('hidden');
-        }
+        const toolboxContainer = document.getElementById('toolboxContainer');
 
-
-        if (
-            !event.target.closest('#toolboxContainer')
-        ) {
-
+        if (toolboxContainer && !toolboxContainer.contains(e.target)) {
             closeToolboxMenu();
         }
-    }
-);
 
 
-/* ================================================================
-   INITIALISE
-================================================================ */
+        const seriesInput = document.getElementById('seriesInput');
 
-initAuth();
+        const seriesResults = document.getElementById('seriesResults');
+
+        if (seriesInput && seriesResults && !seriesInput.contains(e.target) && !seriesResults.contains(e.target)) {
+            seriesResults.classList.add('hidden');
+        }
+    });
+
+});
 
 </script>
 
