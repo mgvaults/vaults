@@ -36,7 +36,6 @@
                     <path fill="#FBBC05" d="M5.27 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.6H1.18C.43 8.12 0 9.8 0 12s.43 3.88 1.18 5.4l4.09-3.16z"/>
                     <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.23 0 3.15 2.68 1.18 6.6l4.09 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/>
                 </svg>
-
                 Sign in with Google
             </button>
         </div>
@@ -46,9 +45,10 @@
     <div id="mainApp" style="display: none;">
         <div class="max-w-7xl mx-auto">
 
+            <!-- Navigation Header -->
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
 
-                <!-- Left Menu -->
+                <!-- Left Navigation Menu -->
                 <div class="flex items-center gap-2">
                     <button
                         onclick="window.location.href='index.html'"
@@ -75,11 +75,12 @@
                     >📚</button>
                 </div>
 
+                <!-- Page Title -->
                 <h1 class="text-3xl font-black tracking-tighter text-indigo-500 uppercase italic">
                     Games Vault
                 </h1>
 
-                <!-- Right Menu -->
+                <!-- Right Navigation Menu -->
                 <div class="flex items-center gap-2">
 
                     <button
@@ -100,6 +101,7 @@
                         class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700"
                     >📊</button>
 
+                    <!-- Toolbox Dropdown Container -->
                     <div id="toolboxContainer" class="relative">
 
                         <button
@@ -143,10 +145,10 @@
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
-            <!-- Dashboard -->
+            <!-- Dashboard Area -->
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
 
-                <!-- Active Session -->
+                <!-- Active Session Box -->
                 <div
                     id="activeSessionBox"
                     class="lg:col-span-5 bg-indigo-950/20 p-5 rounded-[2.5rem] border border-indigo-500/20 shadow-inner flex flex-col justify-between"
@@ -189,6 +191,7 @@
 
                     <div class="flex flex-col gap-3 relative flex-1 justify-center">
 
+                        <!-- Game Search Input -->
                         <div class="relative w-full">
                             <input
                                 id="titleInput"
@@ -203,6 +206,7 @@
                             ></div>
                         </div>
 
+                        <!-- Platform Selection -->
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
 
                             <div onclick="toggleP('steam')" id="i-steam" class="plat-box" title="Steam">
@@ -238,10 +242,10 @@
                             </div>
                         </div>
 
+                        <!-- Additional Metadata Inputs -->
                         <div class="flex flex-col sm:flex-row gap-3 text-white relative">
 
                             <div class="flex-1 relative">
-
                                 <input
                                     id="seriesInput"
                                     type="text"
@@ -283,7 +287,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                    <!-- Next Focus -->
+                    <!-- Next Focus Column -->
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">
@@ -305,7 +309,7 @@
                         ></div>
                     </div>
 
-                    <!-- Backlog & Collection -->
+                    <!-- Backlog & Collection Column -->
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">
@@ -330,7 +334,7 @@
                 </div>
             </div>
 
-            <!-- Archive -->
+            <!-- Archive View -->
             <div id="altView" class="hidden">
 
                 <div class="flex justify-between items-center mb-8">
@@ -358,7 +362,7 @@
                 ></div>
             </div>
 
-            <!-- Wishlist -->
+            <!-- Wishlist View -->
             <div id="wishlistView" class="hidden">
 
                 <div class="text-center mb-8">
@@ -369,6 +373,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
+                    <!-- Wishlist: Released -->
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-indigo-400 font-black text-xs uppercase tracking-[0.3em]">
@@ -390,6 +395,7 @@
                         ></div>
                     </div>
 
+                    <!-- Wishlist: Upcoming -->
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-amber-400 font-black text-xs uppercase tracking-[0.3em]">
@@ -418,15 +424,14 @@
     </div>
 
     <script>
-        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
+        /* ============================================================
+           CONFIG & INITIAL STATE
+           ============================================================ */
 
-        /*
-         * IMPORTANT:
-         * Put your existing Supabase anon key here.
-         * It has been intentionally omitted from this copy of the code.
-         */
+        const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
         let allGames = [];
         let editingId = null;
         let currentViewMode = 'queue';
@@ -493,12 +498,13 @@
             }
             return [];
         }
+
         function getLatestCompletionYear(game) {
-    const years = getCompletionYears(game)
-        .map(y => parseInt(y, 10))
-        .filter(y => !isNaN(y));
-    return years.length > 0 ? Math.max(...years) : 0;
-}
+            const years = getCompletionYears(game)
+                .map(y => parseInt(y, 10))
+                .filter(y => !isNaN(y));
+            return years.length > 0 ? Math.max(...years) : 0;
+        }
 
         /* ============================================================
            GENRE ICON SYSTEM
@@ -580,6 +586,7 @@
 
             return aliases[value] || value;
         }
+
         function splitGenres(genreString) {
             if (!genreString) return [];
             const separator = genreString.includes('|') ? '|' : ',';
@@ -589,6 +596,7 @@
                 .map(g => g.trim())
                 .filter(Boolean);
         }
+
         function sortGenres(genres) {
             const uniqueGenres = [...new Set(
                 genres.map(g => normaliseGenreName(g)).filter(Boolean)
@@ -605,6 +613,7 @@
                 return a.localeCompare(b);
             });
         }
+
         function getGenreIconData(genre) {
             const normalised = normaliseGenreName(genre);
             if (GENRE_ICONS[normalised]) {
@@ -671,7 +680,7 @@
         }
 
         /* ============================================================
-           AUTH
+           AUTHENTICATION
            ============================================================ */
 
         async function initAuth() {
@@ -726,7 +735,7 @@
         }
 
         /* ============================================================
-           LOAD GAMES
+           LOAD GAMES & TOOLBOX
            ============================================================ */
 
         async function loadGames() {
@@ -785,7 +794,7 @@
         }
 
         /* ============================================================
-           SAVE
+           SAVE & FORM HANDLING
            ============================================================ */
 
         async function submitForm() {
@@ -867,7 +876,7 @@
                         }
                     }
 
-                    // Default completion year if status is Finished and none specified
+                    /* Default completion year if status is Finished and none specified */
                     const finalCompletedYears =
                         (defaultStatus === 'Finished' && !completedYears)
                             ? String(new Date().getFullYear())
@@ -1047,25 +1056,26 @@
 
             } else if (currentViewMode === 'archive') {
 
-    allGames
-        .filter(g => g.status === 'Finished')
-        .filter(g =>
-            g.title.toLowerCase().includes(fA) ||
-            (g.series && g.series.toLowerCase().includes(fA))
-        )
-        .sort((a, b) => {
-            const yearA = getLatestCompletionYear(a);
-            const yearB = getLatestCompletionYear(b);
+                allGames
+                    .filter(g => g.status === 'Finished')
+                    .filter(g =>
+                        g.title.toLowerCase().includes(fA) ||
+                        (g.series && g.series.toLowerCase().includes(fA))
+                    )
+                    .sort((a, b) => {
+                        const yearA = getLatestCompletionYear(a);
+                        const yearB = getLatestCompletionYear(b);
 
-            if (yearB !== yearA) {
-                return yearB - yearA; // Latest year first
-            }
+                        if (yearB !== yearA) {
+                            return yearB - yearA; /* Latest year first */
+                        }
 
-            return a.title.localeCompare(b.title); // Alphabetical tie-breaker
-        })
-        .forEach(g =>
-            cols.alt.appendChild(createArchiveCard(g))
-        );
+                        return a.title.localeCompare(b.title); /* Alphabetical tie-breaker */
+                    })
+                    .forEach(g =>
+                        cols.alt.appendChild(createArchiveCard(g))
+                    );
+
             } else if (currentViewMode === 'wishlist') {
 
                 const wishlistGames =
@@ -1160,14 +1170,17 @@
 
             div.innerHTML = `
 
+                <!-- Poster Cover -->
                 <img
                     src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
                     alt="${game.title}"
                     class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900"
                 />
 
+                <!-- Card Details -->
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
 
+                    <!-- Series Badge & Status Menu Controls -->
                     <div class="flex items-center justify-between">
 
                         ${
@@ -1207,6 +1220,7 @@
                         </div>
                     </div>
 
+                    <!-- Title & Year -->
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">
                         ${game.title}
                     </h4>
@@ -1215,6 +1229,7 @@
                         ${releaseYear}
                     </span>
 
+                    <!-- Platform Badges -->
                     <div class="flex flex-wrap gap-1 mt-0.5">
                         ${platB}
                     </div>
@@ -1283,6 +1298,7 @@
 
                 <div>
 
+                    <!-- Top Accent Bar -->
                     <div class="h-1.5 w-full ${
                         hasSeries
                             ? 'bg-amber-500'
@@ -1291,6 +1307,7 @@
 
                     <div class="p-2.5 pb-1 flex flex-col items-center">
 
+                        <!-- Poster Image -->
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
 
                             <img
@@ -1309,6 +1326,7 @@
 
                         </div>
 
+                        <!-- Series Badge -->
                         <div class="mt-2 mb-1 w-full text-left">
 
                             ${
@@ -1319,6 +1337,7 @@
 
                         </div>
 
+                        <!-- Title & Edit Controls -->
                         <div class="flex justify-between items-start gap-1.5 w-full">
 
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">
@@ -1363,7 +1382,7 @@
                         }
                     </div>
 
-                    <!-- Status -->
+                    <!-- Status Selection Dropdown -->
                     <select
                         onchange="updateStatus(${game.id}, this.value)"
                         class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0"
@@ -1437,100 +1456,100 @@
             return div;
         }
 
-/* ============================================================
-   ARCHIVE TROPHY CABINET CARD (FINISHED GAMES)
-   ============================================================ */
+        /* ============================================================
+           ARCHIVE TROPHY CABINET CARD (FINISHED GAMES)
+           ============================================================ */
 
-function createArchiveCard(game) {
+        function createArchiveCard(game) {
 
-    const hasSeries =
-        Boolean(game.series && game.series.trim() !== '');
+            const hasSeries =
+                Boolean(game.series && game.series.trim() !== '');
 
-    const sortedPlatforms =
-        sortPlatforms(
-            (game.platform || '').split(',')
-        );
+            const sortedPlatforms =
+                sortPlatforms(
+                    (game.platform || '').split(',')
+                );
 
-    const platB =
-        sortedPlatforms.map(p => {
+            const platB =
+                sortedPlatforms.map(p => {
 
-            const i = PLAT_MAP[p];
+                    const i = PLAT_MAP[p];
 
-            return i
-                ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>`
-                : '';
+                    return i
+                        ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>`
+                        : '';
 
-        }).join(' ');
+                }).join(' ');
 
-    const years = getCompletionYears(game);
-    const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
+            const years = getCompletionYears(game);
+            const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
 
-    const div = document.createElement('div');
-    div.dataset.id = game.id;
-    div.dataset.series = game.series || '';
+            const div = document.createElement('div');
+            div.dataset.id = game.id;
+            div.dataset.series = game.series || '';
 
-    // Added 'h-fit self-start' so the card tightly hugs its contents
-    div.className = "game-card flex flex-col w-full h-fit self-start relative";
+            div.className = "game-card flex flex-col w-full h-fit self-start relative";
 
-    div.innerHTML = `
-        <div>
-            <!-- Top Accent Bar -->
-            <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
+            div.innerHTML = `
+                <div>
+                    <!-- Top Accent Bar -->
+                    <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
 
-            <div class="p-2 pb-1 flex flex-col relative">
-                <!-- Poster Image -->
-                <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden" title="${game.title.replace(/"/g, '&quot;')}">
-                    <img
-                        src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
-                        alt="${game.title}"
-                        class="w-full h-auto object-cover"
-                    >
+                    <div class="p-2 pb-1 flex flex-col relative">
+                        <!-- Poster Image -->
+                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden" title="${game.title.replace(/"/g, '&quot;')}">
+                            <img
+                                src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
+                                alt="${game.title}"
+                                class="w-full h-auto object-cover"
+                            >
+                        </div>
+
+                        <!-- Trophy/Year Badge (Left) & Edit Pencil (Right) -->
+                        <div class="w-full mt-2 flex items-center justify-between gap-1">
+                            <div class="w-fit flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 text-amber-400 rounded-lg py-1 px-2.5 text-left">
+                                <span class="text-xs">🏆</span>
+                                <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
+                            </div>
+
+                            <button
+                                onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})'
+                                title="Edit Game"
+                                class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
+                            >✏️</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Trophy/Year Badge (Left) & Edit Pencil (Right) -->
-                <div class="w-full mt-2 flex items-center justify-between gap-1">
-                    <div class="w-fit flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 text-amber-400 rounded-lg py-1 px-2.5 text-left">
-                        <span class="text-xs">🏆</span>
-                        <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
+                <!-- Bottom Metadata: Platform Badges (Left) & Status Dropdown (Right) -->
+                <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
+
+                    <div class="platform-display flex-1 min-w-0 flex flex-wrap gap-1">
+                        ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
                     </div>
 
-                    <button
-                        onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})'
-                        title="Edit Game"
-                        class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
-                    >✏️</button>
+                    <select
+                        onchange="updateStatus(${game.id}, this.value)"
+                        class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0"
+                    >
+                        <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                        <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                        <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                        <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                        <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                        <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                        <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                        <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                        <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                        <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
+                    </select>
+
                 </div>
-            </div>
-        </div>
+            `;
 
-        <!-- Bottom Metadata: Platform Badges (Left) & Status Dropdown (Right) -->
-        <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
+            return div;
+        }
 
-            <div class="platform-display flex-1 min-w-0 flex flex-wrap gap-1">
-                ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
-            </div>
-
-            <select
-                onchange="updateStatus(${game.id}, this.value)"
-                class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0"
-            >
-                <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
-                <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
-                <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
-                <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
-                <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
-                <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
-                <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
-                <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
-                <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
-                <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
-            </select>
-
-        </div>
-    `;
-
-    return div;
-}
         /* ============================================================
            VIEW SWITCHING
            ============================================================ */
@@ -1599,7 +1618,7 @@ function createArchiveCard(game) {
         }
 
         /* ============================================================
-           EDIT
+           EDIT & DELETE
            ============================================================ */
 
         function editL(g) {
@@ -2308,7 +2327,7 @@ function createArchiveCard(game) {
             );
 
         /* ============================================================
-           START
+           START / INITIALISATION
            ============================================================ */
 
         initAuth();
