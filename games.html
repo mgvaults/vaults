@@ -1424,96 +1424,98 @@
         }
 
         /* ============================================================
-           ARCHIVE TROPHY CABINET CARD (FINISHED GAMES)
-           ============================================================ */
+   ARCHIVE TROPHY CABINET CARD (FINISHED GAMES)
+   ============================================================ */
 
-        function createArchiveCard(game) {
+function createArchiveCard(game) {
 
-            const hasSeries =
-                Boolean(game.series && game.series.trim() !== '');
+    const hasSeries =
+        Boolean(game.series && game.series.trim() !== '');
 
-            const sortedPlatforms =
-                sortPlatforms(
-                    (game.platform || '').split(',')
-                );
+    const sortedPlatforms =
+        sortPlatforms(
+            (game.platform || '').split(',')
+        );
 
-            const platB =
-                sortedPlatforms.map(p => {
+    const platB =
+        sortedPlatforms.map(p => {
 
-                    const i = PLAT_MAP[p];
+            const i = PLAT_MAP[p];
 
-                    return i
-                        ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>`
-                        : '';
+            return i
+                ? `<span class="plat-badge shadow-sm" style="background:${i.c}" title="${i.n}">${i.n}</span>`
+                : '';
 
-                }).join(' ');
+        }).join(' ');
 
-            const years = getCompletionYears(game);
-            const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
+    const years = getCompletionYears(game);
+    const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
 
-            const div = document.createElement('div');
-            div.dataset.id = game.id;
-            div.dataset.series = game.series || '';
+    const div = document.createElement('div');
+    div.dataset.id = game.id;
+    div.dataset.series = game.series || '';
 
-            div.className = "game-card flex flex-col justify-between w-full relative";
+    div.className = "game-card flex flex-col justify-between w-full relative";
 
-            div.innerHTML = `
-                <div>
-                    <!-- Top Accent Bar -->
-                    <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
+    div.innerHTML = `
+        <div>
+            <!-- Top Accent Bar -->
+            <div class="h-1.5 w-full ${hasSeries ? 'bg-amber-500' : 'bg-cyan-500'}"></div>
 
-                    <div class="p-2 pb-1 flex flex-col items-center relative">
-                        <!-- Poster Image -->
-                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden group" title="${game.title.replace(/"/g, '&quot;')}">
-                            <img
-                                src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
-                                alt="${game.title}"
-                                class="w-full h-auto object-cover"
-                            >
-                            <button
-                                onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})'
-                                title="Edit Game"
-                                class="absolute top-1.5 right-1.5 bg-slate-900/80 hover:bg-amber-500 text-white hover:text-slate-900 p-1.5 rounded-lg text-xs transition shadow-md"
-                            >✏️</button>
-                        </div>
-
-                        <!-- Trophy & Completed Years -->
-                        <div class="w-full mt-2 flex items-center justify-center gap-1 bg-amber-950/40 border border-amber-500/30 text-amber-400 rounded-lg py-1 px-2 text-center">
-                            <span class="text-xs">🏆</span>
-                            <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bottom Metadata: Platform Badges & Status Dropdown -->
-                <div class="px-2 pb-2 mt-1 flex flex-col gap-1.5 border-t border-slate-800/80 pt-1.5">
-
-                    <div class="platform-display flex flex-wrap gap-1 justify-center min-w-0">
-                        ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
-                    </div>
-
-                    <select
-                        onchange="updateStatus(${game.id}, this.value)"
-                        class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-full text-center"
+            <div class="p-2 pb-1 flex flex-col relative">
+                <!-- Poster Image -->
+                <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden" title="${game.title.replace(/"/g, '&quot;')}">
+                    <img
+                        src="${game.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover'}"
+                        alt="${game.title}"
+                        class="w-full h-auto object-cover"
                     >
-                        <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
-                        <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
-                        <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
-                        <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
-                        <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
-                        <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
-                        <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
-                        <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
-                        <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
-                        <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
-                    </select>
-
                 </div>
-            `;
 
-            return div;
-        }
+                <!-- Trophy/Year Badge (Left) & Edit Pencil (Right) -->
+                <div class="w-full mt-2 flex items-center justify-between gap-1">
+                    <div class="w-fit flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 text-amber-400 rounded-lg py-1 px-2.5 text-left">
+                        <span class="text-xs">🏆</span>
+                        <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
+                    </div>
 
+                    <button
+                        onclick='editL(${JSON.stringify(game).replace(/'/g, "&apos;")})'
+                        title="Edit Game"
+                        class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
+                    >✏️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Metadata: Platform Badges (Left) & Status Dropdown (Right) -->
+        <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
+
+            <div class="platform-display flex-1 min-w-0 flex flex-wrap gap-1">
+                ${platB || `<span class="text-slate-600 text-[9px]">No platform</span>`}
+            </div>
+
+            <select
+                onchange="updateStatus(${game.id}, this.value)"
+                class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0"
+            >
+                <option value="Backlog" ${game.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                <option value="Wishlist" ${game.status === 'Wishlist' ? 'selected' : ''}>Wishlist</option>
+                <option value="Game Pass" ${game.status === 'Game Pass' ? 'selected' : ''}>Game Pass</option>
+                <option value="PS Plus" ${game.status === 'PS Plus' ? 'selected' : ''}>PS Plus</option>
+                <option value="Switch Online" ${game.status === 'Switch Online' ? 'selected' : ''}>Switch Online</option>
+                <option value="Downloaded" ${game.status === 'Downloaded' ? 'selected' : ''}>Downloaded</option>
+                <option value="Playing" ${game.status === 'Playing' ? 'selected' : ''}>Playing</option>
+                <option value="Up Next" ${game.status === 'Up Next' ? 'selected' : ''}>Up Next</option>
+                <option value="Started" ${game.status === 'Started' ? 'selected' : ''}>Started</option>
+                <option value="Finished" ${game.status === 'Finished' ? 'selected' : ''}>Finished 🏆</option>
+            </select>
+
+        </div>
+    `;
+
+    return div;
+}
         /* ============================================================
            VIEW SWITCHING
            ============================================================ */
