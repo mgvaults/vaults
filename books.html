@@ -2873,11 +2873,6 @@ function getSeriesLabel(book) {
     return `${series} #${Number(book.series_num)}`;
 }
 
-
-/* ================================================================
-   ACTIVE READING CARD COMPONENT
-================================================================ */
-
 /* ================================================================
    ACTIVE READING CARD COMPONENT
 ================================================================ */
@@ -2887,35 +2882,24 @@ function createActiveCard(book) {
     const div = document.createElement('div');
 
     const hasSeries = Boolean(book.series && book.series.trim());
-
     const releaseYear = parseReleaseYear(book.release_year);
-
     const cover = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
-    
     const mediaType = book.media_type || 'Novel';
-    
     const typeData = getMediaTypeData(mediaType);
-
 
     div.className = 'flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full';
 
-
     div.innerHTML = `
-
         <div class="w-14 h-20 flex-shrink-0 bg-slate-900 rounded-md overflow-hidden flex items-center justify-center">
-
             <img
                 src="${escapeHtml(cover)}"
                 onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
                 alt="${escapeHtml(book.title)}"
                 class="w-full h-full object-cover shadow-md">
-
         </div>
 
         <div class="flex flex-col gap-1 flex-1 min-w-0">
-
             <div class="flex items-center justify-between">
-
                 ${
                     hasSeries
                         ? `
@@ -2931,32 +2915,26 @@ function createActiveCard(book) {
                 }
 
                 <div class="relative group/menu">
-
                     <button
                         class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors">
                         ✏️
                     </button>
 
                     <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-amber-900/80 p-1.5 rounded-lg shadow-xl z-50">
-
                         <button
                             onclick="updateStatus(${book.id}, 'To Read')"
                             class="p-1.5 rounded hover:bg-amber-500/20 text-amber-400"
                             title="Move to Collection">
                             📚
                         </button>
-
                         <button
                             onclick="updateStatus(${book.id}, 'Finished')"
                             class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400"
                             title="Mark Finished">
                             🏆
                         </button>
-
                     </div>
-
                 </div>
-
             </div>
 
             <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">
@@ -2968,20 +2946,12 @@ function createActiveCard(book) {
             </span>
 
             <div class="flex items-center gap-2 mt-0.5">
-
                 <span class="text-[9px] bg-slate-800 border border-slate-700 text-slate-300 px-1.5 py-0.5 rounded uppercase font-semibold">
                     ${typeData.icon} ${escapeHtml(typeData.short)}
                 </span>
-
-                <span class="text-[9px] bg-amber-900/60 text-amber-300 px-1.5 py-0.5 rounded uppercase font-semibold">
-                    📖 READING
-                </span>
-
             </div>
-
         </div>
     `;
-
 
     return div;
 }
