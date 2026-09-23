@@ -500,21 +500,27 @@
 
                         <div class="flex gap-3 text-white relative">
 
-                            <input
-                                id="seriesNumInput"
-                                type="number"
-                                step="0.1"
-                                placeholder="Book #"
-                                class="w-28 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
+    <input
+        id="seriesNumInput"
+        type="number"
+        step="0.1"
+        placeholder="Book #"
+        class="w-28 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
 
-                            <button
-                                onclick="submitForm()"
-                                id="submitBtn"
-                                class="flex-1 bg-amber-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-amber-500 transition">
-                                Commit
-                            </button>
+    <input
+        id="completedYearsInput"
+        type="text"
+        placeholder="Finished Years (e.g. 2023, 2026)"
+        class="flex-1 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
 
-                        </div>
+    <button
+        onclick="submitForm()"
+        id="submitBtn"
+        class="bg-amber-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-amber-500 transition">
+        Commit
+    </button>
+
+</div>
 
                     </div>
 
@@ -1807,6 +1813,14 @@ function parseReleaseYear(val) {
 
 function parseFinishedYear(book) {
 
+    if (book.completed_years) {
+        return String(book.completed_years);
+    }
+
+    if (book.completed_year) {
+        return String(book.completed_year);
+    }
+
     if (book.finished_year) {
         return String(book.finished_year);
     }
@@ -2546,129 +2560,88 @@ function selectBook(
 async function submitForm() {
 
     const titleInput = document.getElementById('titleInput');
-
     const authorInput = document.getElementById('authorInput');
-
     const seriesInput = document.getElementById('seriesInput');
-
     const seriesNumInput = document.getElementById('seriesNumInput');
-
+    const completedYearsInput = document.getElementById('completedYearsInput');
     const submitButton = document.getElementById('submitBtn');
 
-
     const title = titleInput.value.trim();
-
     if (!title) return;
-
 
     submitButton.disabled = true;
 
-
     try {
-
         const enteredSeries = seriesInput.value.trim();
-
         const enteredSeriesNum = seriesNumInput.value !== '' ? parseFloat(seriesNumInput.value) : null;
-
+        const completedYearsVal = completedYearsInput ? completedYearsInput.value.trim() : null;
 
         let series = enteredSeries || null;
-
         let seriesNum = enteredSeriesNum;
 
-
         if (editingId) {
-
             const originalSeries = String(editingOriginalSeries || '').trim();
-
             const currentSeries = enteredSeries;
-
             if (currentSeries === originalSeries) {
                 series = originalSeries || null;
             }
 
-
             const originalNum = (editingOriginalSeriesNum === null || editingOriginalSeriesNum === undefined || editingOriginalSeriesNum === '')
                 ? null
                 : Number(editingOriginalSeriesNum);
-
             const currentNum = enteredSeriesNum;
-
 
             if (originalNum === currentNum || (originalNum !== null && currentNum !== null && Number(originalNum) === Number(currentNum))) {
                 seriesNum = originalNum;
             }
         }
 
-
         const cover = titleInput.dataset.img || '';
-
         const genre = titleInput.dataset.genre || '';
-
         const releaseYear = titleInput.dataset.release || '';
-
         const mediaType = selectedMediaType || titleInput.dataset.mediaType || 'Novel';
 
+        const payload = {
+            title,
+            author: authorInput.value.trim() || 'Unknown',
+            series,
+            series_num: seriesNum,
+            cover_url: cover || currentBook?.cover_url || '',
+            genre: genre || currentBook?.genre || '',
+            release_year: releaseYear || currentBook?.release_year || '',
+            media_type: mediaType,
+            completed_years: completedYearsVal || null,
+            completed_year: completedYearsVal || null
+        };
 
         if (editingId) {
-
-            const currentBook = allBooks.find(book => book.id === editingId);
-
-            const payload = {
-                title,
-                author: authorInput.value.trim() || 'Unknown',
-                series,
-                series_num: seriesNum,
-                cover_url: cover || currentBook?.cover_url || '',
-                genre: genre || currentBook?.genre || '',
-                release_year: releaseYear || currentBook?.release_year || '',
-                media_type: mediaType
-            };
-
-
             const { error } = await supabaseClient
                 .from('books')
                 .update(payload)
                 .eq('id', editingId);
 
-
             if (error) throw error;
 
         } else {
-
             const status = currentViewMode === 'wishlist' ? 'Wishlist' : 'To Read';
 
             const { error } = await supabaseClient
                 .from('books')
                 .insert([{
-                    title,
-                    author: authorInput.value.trim() || 'Unknown',
-                    series,
-                    series_num: seriesNum,
-                    cover_url: cover,
-                    genre,
-                    release_year: releaseYear,
-                    media_type: mediaType,
+                    ...payload,
                     status
                 }]);
-
 
             if (error) throw error;
         }
 
-
         resetForm();
-
         await loadBooks();
 
-
     } catch (error) {
-
         console.error('Save failed:', error);
-
         alert('Error saving book: ' + (error.message || 'Unknown error'));
-
     } finally {
-
         submitButton.disabled = false;
     }
 }
@@ -2701,6 +2674,7 @@ function resetForm() {
 
     document.getElementById('seriesNumInput').value = '';
 
+    document.getElementById('completedYearsInput').value = '';
 
     toggleType('Novel');
 
@@ -3414,7 +3388,8 @@ function editL(id) {
     document.getElementById('seriesInput').value = book.series || '';
 
     document.getElementById('seriesNumInput').value = (book.series_num !== null && book.series_num !== undefined) ? book.series_num : '';
-
+    
+    document.getElementById('completedYearsInput').value = book.completed_years || book.completed_year || '';
 
     document.getElementById('formModeLabel').innerText = 'Updating: ' + book.title;
 
