@@ -3131,6 +3131,10 @@ function createCard(book) {
    FINISHED ARCHIVE CARD COMPONENT
 ================================================================ */
 
+/* ================================================================
+   FINISHED ARCHIVE CARD COMPONENT
+================================================================ */
+
 function createArchiveCard(book) {
 
     const div = document.createElement('div');
@@ -3147,18 +3151,14 @@ function createArchiveCard(book) {
 
     const typeData = getMediaTypeData(mediaType);
 
-
     div.dataset.id = book.id;
 
     div.className = 'book-card flex flex-col justify-between w-full';
 
-
     div.innerHTML = `
 
         <div>
-
             <div class="h-1.5 w-full ${topBar}"></div>
-
             <div class="p-2.5 pb-1 flex flex-col items-center">
 
                 <div class="book-poster-container shadow-inner">
@@ -3167,12 +3167,9 @@ function createArchiveCard(book) {
                         src="${escapeHtml(cover)}"
                         onerror="this.onerror=null; this.src='https://via.placeholder.com/150x225?text=No+Cover';"
                         alt="${escapeHtml(book.title)}">
-
                 </div>
 
-
-                <div class="flex justify-between items-center w-full mt-2 mb-1">
-
+                <div class="flex justify-between items-center w-full mt-2 mb-1 px-1">
                     <span class="text-[10px] font-black text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
                         🏆 ${finishedYear}
                     </span>
@@ -3186,22 +3183,10 @@ function createArchiveCard(book) {
 
                 </div>
 
-                <div class="w-full text-left mt-1">
-                    <h3 class="font-bold text-sm text-white leading-snug line-clamp-2">
-                        ${escapeHtml(book.title)}
-                    </h3>
-                    <p class="text-xs text-amber-400 font-bold mt-0.5 truncate">
-                        ${escapeHtml(book.author || 'Unknown')}
-                    </p>
-                </div>
-
             </div>
 
         </div>
-
-
         <div class="px-2.5 pb-2 mt-1 flex items-center justify-between gap-1 border-t border-slate-800/80 pt-1.5">
-
             <span
                 class="type-badge shadow-sm"
                 title="${escapeHtml(mediaType)}">
@@ -3210,8 +3195,6 @@ function createArchiveCard(book) {
                 ${escapeHtml(typeData.short)}
 
             </span>
-
-
             <select
                 onchange="updateStatus(${book.id}, this.value)"
                 class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
@@ -3248,7 +3231,6 @@ function createArchiveCard(book) {
 
     return div;
 }
-
 
 /* ================================================================
    VIEW SWITCHING
