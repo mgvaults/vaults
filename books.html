@@ -327,206 +327,207 @@
 
 
             <!-- =====================================================
-                 TOP DASHBOARD
-            ====================================================== -->
+                  TOP DASHBOARD
+ ====================================================== -->
 
-            <div
-                id="dashboardTop"
-                class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
+<div
+    id="dashboardTop"
+    class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
 
-                <!-- CURRENTLY READING -->
+    <!-- CURRENTLY READING -->
 
-                <div
-                    id="activeSessionBox"
-                    class="lg:col-span-5 bg-amber-950/20 p-5 rounded-[2.5rem] border border-amber-500/20 shadow-inner flex flex-col justify-between">
+    <div
+        id="activeSessionBox"
+        class="lg:col-span-5 bg-amber-950/20 p-5 rounded-[2.5rem] border border-amber-500/20 shadow-inner flex flex-col justify-between">
 
-                    <h2 class="text-amber-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">
-                        Currently Reading 📖
-                    </h2>
+        <h2 class="text-amber-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">
+            Currently Reading 📖
+        </h2>
 
-                    <div
-                        id="col-reading"
-                        class="flex-1 flex flex-col gap-3 justify-center">
-                    </div>
+        <div
+            id="col-reading"
+            class="flex-1 flex flex-col gap-3 justify-center">
+        </div>
+
+    </div>
+
+
+    <!-- SEARCH AND ADD INPUT AREA -->
+    <!-- Changed p-6 to p-5 to match the Currently Reading box -->
+    <div
+        id="inputArea"
+        class="lg:col-span-7 bg-slate-800 p-5 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
+
+        <div class="flex flex-col gap-3 relative">
+
+            <!-- Updated text-[10px] to text-xs, added tracking-widest, removed px-1, added items-center -->
+            <div class="text-xs font-black text-amber-400 uppercase tracking-widest italic flex justify-between items-center mb-1">
+
+                <span id="formModeLabel">
+                    Search
+                </span>
+
+                <div class="flex gap-2">
+
+                    <button
+                        id="cancelEdit"
+                        onclick="exitEditMode()"
+                        class="hidden text-slate-400 hover:text-white text-xs font-bold">
+                        Cancel
+                    </button>
+
+                    <button
+                        id="deleteSelectedBtn"
+                        onclick="deleteSelectedFromForm()"
+                        class="hidden text-red-400 hover:text-red-300 text-xs font-bold">
+                        🗑️ Delete
+                    </button>
 
                 </div>
 
+            </div>
 
-                <!-- SEARCH AND ADD INPUT AREA -->
+
+            <!-- SEARCH INPUT -->
+
+            <input
+                id="titleInput"
+                type="text"
+                oninput="searchBooks(this.value)"
+                placeholder="Search for book title or ISBN..."
+                autocomplete="off"
+                class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
+
+            <div
+                id="searchResults"
+                class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white">
+            </div>
+
+
+            <!-- MEDIA TYPE SELECTOR -->
+
+            <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
 
                 <div
-                    id="inputArea"
-                    class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
+                    onclick="toggleType('Novel')"
+                    id="i-novel"
+                    class="type-box active"
+                    title="Novel">
+                    <span style="font-size:16px;">📖</span>
+                </div>
 
-                    <div class="flex flex-col gap-3 relative">
+                <div
+                    onclick="toggleType('Graphic Novel')"
+                    id="i-graphic"
+                    class="type-box"
+                    title="Graphic Novel">
+                    <span style="font-size:16px;">🖼️</span>
+                </div>
 
-                        <div class="text-[10px] font-black text-amber-400 uppercase px-1 italic flex justify-between">
+                <div
+                    onclick="toggleType('Comic')"
+                    id="i-comic"
+                    class="type-box"
+                    title="Comic">
+                    <span style="font-size:16px;">💥</span>
+                </div>
 
-                            <span id="formModeLabel">
-                                Search
-                            </span>
+                <div
+                    onclick="toggleType('Manga')"
+                    id="i-manga"
+                    class="type-box"
+                    title="Manga">
+                    <span style="font-size:16px;">🍥</span>
+                </div>
 
-                            <div class="flex gap-2">
+                <div
+                    onclick="toggleType('Short Story')"
+                    id="i-short"
+                    class="type-box"
+                    title="Short Story">
+                    <span style="font-size:16px;">📄</span>
+                </div>
 
-                                <button
-                                    id="cancelEdit"
-                                    onclick="exitEditMode()"
-                                    class="hidden text-slate-400 hover:text-white text-xs font-bold">
-                                    Cancel
-                                </button>
+                <div
+                    onclick="toggleType('Anthology')"
+                    id="i-anthology"
+                    class="type-box"
+                    title="Anthology">
+                    <span style="font-size:16px;">📚</span>
+                </div>
 
-                                <button
-                                    id="deleteSelectedBtn"
-                                    onclick="deleteSelectedFromForm()"
-                                    class="hidden text-red-400 hover:text-red-300 text-xs font-bold">
-                                    🗑️ Delete
-                                </button>
+                <div
+                    onclick="toggleType('Non-Fiction')"
+                    id="i-nonfiction"
+                    class="type-box"
+                    title="Non-Fiction">
+                    <span style="font-size:16px;">📘</span>
+                </div>
 
-                            </div>
-
-                        </div>
-
-
-                        <!-- SEARCH INPUT -->
-
-                        <input
-                            id="titleInput"
-                            type="text"
-                            oninput="searchBooks(this.value)"
-                            placeholder="Search for book title or ISBN..."
-                            autocomplete="off"
-                            class="w-full bg-slate-900 p-4 rounded-2xl outline-none border border-slate-700 text-white text-sm">
-
-                        <div
-                            id="searchResults"
-                            class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white">
-                        </div>
-
-
-                        <!-- MEDIA TYPE SELECTOR -->
-
-                        <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
-
-                            <div
-                                onclick="toggleType('Novel')"
-                                id="i-novel"
-                                class="type-box active"
-                                title="Novel">
-                                <span style="font-size:16px;">📖</span>
-                            </div>
-
-                            <div
-                                onclick="toggleType('Graphic Novel')"
-                                id="i-graphic"
-                                class="type-box"
-                                title="Graphic Novel">
-                                <span style="font-size:16px;">🖼️</span>
-                            </div>
-
-                            <div
-                                onclick="toggleType('Comic')"
-                                id="i-comic"
-                                class="type-box"
-                                title="Comic">
-                                <span style="font-size:16px;">💥</span>
-                            </div>
-
-                            <div
-                                onclick="toggleType('Manga')"
-                                id="i-manga"
-                                class="type-box"
-                                title="Manga">
-                                <span style="font-size:16px;">🍥</span>
-                            </div>
-
-                            <div
-                                onclick="toggleType('Short Story')"
-                                id="i-short"
-                                class="type-box"
-                                title="Short Story">
-                                <span style="font-size:16px;">📄</span>
-                            </div>
-
-                            <div
-                                onclick="toggleType('Anthology')"
-                                id="i-anthology"
-                                class="type-box"
-                                title="Anthology">
-                                <span style="font-size:16px;">📚</span>
-                            </div>
-
-                            <div
-                                onclick="toggleType('Non-Fiction')"
-                                id="i-nonfiction"
-                                class="type-box"
-                                title="Non-Fiction">
-                                <span style="font-size:16px;">📘</span>
-                            </div>
-
-                        </div>
+            </div>
 
 
-                        <!-- AUTHOR AND SERIES INPUTS -->
+            <!-- AUTHOR AND SERIES INPUTS -->
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                            <input
-                                id="authorInput"
-                                type="text"
-                                placeholder="Author Name"
-                                class="bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
+                <input
+                    id="authorInput"
+                    type="text"
+                    placeholder="Author Name"
+                    class="bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
 
-                            <div class="relative">
+                <div class="relative">
 
-                                <input
-                                    id="seriesInput"
-                                    type="text"
-                                    oninput="filterSeriesDropdown(this.value)"
-                                    onfocus="filterSeriesDropdown(this.value)"
-                                    placeholder="Series Name (Automatic)"
-                                    class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
+                    <input
+                        id="seriesInput"
+                        type="text"
+                        oninput="filterSeriesDropdown(this.value)"
+                        onfocus="filterSeriesDropdown(this.value)"
+                        placeholder="Series Name (Automatic)"
+                        class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
 
-                                <div
-                                    id="seriesResults"
-                                    class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white">
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- SERIES NUMBER AND SUBMIT BUTTON -->
-
-                        <div class="flex gap-3 text-white relative">
-
-    <input
-        id="seriesNumInput"
-        type="number"
-        step="0.1"
-        placeholder="Book #"
-        class="w-28 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
-
-    <input
-        id="completedYearsInput"
-        type="text"
-        placeholder="Finished Years (e.g. 2023, 2026)"
-        class="flex-1 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
-
-    <button
-        onclick="submitForm()"
-        id="submitBtn"
-        class="bg-amber-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-amber-500 transition">
-        Commit
-    </button>
-
-</div>
-
+                    <div
+                        id="seriesResults"
+                        class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white">
                     </div>
 
                 </div>
 
             </div>
+
+
+            <!-- SERIES NUMBER AND SUBMIT BUTTON -->
+
+            <div class="flex gap-3 text-white relative">
+
+                <input
+                    id="seriesNumInput"
+                    type="number"
+                    step="0.1"
+                    placeholder="Book #"
+                    class="w-28 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold">
+
+                <input
+                    id="completedYearsInput"
+                    type="text"
+                    placeholder="Finished Years (e.g. 2023, 2026)"
+                    class="flex-1 bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
+
+                <button
+                    onclick="submitForm()"
+                    id="submitBtn"
+                    class="bg-amber-600 px-8 rounded-2xl font-black uppercase text-xs text-white hover:bg-amber-500 transition">
+                    Commit
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
             <!-- =====================================================
