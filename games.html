@@ -493,6 +493,12 @@
             }
             return [];
         }
+        function getLatestCompletionYear(game) {
+    const years = getCompletionYears(game)
+        .map(y => parseInt(y, 10))
+        .filter(y => !isNaN(y));
+    return years.length > 0 ? Math.max(...years) : 0;
+}
 
         /* ============================================================
            GENRE ICON SYSTEM
@@ -1041,16 +1047,27 @@
 
             } else if (currentViewMode === 'archive') {
 
-                allGames
-                    .filter(g => g.status === 'Finished')
-                    .filter(g =>
-                        g.title.toLowerCase().includes(fA) ||
-                        (g.series &&
-                            g.series.toLowerCase().includes(fA))
-                    )
-                    .forEach(g =>
-                        cols.alt.appendChild(createArchiveCard(g))
-                    );
+    allGames
+        .filter(g => g.status === 'Finished')
+        .filter(g =>
+            g.title.toLowerCase().includes(fA) ||
+            (g.series && g.series.toLowerCase().includes(fA))
+        )
+        .sort((a, b) => {
+            const yearA = getLatestCompletionYear(a);
+            const yearB = getLatestCompletionYear(b);
+
+            if (yearB !== yearA) {
+                return yearB - yearA; // Latest year first
+            }
+
+            return a.title.localeCompare(b.title); // Alphabetical tie-breaker
+        })
+        .forEach(g =>
+            cols.alt.appendChild(createArchiveCard(g))
+        );
+
+}
 
             } else if (currentViewMode === 'wishlist') {
 
