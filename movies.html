@@ -16,7 +16,7 @@
         .type-box { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; cursor: pointer; transition: all 0.2s; opacity: 0.25; color: black; font-weight: 900; }
         .type-box.active { opacity: 1; transform: scale(1.08); border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         #authScreen { background-color: #0b0f19; position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .type-badge { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; uppercase; display: inline-block; }
+        .type-badge { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block; }
         .badge-tv { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
         .badge-movie-series { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
         .badge-movie-standalone { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid #0891b2; }
@@ -28,6 +28,9 @@
 </head>
 <body class="min-h-screen p-2 sm:p-4 font-sans text-left overflow-x-hidden">
 
+    <!-- ============================================================
+         AUTHENTICATION SCREEN
+         ============================================================ -->
     <div id="authScreen">
         <div class="bg-slate-800 p-10 rounded-[3rem] border border-slate-700 shadow-2xl w-full max-w-sm text-center">
             <div class="mb-2 text-cyan-400 text-6xl font-black italic tracking-tighter uppercase leading-none text-white">Vault</div>
@@ -44,8 +47,13 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         MAIN APPLICATION INTERFACE
+         ============================================================ -->
     <div id="mainApp" style="display: none;">
         <div class="max-w-7xl mx-auto">
+            
+            <!-- Navigation Header -->
             <header class="flex justify-between items-center py-4 mb-8 border-b border-slate-800 text-white">
                 <div class="flex items-center gap-2">
                    <button onclick="window.location.href='index.html'" title="Home Vault" class="bg-slate-800 p-2.5 px-4 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🏠</button>
@@ -70,17 +78,22 @@
                 <input type="file" id="csvFile" accept=".csv" class="hidden">
             </header>
 
+            <!-- Metadata Repair Status Notification -->
             <div id="repairStatus" class="hidden mb-6 p-4 bg-cyan-950/60 border border-cyan-500/40 rounded-2xl text-cyan-200 text-xs font-bold flex items-center justify-between">
                 <span id="repairStatusText">Repairing metadata...</span>
                 <span id="repairCount" class="bg-cyan-900/80 px-2.5 py-1 rounded-lg border border-cyan-500/30">0 / 0</span>
             </div>
 
+            <!-- Top Dashboard Section (Currently Watching & Input Form) -->
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
+                
+                <!-- Currently Watching Container -->
                 <div id="activeSessionBox" class="lg:col-span-5 bg-cyan-950/20 p-5 rounded-[2.5rem] border border-cyan-500/20 shadow-inner flex flex-col justify-between">
                     <h2 class="text-cyan-400 font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-3 italic justify-start">Currently Watching 👁️</h2>
                     <div id="col-watching" class="flex-1 flex flex-col gap-3 justify-center"></div>
                 </div>
                 
+                <!-- Search & Manual Input Form -->
                 <div id="inputArea" class="lg:col-span-7 bg-slate-800 p-6 rounded-[2.5rem] border border-slate-700 shadow-2xl relative flex flex-col justify-center">
                     <div class="flex flex-col gap-3 relative">
                         <div class="text-[10px] font-black text-cyan-400 uppercase px-1 italic flex justify-between">
@@ -115,6 +128,7 @@
                 </div>
             </div>
 
+            <!-- Vault Backlog / Queue Collection Grid -->
             <div id="queueView">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Vault Collection</h2>
@@ -123,6 +137,7 @@
                 <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
+            <!-- Watched Archive View (Trophy Cabinet) -->
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
@@ -131,16 +146,26 @@
                 </div>
                 <div id="col-alt" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
+
         </div>
     </div>
 
+    <!-- ============================================================
+         APPLICATION JAVASCRIPT LOGIC
+         ============================================================ -->
     <script>
+        /* ============================================================
+           GLOBAL CONFIGURATION & SUPABASE INITIALIZATION
+           ============================================================ */
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [], editingId = null, currentViewMode = 'queue', selectedType = 'Movie';
 
+        /* ============================================================
+           AUTHENTICATION & APP LIFECYCLE
+           ============================================================ */
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) showApp(); else showAuth();
@@ -173,6 +198,9 @@
             document.getElementById('mainApp').style.display = 'none';
         }
 
+        /* ============================================================
+           DATA FETCHING & DATABASE OPERATIONS
+           ============================================================ */
         async function loadMovies() { 
             let { data, error } = await supabaseClient.from('movies').select('*').order('title', { ascending: true }); 
             if (!error) { 
@@ -181,125 +209,19 @@
             } 
         }
 
-        function toggleToolbox(e) {
-            if (e) e.stopPropagation();
-            const menu = document.getElementById('toolboxMenu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
-        }
+        async function updateStatus(id, newStatus) {
+            const movie = allMovies.find(m => m.id === id);
+            let payload = { status: newStatus };
 
-        function toggleType(t) { 
-            selectedType = t;
-            document.getElementById('i-movie').classList.toggle('active', t === 'Movie');
-            document.getElementById('i-tv').classList.toggle('active', t === 'TV Show' || t === 'SHOW');
-        }
-
-        function parseReleaseYear(val) {
-            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
-            if (typeof val === 'string' && val.includes('-')) {
-                const yearPart = val.split('-')[0];
-                if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
-            }
-            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
-            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
-            
-            let num = Number(val);
-            if (!isNaN(num) && num > 0) {
-                if (num > 32503680000) num = Math.floor(num / 1000);
-                const dateObj = new Date(num * 1000);
-                if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
-            }
-            return 'TBA';
-        }
-
-        function isUnreleased(val) {
-            // Treat missing or TBA dates explicitly as unreleased
-            if (!val || val === 'TBA' || val === 'null' || val === 'undefined') return true;
-            
-            let releaseDate = null;
-
-            if (typeof val === 'string' && val.includes('-')) {
-                releaseDate = new Date(val);
-            } else if (/^\d{4}$/.test(String(val).trim())) {
-                releaseDate = new Date(`${val.trim()}-12-31`);
-            }
-
-            if (releaseDate && !isNaN(releaseDate.getTime())) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return releaseDate > today;
-            }
-            return false;
-        }
-
-        async function repairMetadata() {
-            const menu = document.getElementById('toolboxMenu');
-            menu.classList.add('hidden');
-            menu.classList.remove('flex');
-
-            const statusContainer = document.getElementById('repairStatus');
-            const statusText = document.getElementById('repairStatusText');
-            const countText = document.getElementById('repairCount');
-
-            statusContainer.classList.remove('hidden');
-            let updatedCount = 0;
-            const total = allMovies.length;
-
-            for (let i = 0; i < total; i++) {
-                const movie = allMovies[i];
-                countText.innerText = `${i + 1} / ${total}`;
-                statusText.innerText = `Checking metadata for "${movie.title}"...`;
-
-                const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW';
-
-                try {
-                    const searchRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-                        body: JSON.stringify({ query: movie.title })
-                    });
-                    const searchData = await searchRes.json();
-                    const results = searchData.results || searchData || [];
-
-                    if (Array.isArray(results) && results.length > 0) {
-                        const match = results.find(r => (isTV ? (r.media_type === 'tv' || r.name) : (r.media_type === 'movie' || r.title))) || results[0];
-                        
-                        const newCover = match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : movie.cover_url;
-                        const newRelease = match.release_date || match.first_air_date || movie.release_year;
-                        let newSeasons = movie.seasons;
-
-                        if (isTV && match.id) {
-                            try {
-                                const detailRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-                                    body: JSON.stringify({ tmdbId: match.id, type: 'tv' })
-                                });
-                                const details = await detailRes.json();
-                                if (details && details.number_of_seasons) {
-                                    newSeasons = details.number_of_seasons;
-                                }
-                            } catch (e) { console.error("Detail error:", e); }
-                        }
-
-                        if (newCover !== movie.cover_url || newRelease !== movie.release_year || newSeasons !== movie.seasons) {
-                            await supabaseClient.from('movies').update({
-                                cover_url: newCover,
-                                release_year: newRelease,
-                                seasons: newSeasons
-                            }).eq('id', movie.id);
-                            updatedCount++;
-                        }
-                    }
-                } catch (err) {
-                    console.error(`Repair failed for ${movie.title}:`, err);
+            if (newStatus === 'Watched') {
+                const existingYears = getCompletionYears(movie);
+                if (existingYears.length === 0) {
+                    payload.completed_years = new Date().getFullYear().toString();
                 }
             }
 
-            statusText.innerText = `Metadata Repair Finished! Updated ${updatedCount} items.`;
-            countText.innerText = `${total} / ${total}`;
-            setTimeout(() => { statusContainer.classList.add('hidden'); }, 4000);
-            await loadMovies();
+            await supabaseClient.from('movies').update(payload).eq('id', id);
+            loadMovies();
         }
 
         async function submitForm() {
@@ -356,164 +278,93 @@
             }
         }
 
-        function resetForm() { 
-            editingId = null;
-            const tIn = document.getElementById('titleInput'); 
-            tIn.value = ''; 
-            delete tIn.dataset.img; 
-            delete tIn.dataset.genre; 
-            delete tIn.dataset.release; 
-            delete tIn.dataset.seasons;
-
-            document.getElementById('seriesInput').value = ''; 
-            document.getElementById('searchResults').classList.add('hidden');
-            document.getElementById('searchResults').innerHTML = '';
-            document.getElementById('seriesResults').classList.add('hidden');
-            document.getElementById('seriesResults').innerHTML = '';
-
-            toggleType('Movie');
-            document.getElementById('submitBtn').innerText = "Commit"; 
-            document.getElementById('formModeLabel').innerText = "Search"; 
-            document.getElementById('cancelEdit').classList.add('hidden'); 
-            document.getElementById('deleteSelectedBtn').classList.add('hidden');
-        }
-
-        function render() {
-            const fM = document.getElementById('filterMain').value.toLowerCase();
-            const fA = document.getElementById('filterAlt').value.toLowerCase();
-
-            const cols = { 
-                watching: document.getElementById('col-watching'), 
-                main: document.getElementById('col-main'),
-                alt: document.getElementById('col-alt')
-            };
-            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
-
-            const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
-
-            if (currentViewMode === 'queue') {
-                const activeMovies = sortedList.filter(m => m.status === 'Watching');
-                if (activeMovies.length > 0) {
-                    activeMovies.forEach(m => cols.watching.appendChild(createActiveCard(m)));
-                } else {
-                    cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
-                }
-                
-                sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
-                    .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
-                    .forEach(m => cols.main.appendChild(createCard(m)));
-
-            } else if (currentViewMode === 'archive') {
-                sortedList.filter(m => m.status === 'Watched')
-                    .filter(m => m.title.toLowerCase().includes(fA) || (m.series && m.series.toLowerCase().includes(fA)))
-                    .forEach(m => cols.alt.appendChild(createCard(m)));
+        async function deleteSelectedFromForm() {
+            if (!editingId) return;
+            if (confirm("Are you sure you want to delete this title?")) {
+                await supabaseClient.from('movies').delete().eq('id', editingId);
+                resetForm();
+                loadMovies();
             }
         }
 
-        function getCardConfig(movie) {
-            const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW' || movie.seasons > 0;
-            
-            let topBarColor = 'bg-cyan-500';
-            let badgeStyle = 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
-            let pillClass = 'badge-movie-standalone';
-            let typePillText = 'MOVIE';
+        /* ============================================================
+           COMPLETION YEARS HELPERS
+           ============================================================ */
+        function getCompletionYears(movie) {
+            if (!movie || !movie.completed_years) return [];
+            if (Array.isArray(movie.completed_years)) {
+                return movie.completed_years.map(y => String(y).trim()).filter(Boolean);
+            }
+            if (typeof movie.completed_years === 'string') {
+                return movie.completed_years
+                    .split(',')
+                    .map(y => y.trim())
+                    .filter(Boolean);
+            }
+            return [];
+        }
 
-            if (isTV) {
-                topBarColor = 'bg-rose-500';
-                badgeStyle = 'bg-rose-600/20 text-rose-400 border-rose-500/30';
-                pillClass = 'badge-tv';
-                typePillText = 'SHOW';
-            } else if (hasSeries) {
-                topBarColor = 'bg-amber-500';
-                badgeStyle = 'bg-amber-600/20 text-amber-400 border-amber-500/30';
-                pillClass = 'badge-movie-series';
-                typePillText = 'MOVIE';
+        function getLatestCompletionYear(movie) {
+            const years = getCompletionYears(movie)
+                .map(y => parseInt(y, 10))
+                .filter(y => !isNaN(y));
+            return years.length > 0 ? Math.max(...years) : 0;
+        }
+
+        /* ============================================================
+           DATE & RELEASE STATUS UTILITIES
+           ============================================================ */
+        function parseReleaseYear(val) {
+            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
+            if (typeof val === 'string' && val.includes('-')) {
+                const yearPart = val.split('-')[0];
+                if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
+            }
+            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
+            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
+            
+            let num = Number(val);
+            if (!isNaN(num) && num > 0) {
+                if (num > 32503680000) num = Math.floor(num / 1000);
+                const dateObj = new Date(num * 1000);
+                if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
+            }
+            return 'TBA';
+        }
+
+        function isUnreleased(val) {
+            if (!val || val === 'TBA' || val === 'null' || val === 'undefined') return true;
+            
+            let releaseDate = null;
+
+            if (typeof val === 'string' && val.includes('-')) {
+                releaseDate = new Date(val);
+            } else if (/^\d{4}$/.test(String(val).trim())) {
+                releaseDate = new Date(`${val.trim()}-12-31`);
             }
 
-            return { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText };
+            if (releaseDate && !isNaN(releaseDate.getTime())) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return releaseDate > today;
+            }
+            return false;
         }
 
-        function createActiveCard(movie) {
-            const { hasSeries, isTV, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
-            const releaseYear = parseReleaseYear(movie.release_year);
-            const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
-            const unreleased = isUnreleased(movie.release_year);
-            const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
-
-            const div = document.createElement('div');
-            div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
-            
-            div.innerHTML = `
-                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900 ${imgFilterClass}" />
-                <div class="flex flex-col gap-1 flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
-                        
-                        <div class="relative group/menu">
-                            <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                </svg>
-                            </button>
-                            
-                            <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
-                                <button onclick="updateStatus(${movie.id}, 'Archive')" class="p-1.5 rounded hover:bg-cyan-500/20 text-cyan-400 transition-colors" title="Move to Vault (🎬)">🎬</button>
-                                <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🏆)">🏆</button>
-                            </div>
-                        </div>
-                    </div>
-                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
-                    <span class="text-xs text-slate-400">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</span>
-                    <div class="flex items-center gap-2 mt-0.5">
-                        <span class="type-badge ${pillClass}">${typePillText}</span>
-                    </div>
-                </div>
-            `;
-            return div;
+        /* ============================================================
+           UI STATE & TOOLBOX HELPERS
+           ============================================================ */
+        function toggleToolbox(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('toolboxMenu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
         }
 
-        function createCard(movie) {
-            const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
-            const releaseYear = parseReleaseYear(movie.release_year);
-            const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
-            const unreleased = isUnreleased(movie.release_year);
-            const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
-
-            const div = document.createElement('div');
-            div.dataset.id = movie.id; 
-            div.dataset.series = movie.series || '';
-            div.className = `movie-card flex flex-col justify-between w-full`;
-
-            div.innerHTML = `
-                <div>
-                    <div class="h-1.5 w-full ${topBarColor}"></div>
-                    <div class="p-2.5 pb-1 flex flex-col items-center">
-                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
-                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="${imgFilterClass}">
-                        </div>
-                        <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
-                        </div>
-                        <div class="flex justify-between items-start gap-1.5 w-full">
-                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
-                            <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</p>
-                    </div>
-                </div>
-                <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <span class="type-badge ${pillClass}">${typePillText}</span>
-                        <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
-                            <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
-                            <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
-                            <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-            return div;
+        function toggleType(t) { 
+            selectedType = t;
+            document.getElementById('i-movie').classList.toggle('active', t === 'Movie');
+            document.getElementById('i-tv').classList.toggle('active', t === 'TV Show' || t === 'SHOW');
         }
 
         function toggleView(v) { 
@@ -568,17 +419,277 @@
 
         function exitEditMode() { resetForm(); toggleView(currentViewMode); }
 
-        async function deleteSelectedFromForm() {
-            if (!editingId) return;
-            if (confirm("Are you sure you want to delete this title?")) {
-                await supabaseClient.from('movies').delete().eq('id', editingId);
-                resetForm();
-                loadMovies();
+        function resetForm() { 
+            editingId = null;
+            const tIn = document.getElementById('titleInput'); 
+            tIn.value = ''; 
+            delete tIn.dataset.img; 
+            delete tIn.dataset.genre; 
+            delete tIn.dataset.release; 
+            delete tIn.dataset.seasons;
+
+            document.getElementById('seriesInput').value = ''; 
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('seriesResults').classList.add('hidden');
+            document.getElementById('seriesResults').innerHTML = '';
+
+            toggleType('Movie');
+            document.getElementById('submitBtn').innerText = "Commit"; 
+            document.getElementById('formModeLabel').innerText = "Search"; 
+            document.getElementById('cancelEdit').classList.add('hidden'); 
+            document.getElementById('deleteSelectedBtn').classList.add('hidden');
+        }
+
+        /* ============================================================
+           CARD CONFIGURATION GENERATOR
+           ============================================================ */
+        function getCardConfig(movie) {
+            const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
+            const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW' || movie.seasons > 0;
+            
+            let topBarColor = 'bg-cyan-500';
+            let badgeStyle = 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
+            let pillClass = 'badge-movie-standalone';
+            let typePillText = 'MOVIE';
+
+            if (isTV) {
+                topBarColor = 'bg-rose-500';
+                badgeStyle = 'bg-rose-600/20 text-rose-400 border-rose-500/30';
+                pillClass = 'badge-tv';
+                typePillText = 'SHOW';
+            } else if (hasSeries) {
+                topBarColor = 'bg-amber-500';
+                badgeStyle = 'bg-amber-600/20 text-amber-400 border-amber-500/30';
+                pillClass = 'badge-movie-series';
+                typePillText = 'MOVIE';
+            }
+
+            return { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText };
+        }
+
+        /* ============================================================
+           CURRENTLY WATCHING CARD GENERATOR
+           ============================================================ */
+        function createActiveCard(movie) {
+            const { hasSeries, isTV, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            const releaseYear = parseReleaseYear(movie.release_year);
+            const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
+            const unreleased = isUnreleased(movie.release_year);
+            const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
+
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
+            
+            div.innerHTML = `
+                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900 ${imgFilterClass}" />
+                <div class="flex flex-col gap-1 flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        ${hasSeries ? `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
+                        
+                        <div class="relative group/menu">
+                            <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                            </button>
+                            
+                            <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
+                                <button onclick="updateStatus(${movie.id}, 'Archive')" class="p-1.5 rounded hover:bg-cyan-500/20 text-cyan-400 transition-colors" title="Move to Vault (🎬)">🎬</button>
+                                <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🏆)">🏆</button>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
+                    <span class="text-xs text-slate-400">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</span>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="type-badge ${pillClass}">${typePillText}</span>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        /* ============================================================
+           VAULT QUEUE CARD GENERATOR
+           ============================================================ */
+        function createCard(movie) {
+            const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            const releaseYear = parseReleaseYear(movie.release_year);
+            const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
+            const unreleased = isUnreleased(movie.release_year);
+            const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
+
+            const div = document.createElement('div');
+            div.dataset.id = movie.id; 
+            div.dataset.series = movie.series || '';
+            div.className = `movie-card flex flex-col justify-between w-full`;
+
+            div.innerHTML = `
+                <div>
+                    <div class="h-1.5 w-full ${topBarColor}"></div>
+                    <div class="p-2.5 pb-1 flex flex-col items-center">
+                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
+                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="${imgFilterClass}">
+                        </div>
+                        <div class="mt-2 mb-1 w-full text-left">
+                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
+                        </div>
+                        <div class="flex justify-between items-start gap-1.5 w-full">
+                            <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
+                            <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</p>
+                    </div>
+                </div>
+                <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="type-badge ${pillClass}">${typePillText}</span>
+                        <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+                            <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
+                            <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
+                            <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        /* ============================================================
+           ARCHIVE TROPHY CABINET CARD (WATCHED MOVIES / SHOWS)
+           ============================================================ */
+        function createArchiveCard(movie) {
+            const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            
+            const years = getCompletionYears(movie);
+            const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
+
+            const div = document.createElement('div');
+            div.dataset.id = movie.id;
+            div.dataset.series = movie.series || '';
+
+            div.className = "movie-card flex flex-col w-full h-fit self-start relative";
+
+            div.innerHTML = `
+                <div>
+                    <!-- Top Accent Bar -->
+                    <div class="h-1.5 w-full ${topBarColor}"></div>
+
+                    <div class="p-2 pb-1 flex flex-col relative">
+                        <!-- Poster Image -->
+                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden" title="${movie.title.replace(/"/g, '&quot;')}">
+                            <img
+                                src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}"
+                                alt="${movie.title}"
+                                class="w-full h-auto object-cover"
+                            >
+                        </div>
+
+                        <!-- Watched Year Badge (Left) & Edit Pencil (Right) -->
+                        <div class="w-full mt-2 flex items-center justify-between gap-1">
+                            <div class="w-fit flex items-center gap-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 px-2.5 text-left">
+                                <span class="text-xs">🏆</span>
+                                <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
+                            </div>
+
+                            <button
+                                onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})'
+                                title="Edit Title"
+                                class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
+                            >✏️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Metadata: Type/Series Badge (Left) & Status Dropdown (Right) -->
+                <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
+
+                    <div class="min-w-0 flex-1 flex flex-wrap gap-1">
+                        <span class="type-badge ${pillClass}">${typePillText}</span>
+                        ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : ''}
+                    </div>
+
+                    <select
+                        onchange="updateStatus(${movie.id}, this.value)"
+                        class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px] flex-shrink-0"
+                    >
+                        <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
+                        <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
+                        <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
+                    </select>
+
+                </div>
+            `;
+
+            return div;
+        }
+
+        /* ============================================================
+           RENDER FUNCTION (DOM RENDERING & SORTING)
+           ============================================================ */
+        function render() {
+            const fM = document.getElementById('filterMain').value.toLowerCase();
+            const fA = document.getElementById('filterAlt').value.toLowerCase();
+
+            const cols = { 
+                watching: document.getElementById('col-watching'), 
+                main: document.getElementById('col-main'),
+                alt: document.getElementById('col-alt')
+            };
+            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
+
+            const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
+
+            if (currentViewMode === 'queue') {
+                const activeMovies = sortedList.filter(m => m.status === 'Watching');
+                if (activeMovies.length > 0) {
+                    activeMovies.forEach(m => cols.watching.appendChild(createActiveCard(m)));
+                } else {
+                    cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
+                }
+                
+                sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
+                    .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
+                    .forEach(m => cols.main.appendChild(createCard(m)));
+
+            } else if (currentViewMode === 'archive') {
+                allMovies
+                    .filter(m => m.status === 'Watched')
+                    .filter(m =>
+                        m.title.toLowerCase().includes(fA) ||
+                        (m.series && m.series.toLowerCase().includes(fA))
+                    )
+                    .sort((a, b) => {
+                        const yearA = getLatestCompletionYear(a);
+                        const yearB = getLatestCompletionYear(b);
+
+                        // 1. Primary: Most recent completion year first
+                        if (yearB !== yearA) {
+                            return yearB - yearA;
+                        }
+
+                        // 2. Secondary: Group by Series name so Die Hard films group under D
+                        const keyA = (a.series && a.series.trim()) ? a.series.trim() : a.title.trim();
+                        const keyB = (b.series && b.series.trim()) ? b.series.trim() : b.title.trim();
+
+                        const seriesCompare = keyA.localeCompare(keyB, undefined, { sensitivity: 'base' });
+                        if (seriesCompare !== 0) {
+                            return seriesCompare;
+                        }
+
+                        // 3. Tertiary: Alphabetical order by title within the series
+                        return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+                    })
+                    .forEach(m =>
+                        cols.alt.appendChild(createArchiveCard(m))
+                    );
             }
         }
 
-        async function updateStatus(id, s) { await supabaseClient.from('movies').update({ status:s }).eq('id', id); loadMovies(); }
-
+        /* ============================================================
+           SERIES DROPDOWN & AUTOCOMPLETE
+           ============================================================ */
         function filterSeriesDropdown(val) {
             const sr = document.getElementById('seriesResults');
             const existingSeries = Array.from(new Set(allMovies.map(m => m.series).filter(s => s && s.trim() !== '')));
@@ -594,15 +705,9 @@
             document.getElementById('seriesResults').classList.add('hidden');
         }
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { document.getElementById('seriesResults').classList.add('hidden'); }
-            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults') && !e.target.closest('button')) { document.getElementById('searchResults').classList.add('hidden'); }
-            if (!e.target.closest('#toolboxContainer')) {
-                const menu = document.getElementById('toolboxMenu');
-                if (menu) { menu.classList.add('hidden'); menu.classList.remove('flex'); }
-            }
-        });
-
+        /* ============================================================
+           TMDB API SEARCH & SELECTION
+           ============================================================ */
         function triggerSearch() {
             const q = document.getElementById('titleInput').value;
             searchMovies(q);
@@ -686,9 +791,122 @@
             document.getElementById('seriesInput').focus();
         }
 
-        function downloadTemplate() { const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'movies_template.csv'; a.click(); }
-        document.getElementById('csvFile').addEventListener('change', function(e) { const r = new FileReader(); r.onload = async (ev) => { const rows = ev.target.result.split('\n').slice(1); const mToInsert = rows.map(r => { const cols = r.split(',').map(x => x?.trim()); if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Archive', cover_url: cols[5]||'' }; }).filter(x => x); await supabaseClient.from('movies').insert(mToInsert); loadMovies(); }; r.readAsText(e.target.files[0]); });
+        /* ============================================================
+           METADATA REPAIR TOOL
+           ============================================================ */
+        async function repairMetadata() {
+            const menu = document.getElementById('toolboxMenu');
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
 
+            const statusContainer = document.getElementById('repairStatus');
+            const statusText = document.getElementById('repairStatusText');
+            const countText = document.getElementById('repairCount');
+
+            statusContainer.classList.remove('hidden');
+            let updatedCount = 0;
+            const total = allMovies.length;
+
+            for (let i = 0; i < total; i++) {
+                const movie = allMovies[i];
+                countText.innerText = `${i + 1} / ${total}`;
+                statusText.innerText = `Checking metadata for "${movie.title}"...`;
+
+                const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW';
+
+                try {
+                    const searchRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                        body: JSON.stringify({ query: movie.title })
+                    });
+                    const searchData = await searchRes.json();
+                    const results = searchData.results || searchData || [];
+
+                    if (Array.isArray(results) && results.length > 0) {
+                        const match = results.find(r => (isTV ? (r.media_type === 'tv' || r.name) : (r.media_type === 'movie' || r.title))) || results[0];
+                        
+                        const newCover = match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : movie.cover_url;
+                        const newRelease = match.release_date || match.first_air_date || movie.release_year;
+                        let newSeasons = movie.seasons;
+
+                        if (isTV && match.id) {
+                            try {
+                                const detailRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+                                    body: JSON.stringify({ tmdbId: match.id, type: 'tv' })
+                                });
+                                const details = await detailRes.json();
+                                if (details && details.number_of_seasons) {
+                                    newSeasons = details.number_of_seasons;
+                                }
+                            } catch (e) { console.error("Detail error:", e); }
+                        }
+
+                        if (newCover !== movie.cover_url || newRelease !== movie.release_year || newSeasons !== movie.seasons) {
+                            await supabaseClient.from('movies').update({
+                                cover_url: newCover,
+                                release_year: newRelease,
+                                seasons: newSeasons
+                            }).eq('id', movie.id);
+                            updatedCount++;
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Repair failed for ${movie.title}:`, err);
+                }
+            }
+
+            statusText.innerText = `Metadata Repair Finished! Updated ${updatedCount} items.`;
+            countText.innerText = `${total} / ${total}`;
+            setTimeout(() => { statusContainer.classList.add('hidden'); }, 4000);
+            await loadMovies();
+        }
+
+        /* ============================================================
+           CSV IMPORT & TEMPLATE EXPORT
+           ============================================================ */
+        function downloadTemplate() { 
+            const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; 
+            const blob = new Blob([csv], { type: 'text/csv' }); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = 'movies_template.csv'; 
+            a.click(); 
+        }
+
+        document.getElementById('csvFile').addEventListener('change', function(e) { 
+            const r = new FileReader(); 
+            r.onload = async (ev) => { 
+                const rows = ev.target.result.split('\n').slice(1); 
+                const mToInsert = rows.map(r => { 
+                    const cols = r.split(',').map(x => x?.trim()); 
+                    if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Archive', cover_url: cols[5]||'' }; 
+                }).filter(x => x); 
+                await supabaseClient.from('movies').insert(mToInsert); 
+                loadMovies(); 
+            }; 
+            r.readAsText(e.target.files[0]); 
+        });
+
+        /* ============================================================
+           GLOBAL EVENT LISTENERS & INITIALIZATION
+           ============================================================ */
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { 
+                document.getElementById('seriesResults').classList.add('hidden'); 
+            }
+            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults') && !e.target.closest('button')) { 
+                document.getElementById('searchResults').classList.add('hidden'); 
+            }
+            if (!e.target.closest('#toolboxContainer')) {
+                const menu = document.getElementById('toolboxMenu');
+                if (menu) { menu.classList.add('hidden'); menu.classList.remove('flex'); }
+            }
+        });
+
+        // Initialize App Authentication
         initAuth();
     </script>
 </body>
