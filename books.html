@@ -3141,7 +3141,6 @@ function createArchiveCard(book) {
 
     const cover = book.cover_url || 'https://via.placeholder.com/150x225?text=No+Cover';
 
-
     const topBar = hasSeries ? 'bg-amber-500' : 'bg-cyan-500';
 
     const mediaType = book.media_type || 'Novel';
@@ -3172,10 +3171,10 @@ function createArchiveCard(book) {
                 </div>
 
 
-                <div class="flex justify-between items-center w-full mt-2 mb-1 px-1">
+                <div class="flex justify-between items-center w-full mt-2 mb-1">
 
-                    <span class="text-xs text-emerald-400 font-bold">
-                        ${finishedYear}
+                    <span class="text-[10px] font-black text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
+                        🏆 ${finishedYear}
                     </span>
 
                     <button
@@ -3185,6 +3184,15 @@ function createArchiveCard(book) {
                         ✏️
                     </button>
 
+                </div>
+
+                <div class="w-full text-left mt-1">
+                    <h3 class="font-bold text-sm text-white leading-snug line-clamp-2">
+                        ${escapeHtml(book.title)}
+                    </h3>
+                    <p class="text-xs text-amber-400 font-bold mt-0.5 truncate">
+                        ${escapeHtml(book.author || 'Unknown')}
+                    </p>
                 </div>
 
             </div>
