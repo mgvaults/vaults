@@ -260,40 +260,40 @@
                 const seasons = tIn.dataset.seasons ? parseInt(tIn.dataset.seasons) : null;
                 const series = sIn.value.trim() || null;
 
-                if (editingId) {
-                   const completedYearsInput = document.getElementById('completedYearsInput').value.trim();
+               if (editingId) {
+    const cur = allMovies.find(m => m.id === editingId);
 
-const completedYears = completedYearsInput
-    .split(',')
-    .map(y => y.trim())
-    .filter(y => /^\d{4}$/.test(y));
+    if (!cur) {
+        throw new Error('Could not find the item being edited.');
+    }
 
-const payload = { 
-    title: tIn.value.trim(), 
-    series, 
-    media_type: selectedType, 
-    cover_url: cover || cur.cover_url, 
-    genre: genre || cur.genre,
-    seasons: seasons || cur.seasons,
-    release_year: rawRelease || cur.release_year,
-    completed_years: completedYears
-                    };
-                    
-                    const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabaseClient.from('movies').insert([{ 
-                        title: tIn.value.trim(), 
-                        media_type: selectedType, 
-                        series, 
-                        cover_url: cover, 
-                        genre: genre || (selectedType === 'TV Show' ? 'SHOW' : 'Movie'), 
-                        seasons: seasons,
-                        release_year: rawRelease, 
-                        status: 'Archive'
-                    }]);
-                    if (error) throw error;
-                }
+    const completedYearsInput = document.getElementById('completedYearsInput').value.trim();
+
+    const completedYears = completedYearsInput
+        ? completedYearsInput
+            .split(',')
+            .map(y => y.trim())
+            .filter(y => /^\d{4}$/.test(y))
+        : [];
+
+    const payload = {
+        title: tIn.value.trim(),
+        series,
+        media_type: selectedType,
+        cover_url: cover || cur.cover_url,
+        genre: genre || cur.genre,
+        seasons: seasons || cur.seasons,
+        release_year: rawRelease || cur.release_year,
+        completed_years: completedYears
+    };
+
+    const { error } = await supabaseClient
+        .from('movies')
+        .update(payload)
+        .eq('id', editingId);
+
+    if (error) throw error;
+}
 
                 resetForm(); 
                 await loadMovies();
