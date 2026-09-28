@@ -196,6 +196,60 @@
         let allMovies = [], editingId = null, currentViewMode = 'queue', selectedType = 'Movie';
 
 /* ============================================================
+   AUTH
+   ============================================================ */
+
+async function initAuth() {
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (session) {
+        showApp();
+    } else {
+        showAuth();
+    }
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+        if (session) {
+            showApp();
+        } else {
+            showAuth();
+        }
+    });
+}
+
+async function loginWithGoogle() {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.href
+        }
+    });
+
+    if (error) {
+        alert('OAuth error: ' + error.message);
+    }
+}
+
+async function logout() {
+    await supabaseClient.auth.signOut();
+    showAuth();
+}
+
+function showApp() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    loadMovies();
+}
+
+function showAuth() {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+}
+
+
+/* ============================================================
    DATA FETCHING
    ============================================================ */
 async function loadMovies() {
