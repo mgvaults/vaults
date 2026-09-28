@@ -560,7 +560,7 @@
            ARCHIVE TROPHY CABINET CARD (WATCHED MOVIES / SHOWS)
            ============================================================ */
         function createArchiveCard(movie) {
-            const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            const { isTV, topBarColor, pillClass, typePillText } = getCardConfig(movie);
             
             const years = getCompletionYears(movie);
             const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
@@ -602,12 +602,11 @@
                     </div>
                 </div>
 
-                <!-- Bottom Metadata: Type/Series Badge (Left) & Status Dropdown (Right) -->
+                <!-- Bottom Metadata: Type Badge Only (Left) & Status Dropdown (Right) -->
                 <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
 
                     <div class="min-w-0 flex-1 flex flex-wrap gap-1">
                         <span class="type-badge ${pillClass}">${typePillText}</span>
-                        ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : ''}
                     </div>
 
                     <select
