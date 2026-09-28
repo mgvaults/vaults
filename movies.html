@@ -20,6 +20,8 @@
         .badge-tv { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
         .badge-movie-series { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
         .badge-movie-standalone { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid #0891b2; }
+        .badge-documentary { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; }
+        .badge-standup { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
         .col-filter { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 16px; font-size: 11px; outline: none; width: 220px; color: white; }
         #searchResults::-webkit-scrollbar, #seriesResults::-webkit-scrollbar { width: 8px; }
         #searchResults::-webkit-scrollbar-track, #seriesResults::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
@@ -84,7 +86,7 @@
                 <span id="repairCount" class="bg-cyan-900/80 px-2.5 py-1 rounded-lg border border-cyan-500/30">0 / 0</span>
             </div>
 
-            <!-- Top Dashboard Section (Currently Watching & Input Form) -->
+            <!-- Top Dashboard Section -->
             <div id="dashboardTop" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
                 
                 <!-- Currently Watching Container -->
@@ -110,41 +112,50 @@
                                 🔍 Search
                             </button>
                         </div>
+
                         <div id="searchResults" class="hidden absolute top-[85px] left-0 right-0 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[350px] z-50 text-white"></div>
                         
+                        <!-- Media Type Selector -->
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
-                            <div onclick="toggleType('Movie')" id="i-movie" class="type-box active" title="Movie"><span style="color:#06b6d4; font-size: 16px;">🎬</span></div>
-                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#ef4444; font-size: 16px;">📺</span></div>
-    <div onclick="toggleType('Documentary')" id="i-documentary" class="type-box" title="Documentary">
-        <span style="color:#a855f7; font-size: 16px;">🎥</span>
-    </div>
+                            <div onclick="toggleType('Movie')" id="i-movie" class="type-box active" title="Movie">
+                                <span style="color:#06b6d4; font-size:16px;">🎬</span>
+                            </div>
 
-    <div onclick="toggleType('Stand-up')" id="i-standup" class="type-box" title="Stand-up">
-        <span style="color:#f59e0b; font-size: 16px;">🎤</span>
-    </div>
-</div>
+                            <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show">
+                                <span style="color:#ef4444; font-size:16px;">📺</span>
+                            </div>
+
+                            <div onclick="toggleType('Documentary')" id="i-documentary" class="type-box" title="Documentary">
+                                <span style="color:#a855f7; font-size:16px;">🎥</span>
+                            </div>
+
+                            <div onclick="toggleType('Stand-up')" id="i-standup" class="type-box" title="Stand-up">
+                                <span style="color:#f59e0b; font-size:16px;">🎤</span>
+                            </div>
+                        </div>
                         
-<div class="flex gap-3 text-white relative items-end">
-    <div class="flex-1 relative">
-        <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Collection/Franchise Series (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
-        <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
-    </div>
+                        <!-- Series + Watched Years + Commit -->
+                        <div class="flex gap-3 text-white relative items-end">
+                            <div class="flex-1 relative">
+                                <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Collection/Franchise Series (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
+                                <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
+                            </div>
 
-    <!-- Completed Year(s) - only visible while editing -->
-    <div id="completedYearContainer" class="hidden w-48 flex-shrink-0">
-        <input
-            id="completedYearsInput"
-            type="text"
-            placeholder="Watched year(s)"
-            class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic"
-            title="Enter one year or multiple years separated by commas"
-        >
-    </div>
+                            <!-- Watched Years - only visible while editing -->
+                            <div id="completedYearContainer" class="hidden w-48 flex-shrink-0">
+                                <input
+                                    id="completedYearsInput"
+                                    type="text"
+                                    placeholder="Watched year(s)"
+                                    class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic"
+                                    title="Enter one year or multiple years separated by commas"
+                                >
+                            </div>
 
-    <button onclick="submitForm()" id="submitBtn" class="bg-cyan-600 px-8 py-3.5 rounded-2xl font-black uppercase text-xs text-white hover:bg-cyan-500 transition">
-        Commit
-    </button>
-</div>
+                            <button onclick="submitForm()" id="submitBtn" class="bg-cyan-600 px-8 py-3.5 rounded-2xl font-black uppercase text-xs text-white hover:bg-cyan-500 transition">
+                                Commit
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -158,7 +169,7 @@
                 <div id="col-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
             </div>
 
-            <!-- Watched Archive View (Trophy Cabinet) -->
+            <!-- Watched Archive View -->
             <div id="altView" class="hidden">
                 <div class="flex justify-between items-center mb-8">
                     <div class="w-44"></div>
@@ -179,7 +190,7 @@
            GLOBAL CONFIGURATION & SUPABASE INITIALIZATION
            ============================================================ */
         const SB_URL = 'https://zioiamijgblwxlfevcdr.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjgwNTYsImV4cCI6MjA5MjU0NDA1Nn0.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppb2lhbWlqZ2Jsd3hsZmV2Y2RyIiwiaWF0IjoxNzc2OTY4MDU2LCJleHAiOjIwOTI1NDQwNTZ9.AoTc_GhRLu1GZhF7sH0h2xVhnIcpDVwmBg5PA7zXL-o';
 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [], editingId = null, currentViewMode = 'queue', selectedType = 'Movie';
@@ -190,6 +201,7 @@
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) showApp(); else showAuth();
+
             supabaseClient.auth.onAuthStateChange((_event, session) => {
                 if (session) showApp(); else showAuth();
             });
@@ -200,6 +212,7 @@
                 provider: 'google',
                 options: { redirectTo: window.location.href }
             });
+
             if (error) alert("OAuth error: " + error.message);
         }
 
@@ -220,37 +233,71 @@
         }
 
         /* ============================================================
-           DATA FETCHING & DATABASE OPERATIONS
+           DATA FETCHING
            ============================================================ */
-        async function loadMovies() { 
-            let { data, error } = await supabaseClient.from('movies').select('*').order('title', { ascending: true }); 
-            if (!error) { 
-                allMovies = data || []; 
-                render(); 
-            } 
+        async function loadMovies() {
+            const { data, error } = await supabaseClient
+                .from('movies')
+                .select('*')
+                .order('title', { ascending: true });
+
+            if (!error) {
+                allMovies = data || [];
+                render();
+            } else {
+                console.error("Load failed:", error);
+            }
         }
 
+        /* ============================================================
+           STATUS / WATCH HISTORY
+           ============================================================ */
         async function updateStatus(id, newStatus) {
             const movie = allMovies.find(m => m.id === id);
+
+            if (!movie) return;
+
             let payload = { status: newStatus };
 
             if (newStatus === 'Watched') {
-                const existingYears = getCompletionYears(movie);
-                if (existingYears.length === 0) {
-                    payload.completed_years = new Date().getFullYear().toString();
+                const existingYears = getCompletionYears(movie)
+                    .map(y => parseInt(y, 10))
+                    .filter(y => !isNaN(y));
+
+                const currentYear = new Date().getFullYear();
+
+                if (!existingYears.includes(currentYear)) {
+                    existingYears.push(currentYear);
+                    existingYears.sort((a, b) => a - b);
                 }
+
+                payload.completed_years = existingYears;
             }
 
-            await supabaseClient.from('movies').update(payload).eq('id', id);
-            loadMovies();
+            const { error } = await supabaseClient
+                .from('movies')
+                .update(payload)
+                .eq('id', id);
+
+            if (error) {
+                console.error("Status update failed:", error);
+                alert(`Error updating status: ${error.message}`);
+                return;
+            }
+
+            await loadMovies();
         }
 
+        /* ============================================================
+           ADD / EDIT FORM
+           ============================================================ */
         async function submitForm() {
             const submitBtn = document.getElementById('submitBtn');
             const tIn = document.getElementById('titleInput');
             const sIn = document.getElementById('seriesInput');
-            
+
             if (!tIn.value.trim()) return;
+
             submitBtn.disabled = true;
 
             try {
@@ -260,42 +307,75 @@
                 const seasons = tIn.dataset.seasons ? parseInt(tIn.dataset.seasons) : null;
                 const series = sIn.value.trim() || null;
 
-               if (editingId) {
-    const cur = allMovies.find(m => m.id === editingId);
+                /* ====================================================
+                   EDIT EXISTING ITEM
+                   ==================================================== */
+                if (editingId) {
+                    const cur = allMovies.find(m => m.id === editingId);
 
-    if (!cur) {
-        throw new Error('Could not find the item being edited.');
-    }
+                    if (!cur) {
+                        throw new Error('Could not find the item being edited.');
+                    }
 
-    const completedYearsInput = document.getElementById('completedYearsInput').value.trim();
+                    const completedYearsInput = document
+                        .getElementById('completedYearsInput')
+                        .value
+                        .trim();
 
-    const completedYears = completedYearsInput
-        ? completedYearsInput
-            .split(',')
-            .map(y => y.trim())
-            .filter(y => /^\d{4}$/.test(y))
-        : [];
+                    const completedYears = completedYearsInput
+                        ? completedYearsInput
+                            .split(',')
+                            .map(y => parseInt(y.trim(), 10))
+                            .filter(y => !isNaN(y))
+                        : [];
 
-    const payload = {
-        title: tIn.value.trim(),
-        series,
-        media_type: selectedType,
-        cover_url: cover || cur.cover_url,
-        genre: genre || cur.genre,
-        seasons: seasons || cur.seasons,
-        release_year: rawRelease || cur.release_year,
-        completed_years: completedYears
-    };
+                    // Remove duplicate years and sort oldest -> newest
+                    const uniqueYears = [...new Set(completedYears)].sort((a, b) => a - b);
 
-    const { error } = await supabaseClient
-        .from('movies')
-        .update(payload)
-        .eq('id', editingId);
+                    const payload = {
+                        title: tIn.value.trim(),
+                        series,
+                        media_type: selectedType,
+                        cover_url: cover || cur.cover_url,
+                        genre: genre || cur.genre,
+                        seasons: seasons || cur.seasons,
+                        release_year: rawRelease || cur.release_year,
+                        completed_years: uniqueYears
+                    };
 
-    if (error) throw error;
-}
+                    const { error } = await supabaseClient
+                        .from('movies')
+                        .update(payload)
+                        .eq('id', editingId);
 
-                resetForm(); 
+                    if (error) throw error;
+
+                /* ====================================================
+                   ADD NEW ITEM
+                   ==================================================== */
+                } else {
+                    const { error } = await supabaseClient
+                        .from('movies')
+                        .insert([{
+                            title: tIn.value.trim(),
+                            media_type: selectedType,
+                            series,
+                            cover_url: cover,
+                            genre: genre || (
+                                selectedType === 'TV Show'
+                                    ? 'SHOW'
+                                    : selectedType
+                            ),
+                            seasons,
+                            release_year: rawRelease,
+                            status: 'Archive',
+                            completed_years: []
+                        }]);
+
+                    if (error) throw error;
+                }
+
+                resetForm();
                 await loadMovies();
 
             } catch (err) {
@@ -308,48 +388,59 @@
 
         async function deleteSelectedFromForm() {
             if (!editingId) return;
+
             if (confirm("Are you sure you want to delete this title?")) {
-                await supabaseClient.from('movies').delete().eq('id', editingId);
+                const { error } = await supabaseClient
+                    .from('movies')
+                    .delete()
+                    .eq('id', editingId);
+
+                if (error) {
+                    alert(`Error deleting item: ${error.message}`);
+                    return;
+                }
+
                 resetForm();
-                loadMovies();
+                await loadMovies();
             }
         }
 
         /* ============================================================
            COMPLETION YEARS HELPERS
            ============================================================ */
-function getCompletionYears(movie) {
-    if (!movie || movie.completed_years === null || movie.completed_years === undefined) {
-        return [];
-    }
+        function getCompletionYears(movie) {
+            if (!movie || movie.completed_years === null || movie.completed_years === undefined) {
+                return [];
+            }
 
-    // PostgreSQL integer / bigint
-    if (typeof movie.completed_years === 'number') {
-        return [String(movie.completed_years)];
-    }
+            // PostgreSQL integer[] comes back as a JavaScript array
+            if (Array.isArray(movie.completed_years)) {
+                return movie.completed_years
+                    .map(y => String(y).trim())
+                    .filter(Boolean);
+            }
 
-    // PostgreSQL array / JSON array
-    if (Array.isArray(movie.completed_years)) {
-        return movie.completed_years
-            .map(y => String(y).trim())
-            .filter(Boolean);
-    }
+            // Backwards compatibility if any old value is still returned as a number
+            if (typeof movie.completed_years === 'number') {
+                return [String(movie.completed_years)];
+            }
 
-    // Text / comma-separated years
-    if (typeof movie.completed_years === 'string') {
-        return movie.completed_years
-            .split(',')
-            .map(y => y.trim())
-            .filter(Boolean);
-    }
+            // Backwards compatibility for comma-separated text
+            if (typeof movie.completed_years === 'string') {
+                return movie.completed_years
+                    .split(',')
+                    .map(y => y.trim())
+                    .filter(Boolean);
+            }
 
-    return [];
-}
+            return [];
+        }
 
         function getLatestCompletionYear(movie) {
             const years = getCompletionYears(movie)
                 .map(y => parseInt(y, 10))
                 .filter(y => !isNaN(y));
+
             return years.length > 0 ? Math.max(...years) : 0;
         }
 
@@ -357,26 +448,46 @@ function getCompletionYears(movie) {
            DATE & RELEASE STATUS UTILITIES
            ============================================================ */
         function parseReleaseYear(val) {
-            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') return 'TBA';
+            if (val === undefined || val === null || val === 'null' || val === 'undefined' || val === '') {
+                return 'TBA';
+            }
+
             if (typeof val === 'string' && val.includes('-')) {
                 const yearPart = val.split('-')[0];
-                if (yearPart.length === 4 && !isNaN(yearPart)) return yearPart;
+
+                if (yearPart.length === 4 && !isNaN(yearPart)) {
+                    return yearPart;
+                }
             }
-            if (typeof val === 'number' && val > 1800 && val < 2100) return val.toString();
-            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) return val.trim();
-            
+
+            if (typeof val === 'number' && val > 1800 && val < 2100) {
+                return val.toString();
+            }
+
+            if (typeof val === 'string' && /^\d{4}$/.test(val.trim())) {
+                return val.trim();
+            }
+
             let num = Number(val);
+
             if (!isNaN(num) && num > 0) {
                 if (num > 32503680000) num = Math.floor(num / 1000);
+
                 const dateObj = new Date(num * 1000);
-                if (!isNaN(dateObj.getFullYear())) return dateObj.getFullYear().toString();
+
+                if (!isNaN(dateObj.getFullYear())) {
+                    return dateObj.getFullYear().toString();
+                }
             }
+
             return 'TBA';
         }
 
         function isUnreleased(val) {
-            if (!val || val === 'TBA' || val === 'null' || val === 'undefined') return true;
-            
+            if (!val || val === 'TBA' || val === 'null' || val === 'undefined') {
+                return true;
+            }
+
             let releaseDate = null;
 
             if (typeof val === 'string' && val.includes('-')) {
@@ -390,6 +501,7 @@ function getCompletionYears(movie) {
                 today.setHours(0, 0, 0, 0);
                 return releaseDate > today;
             }
+
             return false;
         }
 
@@ -398,21 +510,24 @@ function getCompletionYears(movie) {
            ============================================================ */
         function toggleToolbox(e) {
             if (e) e.stopPropagation();
+
             const menu = document.getElementById('toolboxMenu');
             menu.classList.toggle('hidden');
             menu.classList.toggle('flex');
         }
 
-        function toggleType(t) { 
+        function toggleType(t) {
             selectedType = t;
+
             document.getElementById('i-movie').classList.toggle('active', t === 'Movie');
             document.getElementById('i-tv').classList.toggle('active', t === 'TV Show' || t === 'SHOW');
-                document.getElementById('i-documentary').classList.toggle('active', type === 'Documentary');
-    document.getElementById('i-standup').classList.toggle('active', type === 'Stand-up');
+            document.getElementById('i-documentary').classList.toggle('active', t === 'Documentary');
+            document.getElementById('i-standup').classList.toggle('active', t === 'Stand-up');
         }
 
-        function toggleView(v) { 
+        function toggleView(v) {
             currentViewMode = v;
+
             const qv = document.getElementById('queueView');
             const dt = document.getElementById('dashboardTop');
             const as = document.getElementById('activeSessionBox');
@@ -422,83 +537,144 @@ function getCompletionYears(movie) {
             qv.style.display = 'none';
             av.style.display = 'none';
 
-            if(v === 'queue') {
-                dt.style.display = 'grid'; qv.style.display = 'block'; as.style.display = 'flex'; ia.classList.remove('lg:col-span-12'); ia.classList.add('lg:col-span-7');
+            if (v === 'queue') {
+                dt.style.display = 'grid';
+                qv.style.display = 'block';
+                as.style.display = 'flex';
+
+                ia.classList.remove('lg:col-span-12');
+                ia.classList.add('lg:col-span-7');
             } else {
                 dt.style.display = 'none';
-                if(v === 'archive') av.style.display = 'block';
+
+                if (v === 'archive') {
+                    av.style.display = 'block';
+                }
             }
+
             render();
         }
 
-        function editL(m) { 
-            editingId = m.id; 
+        /* ============================================================
+           EDIT EXISTING ITEM
+           ============================================================ */
+        function editL(m) {
+            editingId = m.id;
+
             const dt = document.getElementById('dashboardTop');
             const as = document.getElementById('activeSessionBox');
             const ia = document.getElementById('inputArea');
+
             dt.style.display = 'grid';
-            
+
             if (currentViewMode !== 'queue') {
                 as.style.display = 'none';
                 ia.classList.remove('lg:col-span-7');
                 ia.classList.add('lg:col-span-12');
             }
 
-            window.scrollTo({top:0, behavior:'smooth'}); 
-            
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
             const tIn = document.getElementById('titleInput');
-            tIn.value = m.title; 
-            if (m.cover_url) tIn.dataset.img = m.cover_url;
-            if (m.genre) tIn.dataset.genre = m.genre;
-            if (m.release_year !== null && m.release_year !== undefined) tIn.dataset.release = m.release_year;
-            if (m.seasons) tIn.dataset.seasons = m.seasons;
 
-            document.getElementById('formModeLabel').innerText = "Updating: " + m.title; 
-            document.getElementById('cancelEdit').classList.remove('hidden'); 
+            tIn.value = m.title;
+
+            if (m.cover_url) {
+                tIn.dataset.img = m.cover_url;
+            } else {
+                delete tIn.dataset.img;
+            }
+
+            if (m.genre) {
+                tIn.dataset.genre = m.genre;
+            } else {
+                delete tIn.dataset.genre;
+            }
+
+            if (m.release_year !== null && m.release_year !== undefined) {
+                tIn.dataset.release = m.release_year;
+            } else {
+                delete tIn.dataset.release;
+            }
+
+            if (m.seasons) {
+                tIn.dataset.seasons = m.seasons;
+            } else {
+                delete tIn.dataset.seasons;
+            }
+
+            document.getElementById('formModeLabel').innerText = "Updating: " + m.title;
+            document.getElementById('cancelEdit').classList.remove('hidden');
             document.getElementById('deleteSelectedBtn').classList.remove('hidden');
-            
-            toggleType(m.media_type || 'Movie');
-            document.getElementById('seriesInput').value = m.series || ''; 
-            const completedYearContainer = document.getElementById('completedYearContainer');
-const completedYearsInput = document.getElementById('completedYearsInput');
 
-completedYearsInput.value = getCompletionYears(m).join(', ');
-completedYearContainer.classList.remove('hidden');
+            toggleType(m.media_type || 'Movie');
+
+            document.getElementById('seriesInput').value = m.series || '';
+
+            // Load existing watched years into the edit box
+            const completedYearContainer = document.getElementById('completedYearContainer');
+            const completedYearsInput = document.getElementById('completedYearsInput');
+
+            completedYearsInput.value = getCompletionYears(m).join(', ');
+            completedYearContainer.classList.remove('hidden');
+
+            document.getElementById('submitBtn').innerText = "Update";
         }
 
-        function exitEditMode() { resetForm(); toggleView(currentViewMode); }
+        function exitEditMode() {
+            resetForm();
+            toggleView(currentViewMode);
+        }
 
-        function resetForm() { 
+        function resetForm() {
             editingId = null;
-            const tIn = document.getElementById('titleInput'); 
-            tIn.value = ''; 
-            delete tIn.dataset.img; 
-            delete tIn.dataset.genre; 
-            delete tIn.dataset.release; 
+
+            const tIn = document.getElementById('titleInput');
+
+            tIn.value = '';
+
+            delete tIn.dataset.img;
+            delete tIn.dataset.genre;
+            delete tIn.dataset.release;
             delete tIn.dataset.seasons;
 
-            document.getElementById('seriesInput').value = ''; 
+            document.getElementById('seriesInput').value = '';
+
             document.getElementById('completedYearsInput').value = '';
-document.getElementById('completedYearContainer').classList.add('hidden');
+            document.getElementById('completedYearContainer').classList.add('hidden');
+
             document.getElementById('searchResults').classList.add('hidden');
             document.getElementById('searchResults').innerHTML = '';
+
             document.getElementById('seriesResults').classList.add('hidden');
             document.getElementById('seriesResults').innerHTML = '';
 
             toggleType('Movie');
-            document.getElementById('submitBtn').innerText = "Commit"; 
-            document.getElementById('formModeLabel').innerText = "Search"; 
-            document.getElementById('cancelEdit').classList.add('hidden'); 
+
+            document.getElementById('submitBtn').innerText = "Commit";
+            document.getElementById('formModeLabel').innerText = "Search";
+
+            document.getElementById('cancelEdit').classList.add('hidden');
             document.getElementById('deleteSelectedBtn').classList.add('hidden');
         }
 
         /* ============================================================
-           CARD CONFIGURATION GENERATOR
+           CARD CONFIGURATION
            ============================================================ */
         function getCardConfig(movie) {
             const hasSeries = Boolean(movie.series && movie.series.trim() !== '');
-            const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW' || movie.seasons > 0;
-            
+
+            const isTV =
+                movie.media_type === 'TV Show' ||
+                movie.media_type === 'SHOW' ||
+                movie.seasons > 0;
+
+            const isDocumentary = movie.media_type === 'Documentary';
+            const isStandup = movie.media_type === 'Stand-up';
+
             let topBarColor = 'bg-cyan-500';
             let badgeStyle = 'bg-cyan-600/20 text-cyan-400 border-cyan-500/30';
             let pillClass = 'badge-movie-standalone';
@@ -509,6 +685,16 @@ document.getElementById('completedYearContainer').classList.add('hidden');
                 badgeStyle = 'bg-rose-600/20 text-rose-400 border-rose-500/30';
                 pillClass = 'badge-tv';
                 typePillText = 'SHOW';
+            } else if (isDocumentary) {
+                topBarColor = 'bg-purple-500';
+                badgeStyle = 'bg-purple-600/20 text-purple-400 border-purple-500/30';
+                pillClass = 'badge-documentary';
+                typePillText = 'DOCUMENTARY';
+            } else if (isStandup) {
+                topBarColor = 'bg-amber-500';
+                badgeStyle = 'bg-amber-600/20 text-amber-400 border-amber-500/30';
+                pillClass = 'badge-standup';
+                typePillText = 'STAND-UP';
             } else if (hasSeries) {
                 topBarColor = 'bg-amber-500';
                 badgeStyle = 'bg-amber-600/20 text-amber-400 border-amber-500/30';
@@ -516,107 +702,181 @@ document.getElementById('completedYearContainer').classList.add('hidden');
                 typePillText = 'MOVIE';
             }
 
-            return { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText };
+            return {
+                hasSeries,
+                isTV,
+                isDocumentary,
+                isStandup,
+                topBarColor,
+                badgeStyle,
+                pillClass,
+                typePillText
+            };
         }
 
         /* ============================================================
-           CURRENTLY WATCHING CARD GENERATOR
+           CURRENTLY WATCHING CARD
            ============================================================ */
         function createActiveCard(movie) {
-            const { hasSeries, isTV, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            const {
+                hasSeries,
+                isTV,
+                badgeStyle,
+                pillClass,
+                typePillText
+            } = getCardConfig(movie);
+
             const releaseYear = parseReleaseYear(movie.release_year);
             const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
             const unreleased = isUnreleased(movie.release_year);
             const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
 
             const div = document.createElement('div');
+
             div.className = "flex items-center gap-4 bg-[#1e293b]/50 p-3 rounded-xl border border-slate-700/50 relative w-full";
-            
+
             div.innerHTML = `
-                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900 ${imgFilterClass}" />
+                <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}"
+                     alt="${movie.title}"
+                     class="w-16 h-22 object-cover rounded-md shadow-md flex-shrink-0 bg-slate-900 ${imgFilterClass}" />
+
                 <div class="flex flex-col gap-1 flex-1 min-w-0">
                     <div class="flex items-center justify-between">
-                        ${hasSeries ? `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>` : `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`}
-                        
+
+                        ${
+                            hasSeries
+                                ? `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate max-w-[140px]">⚡ ${movie.series}</span>`
+                                : `<span class="text-[9px] font-bold ${badgeStyle} px-2 py-0.5 rounded border truncate">🎬 STANDALONE</span>`
+                        }
+
                         <div class="relative group/menu">
                             <button class="p-1 rounded hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors" title="Change Status">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                 </svg>
                             </button>
-                            
+
                             <div class="absolute right-0 top-full mt-1 hidden group-hover/menu:flex items-center gap-1 bg-[#0f172a] border border-cyan-900/80 p-1.5 rounded-lg shadow-xl z-50">
                                 <button onclick="updateStatus(${movie.id}, 'Archive')" class="p-1.5 rounded hover:bg-cyan-500/20 text-cyan-400 transition-colors" title="Move to Vault (🎬)">🎬</button>
                                 <button onclick="updateStatus(${movie.id}, 'Watched')" class="p-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors" title="Mark Watched (🏆)">🏆</button>
                             </div>
                         </div>
                     </div>
+
                     <h4 class="font-bold text-slate-100 text-sm truncate leading-tight">${movie.title}</h4>
-                    <span class="text-xs text-slate-400">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</span>
+
+                    <span class="text-xs text-slate-400">
+                        ${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}
+                    </span>
+
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="type-badge ${pillClass}">${typePillText}</span>
                     </div>
                 </div>
             `;
+
             return div;
         }
 
         /* ============================================================
-           VAULT QUEUE CARD GENERATOR
+           VAULT QUEUE CARD
            ============================================================ */
         function createCard(movie) {
-            const { hasSeries, isTV, topBarColor, badgeStyle, pillClass, typePillText } = getCardConfig(movie);
+            const {
+                hasSeries,
+                isTV,
+                topBarColor,
+                badgeStyle,
+                pillClass,
+                typePillText
+            } = getCardConfig(movie);
+
             const releaseYear = parseReleaseYear(movie.release_year);
             const seasonText = (isTV && movie.seasons) ? ` • S${movie.seasons}` : '';
             const unreleased = isUnreleased(movie.release_year);
             const imgFilterClass = unreleased ? 'grayscale opacity-60' : '';
 
             const div = document.createElement('div');
-            div.dataset.id = movie.id; 
+
+            div.dataset.id = movie.id;
             div.dataset.series = movie.series || '';
             div.className = `movie-card flex flex-col justify-between w-full`;
 
             div.innerHTML = `
                 <div>
                     <div class="h-1.5 w-full ${topBarColor}"></div>
+
                     <div class="p-2.5 pb-1 flex flex-col items-center">
+
                         <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden">
-                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${movie.title}" class="${imgFilterClass}">
+                            <img src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}"
+                                 alt="${movie.title}"
+                                 class="${imgFilterClass}">
                         </div>
+
                         <div class="mt-2 mb-1 w-full text-left">
-                            ${hasSeries ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>` : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`}
+                            ${
+                                hasSeries
+                                    ? `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">⚡ ${movie.series}</span>`
+                                    : `<span class="inline-block text-[9px] ${badgeStyle} border px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-full">🎬 Standalone</span>`
+                            }
                         </div>
+
                         <div class="flex justify-between items-start gap-1.5 w-full">
                             <h3 class="font-bold text-sm text-white leading-snug line-clamp-2 text-left">${movie.title}</h3>
-                            <button onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})' title="Edit" class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition">✏️</button>
+
+                            <button
+                                onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})'
+                                title="Edit"
+                                class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-0.5 transition"
+                            >✏️</button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}</p>
+
+                        <p class="text-xs text-slate-400 mt-0.5 text-left w-full">
+                            ${releaseYear}${seasonText}${unreleased ? ' • ⏳ Unreleased' : ''}
+                        </p>
                     </div>
                 </div>
+
                 <div class="px-2.5 pb-2 mt-1 flex flex-col gap-1 text-xs border-t border-slate-800/80 pt-1.5">
                     <div class="flex items-center justify-between gap-1">
+
                         <span class="type-badge ${pillClass}">${typePillText}</span>
-                        <select onchange="updateStatus(${movie.id}, this.value)" class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]">
+
+                        <select
+                            onchange="updateStatus(${movie.id}, this.value)"
+                            class="bg-slate-900 text-[10px] py-0.5 px-1 rounded border border-slate-700 text-white font-bold outline-none cursor-pointer w-auto max-w-[110px]"
+                        >
                             <option value="Archive" ${!['Watching', 'Watched'].includes(movie.status) ? 'selected' : ''}>Archive 🎬</option>
                             <option value="Watching" ${movie.status === 'Watching' ? 'selected' : ''}>Watching 👁️</option>
                             <option value="Watched" ${movie.status === 'Watched' ? 'selected' : ''}>Watched 🏆</option>
                         </select>
+
                     </div>
                 </div>
             `;
+
             return div;
         }
 
         /* ============================================================
-           ARCHIVE TROPHY CABINET CARD (WATCHED MOVIES / SHOWS)
+           ARCHIVE TROPHY CABINET CARD
            ============================================================ */
         function createArchiveCard(movie) {
-            const { isTV, topBarColor, pillClass, typePillText } = getCardConfig(movie);
-            
+            const {
+                topBarColor,
+                pillClass,
+                typePillText
+            } = getCardConfig(movie);
+
             const years = getCompletionYears(movie);
-            const yearDisplay = years.length > 0 ? years.join(', ') : new Date().getFullYear();
+
+            const yearDisplay = years.length > 0
+                ? years.join(', ')
+                : 'No year recorded';
 
             const div = document.createElement('div');
+
             div.dataset.id = movie.id;
             div.dataset.series = movie.series || '';
 
@@ -628,8 +888,12 @@ document.getElementById('completedYearContainer').classList.add('hidden');
                     <div class="h-1.5 w-full ${topBarColor}"></div>
 
                     <div class="p-2 pb-1 flex flex-col relative">
+
                         <!-- Poster Image -->
-                        <div class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden" title="${movie.title.replace(/"/g, '&quot;')}">
+                        <div
+                            class="relative w-full flex justify-center bg-slate-900 rounded-lg overflow-hidden"
+                            title="${movie.title.replace(/"/g, '&quot;')}"
+                        >
                             <img
                                 src="${movie.cover_url || 'https://via.placeholder.com/150x225?text=No+Poster'}"
                                 alt="${movie.title}"
@@ -637,8 +901,9 @@ document.getElementById('completedYearContainer').classList.add('hidden');
                             >
                         </div>
 
-                        <!-- Watched Year Badge (Left) & Edit Pencil (Right) -->
+                        <!-- Watched Years + Edit Pencil -->
                         <div class="w-full mt-2 flex items-center justify-between gap-1">
+
                             <div class="w-fit flex items-center gap-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 px-2.5 text-left">
                                 <span class="text-xs">🏆</span>
                                 <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
@@ -646,14 +911,14 @@ document.getElementById('completedYearContainer').classList.add('hidden');
 
                             <button
                                 onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})'
-                                title="Edit Title"
+                                title="Edit"
                                 class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
                             >✏️</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bottom Metadata: Type Badge Only (Left) & Status Dropdown (Right) -->
+                <!-- Bottom Metadata -->
                 <div class="px-2 pb-2 mt-1 flex items-center justify-between gap-2 border-t border-slate-800/80 pt-1.5">
 
                     <div class="min-w-0 flex-1 flex flex-wrap gap-1">
@@ -676,34 +941,51 @@ document.getElementById('completedYearContainer').classList.add('hidden');
         }
 
         /* ============================================================
-           RENDER FUNCTION (DOM RENDERING & SORTING)
+           RENDER
            ============================================================ */
         function render() {
             const fM = document.getElementById('filterMain').value.toLowerCase();
             const fA = document.getElementById('filterAlt').value.toLowerCase();
 
-            const cols = { 
-                watching: document.getElementById('col-watching'), 
+            const cols = {
+                watching: document.getElementById('col-watching'),
                 main: document.getElementById('col-main'),
                 alt: document.getElementById('col-alt')
             };
-            Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
 
-            const sortedList = [...allMovies].sort((a, b) => a.title.localeCompare(b.title));
+            Object.values(cols).forEach(c => {
+                if (c) c.innerHTML = '';
+            });
+
+            const sortedList = [...allMovies].sort((a, b) =>
+                a.title.localeCompare(b.title)
+            );
 
             if (currentViewMode === 'queue') {
+
                 const activeMovies = sortedList.filter(m => m.status === 'Watching');
+
                 if (activeMovies.length > 0) {
-                    activeMovies.forEach(m => cols.watching.appendChild(createActiveCard(m)));
+                    activeMovies.forEach(m =>
+                        cols.watching.appendChild(createActiveCard(m))
+                    );
                 } else {
-                    cols.watching.innerHTML = `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
+                    cols.watching.innerHTML =
+                        `<p class="text-slate-500 text-sm font-semibold italic">Nothing currently being watched</p>`;
                 }
-                
-                sortedList.filter(m => !['Watching', 'Watched'].includes(m.status))
-                    .filter(m => m.title.toLowerCase().includes(fM) || (m.series && m.series.toLowerCase().includes(fM)))
-                    .forEach(m => cols.main.appendChild(createCard(m)));
+
+                sortedList
+                    .filter(m => !['Watching', 'Watched'].includes(m.status))
+                    .filter(m =>
+                        m.title.toLowerCase().includes(fM) ||
+                        (m.series && m.series.toLowerCase().includes(fM))
+                    )
+                    .forEach(m =>
+                        cols.main.appendChild(createCard(m))
+                    );
 
             } else if (currentViewMode === 'archive') {
+
                 allMovies
                     .filter(m => m.status === 'Watched')
                     .filter(m =>
@@ -711,25 +993,40 @@ document.getElementById('completedYearContainer').classList.add('hidden');
                         (m.series && m.series.toLowerCase().includes(fA))
                     )
                     .sort((a, b) => {
+
                         const yearA = getLatestCompletionYear(a);
                         const yearB = getLatestCompletionYear(b);
 
-                        // 1. Primary: Most recent completion year first
+                        // Most recently watched first
                         if (yearB !== yearA) {
                             return yearB - yearA;
                         }
 
-                        // 2. Secondary: Group by Series name so Die Hard films group under D
-                        const keyA = (a.series && a.series.trim()) ? a.series.trim() : a.title.trim();
-                        const keyB = (b.series && b.series.trim()) ? b.series.trim() : b.title.trim();
+                        // Group by series
+                        const keyA = (a.series && a.series.trim())
+                            ? a.series.trim()
+                            : a.title.trim();
 
-                        const seriesCompare = keyA.localeCompare(keyB, undefined, { sensitivity: 'base' });
+                        const keyB = (b.series && b.series.trim())
+                            ? b.series.trim()
+                            : b.title.trim();
+
+                        const seriesCompare = keyA.localeCompare(
+                            keyB,
+                            undefined,
+                            { sensitivity: 'base' }
+                        );
+
                         if (seriesCompare !== 0) {
                             return seriesCompare;
                         }
 
-                        // 3. Tertiary: Alphabetical order by title within the series
-                        return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+                        // Alphabetical within series
+                        return a.title.localeCompare(
+                            b.title,
+                            undefined,
+                            { sensitivity: 'base' }
+                        );
                     })
                     .forEach(m =>
                         cols.alt.appendChild(createArchiveCard(m))
@@ -738,15 +1035,34 @@ document.getElementById('completedYearContainer').classList.add('hidden');
         }
 
         /* ============================================================
-           SERIES DROPDOWN & AUTOCOMPLETE
+           SERIES DROPDOWN
            ============================================================ */
         function filterSeriesDropdown(val) {
             const sr = document.getElementById('seriesResults');
-            const existingSeries = Array.from(new Set(allMovies.map(m => m.series).filter(s => s && s.trim() !== '')));
-            const filtered = existingSeries.filter(s => s.toLowerCase().includes(val.toLowerCase().trim()));
 
-            if (filtered.length === 0) { sr.classList.add('hidden'); return; }
-            sr.innerHTML = filtered.map(s => `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`).join('');
+            const existingSeries = Array.from(
+                new Set(
+                    allMovies
+                        .map(m => m.series)
+                        .filter(s => s && s.trim() !== '')
+                )
+            );
+
+            const filtered = existingSeries.filter(s =>
+                s.toLowerCase().includes(val.toLowerCase().trim())
+            );
+
+            if (filtered.length === 0) {
+                sr.classList.add('hidden');
+                return;
+            }
+
+            sr.innerHTML = filtered
+                .map(s =>
+                    `<div onclick="selectSeries('${s.replace(/'/g, "\\'")}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700/60 text-left text-white font-bold text-xs truncate transition-colors">${s}</div>`
+                )
+                .join('');
+
             sr.classList.remove('hidden');
         }
 
@@ -756,83 +1072,151 @@ document.getElementById('completedYearContainer').classList.add('hidden');
         }
 
         /* ============================================================
-           TMDB API SEARCH & SELECTION
+           TMDB API SEARCH
            ============================================================ */
         function triggerSearch() {
             const q = document.getElementById('titleInput').value;
             searchMovies(q);
         }
 
-        async function searchMovies(q) { 
-            const r = document.getElementById('searchResults'); 
+        async function searchMovies(q) {
+            const r = document.getElementById('searchResults');
             const trimmedQuery = q ? q.trim() : '';
 
-            if (trimmedQuery.length < 2) { r.classList.add('hidden'); r.innerHTML = ''; return; } 
+            if (trimmedQuery.length < 2) {
+                r.classList.add('hidden');
+                r.innerHTML = '';
+                return;
+            }
 
             try {
                 const response = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-                    body: JSON.stringify({ query: trimmedQuery })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SB_KEY
+                    },
+                    body: JSON.stringify({
+                        query: trimmedQuery
+                    })
                 });
 
                 const data = await response.json();
                 const results = data.results || data || [];
 
-                if (!Array.isArray(results) || results.length === 0) { 
-                    r.innerHTML = `<div class="p-4 text-sm text-slate-400">No results found.</div>`; 
-                    r.classList.remove('hidden'); 
-                    return; 
+                if (!Array.isArray(results) || results.length === 0) {
+                    r.innerHTML =
+                        `<div class="p-4 text-sm text-slate-400">No results found.</div>`;
+
+                    r.classList.remove('hidden');
+                    return;
                 }
 
                 r.innerHTML = results.slice(0, 10).map(m => {
-                    const isTV = m.media_type === 'tv' || Boolean(m.first_air_date);
-                    const title = (m.title || m.name || '').replace(/"/g, '&quot;');
-                    const cover = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
+
+                    const isTV =
+                        m.media_type === 'tv' ||
+                        Boolean(m.first_air_date);
+
+                    const title = (m.title || m.name || '')
+                        .replace(/"/g, '&quot;');
+
+                    const cover = m.poster_path
+                        ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
+                        : '';
+
                     const genre = isTV ? 'TV Show' : 'Movie';
-                    const fullReleaseDate = m.release_date || m.first_air_date || '';
-                    const displayYear = fullReleaseDate ? fullReleaseDate.split('-')[0] : 'TBA';
+
+                    const fullReleaseDate =
+                        m.release_date ||
+                        m.first_air_date ||
+                        '';
+
+                    const displayYear =
+                        fullReleaseDate
+                            ? fullReleaseDate.split('-')[0]
+                            : 'TBA';
+
                     const tmdbId = m.id || null;
-                    
+
                     return `
-                        <div onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${fullReleaseDate}&quot;, ${tmdbId}, ${isTV})" 
-                             class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors">
-                            ${cover ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">` : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'}
+                        <div
+                            onclick="selectMovie(&quot;${title}&quot;, &quot;${cover}&quot;, &quot;${genre}&quot;, &quot;${fullReleaseDate}&quot;, ${tmdbId}, ${isTV})"
+                            class="p-3 hover:bg-slate-700 cursor-pointer flex items-center gap-4 border-b border-slate-700/60 text-left text-white font-bold transition-colors"
+                        >
+                            ${
+                                cover
+                                    ? `<img src="${cover}" class="w-10 h-14 object-cover rounded shadow bg-slate-900">`
+                                    : '<div class="w-10 h-14 bg-slate-900 rounded flex items-center justify-center text-xs text-slate-500">No Cover</div>'
+                            }
+
                             <div>
                                 <p class="text-sm font-bold text-white">${m.title || m.name}</p>
-                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">${isTV ? 'SHOW' : 'MOVIE'} • ${displayYear}</p>
+                                <p class="text-xs text-slate-400 font-normal uppercase mt-0.5">
+                                    ${isTV ? 'SHOW' : 'MOVIE'} • ${displayYear}
+                                </p>
                             </div>
                         </div>
                     `;
-                }).join(''); 
+                }).join('');
+
                 r.classList.remove('hidden');
+
             } catch (err) {
-                r.innerHTML = `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
+                r.innerHTML =
+                    `<div class="p-4 text-sm text-rose-400 font-bold">Network error: ${err.message}</div>`;
+
                 r.classList.remove('hidden');
             }
         }
 
-        async function selectMovie(n, i, g, fullReleaseDate, tmdbId, isTV) { 
-            const tIn = document.getElementById('titleInput'); 
-            tIn.value = n; 
-            document.getElementById('searchResults').classList.add('hidden'); 
-            if (i) tIn.dataset.img = i;
-            if (g) tIn.dataset.genre = g;
-            if (fullReleaseDate) tIn.dataset.release = fullReleaseDate; else delete tIn.dataset.release;
-            
-            toggleType(g === 'TV Show' || isTV ? 'TV Show' : 'Movie');
+        async function selectMovie(n, i, g, fullReleaseDate, tmdbId, isTV) {
+            const tIn = document.getElementById('titleInput');
+
+            tIn.value = n;
+
+            document.getElementById('searchResults').classList.add('hidden');
+
+            if (i) {
+                tIn.dataset.img = i;
+            }
+
+            if (g) {
+                tIn.dataset.genre = g;
+            }
+
+            if (fullReleaseDate) {
+                tIn.dataset.release = fullReleaseDate;
+            } else {
+                delete tIn.dataset.release;
+            }
+
+            toggleType(
+                g === 'TV Show' || isTV
+                    ? 'TV Show'
+                    : 'Movie'
+            );
 
             if (isTV && tmdbId) {
                 try {
                     const res = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-                        body: JSON.stringify({ tmdbId, type: 'tv' })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SB_KEY
+                        },
+                        body: JSON.stringify({
+                            tmdbId,
+                            type: 'tv'
+                        })
                     });
+
                     const details = await res.json();
+
                     if (details && details.number_of_seasons) {
                         tIn.dataset.seasons = details.number_of_seasons;
                     }
+
                 } catch (e) {
                     console.error("Could not fetch season details:", e);
                 }
@@ -846,6 +1230,7 @@ document.getElementById('completedYearContainer').classList.add('hidden');
            ============================================================ */
         async function repairMetadata() {
             const menu = document.getElementById('toolboxMenu');
+
             menu.classList.add('hidden');
             menu.classList.remove('flex');
 
@@ -854,109 +1239,249 @@ document.getElementById('completedYearContainer').classList.add('hidden');
             const countText = document.getElementById('repairCount');
 
             statusContainer.classList.remove('hidden');
+
             let updatedCount = 0;
             const total = allMovies.length;
 
             for (let i = 0; i < total; i++) {
-                const movie = allMovies[i];
-                countText.innerText = `${i + 1} / ${total}`;
-                statusText.innerText = `Checking metadata for "${movie.title}"...`;
 
-                const isTV = movie.media_type === 'TV Show' || movie.media_type === 'SHOW';
+                const movie = allMovies[i];
+
+                countText.innerText = `${i + 1} / ${total}`;
+                statusText.innerText =
+                    `Checking metadata for "${movie.title}"...`;
+
+                const isTV =
+                    movie.media_type === 'TV Show' ||
+                    movie.media_type === 'SHOW';
 
                 try {
-                    const searchRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-                        body: JSON.stringify({ query: movie.title })
-                    });
+
+                    const searchRes = await fetch(
+                        `${SB_URL}/functions/v1/tmdb-search`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': SB_KEY
+                            },
+                            body: JSON.stringify({
+                                query: movie.title
+                            })
+                        }
+                    );
+
                     const searchData = await searchRes.json();
-                    const results = searchData.results || searchData || [];
+                    const results =
+                        searchData.results ||
+                        searchData ||
+                        [];
 
                     if (Array.isArray(results) && results.length > 0) {
-                        const match = results.find(r => (isTV ? (r.media_type === 'tv' || r.name) : (r.media_type === 'movie' || r.title))) || results[0];
-                        
-                        const newCover = match.poster_path ? `https://image.tmdb.org/t/p/w500${match.poster_path}` : movie.cover_url;
-                        const newRelease = match.release_date || match.first_air_date || movie.release_year;
+
+                        const match = results.find(r =>
+                            isTV
+                                ? (r.media_type === 'tv' || r.name)
+                                : (r.media_type === 'movie' || r.title)
+                        ) || results[0];
+
+                        const newCover =
+                            match.poster_path
+                                ? `https://image.tmdb.org/t/p/w500${match.poster_path}`
+                                : movie.cover_url;
+
+                        const newRelease =
+                            match.release_date ||
+                            match.first_air_date ||
+                            movie.release_year;
+
                         let newSeasons = movie.seasons;
 
                         if (isTV && match.id) {
                             try {
-                                const detailRes = await fetch(`${SB_URL}/functions/v1/tmdb-search`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
-                                    body: JSON.stringify({ tmdbId: match.id, type: 'tv' })
-                                });
+
+                                const detailRes = await fetch(
+                                    `${SB_URL}/functions/v1/tmdb-search`,
+                                    {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'apikey': SB_KEY
+                                        },
+                                        body: JSON.stringify({
+                                            tmdbId: match.id,
+                                            type: 'tv'
+                                        })
+                                    }
+                                );
+
                                 const details = await detailRes.json();
+
                                 if (details && details.number_of_seasons) {
-                                    newSeasons = details.number_of_seasons;
+                                    newSeasons =
+                                        details.number_of_seasons;
                                 }
-                            } catch (e) { console.error("Detail error:", e); }
+
+                            } catch (e) {
+                                console.error("Detail error:", e);
+                            }
                         }
 
-                        if (newCover !== movie.cover_url || newRelease !== movie.release_year || newSeasons !== movie.seasons) {
-                            await supabaseClient.from('movies').update({
-                                cover_url: newCover,
-                                release_year: newRelease,
-                                seasons: newSeasons
-                            }).eq('id', movie.id);
+                        if (
+                            newCover !== movie.cover_url ||
+                            newRelease !== movie.release_year ||
+                            newSeasons !== movie.seasons
+                        ) {
+
+                            await supabaseClient
+                                .from('movies')
+                                .update({
+                                    cover_url: newCover,
+                                    release_year: newRelease,
+                                    seasons: newSeasons
+                                })
+                                .eq('id', movie.id);
+
                             updatedCount++;
                         }
                     }
+
                 } catch (err) {
-                    console.error(`Repair failed for ${movie.title}:`, err);
+                    console.error(
+                        `Repair failed for ${movie.title}:`,
+                        err
+                    );
                 }
             }
 
-            statusText.innerText = `Metadata Repair Finished! Updated ${updatedCount} items.`;
-            countText.innerText = `${total} / ${total}`;
-            setTimeout(() => { statusContainer.classList.add('hidden'); }, 4000);
+            statusText.innerText =
+                `Metadata Repair Finished! Updated ${updatedCount} items.`;
+
+            countText.innerText =
+                `${total} / ${total}`;
+
+            setTimeout(() => {
+                statusContainer.classList.add('hidden');
+            }, 4000);
+
             await loadMovies();
         }
 
         /* ============================================================
            CSV IMPORT & TEMPLATE EXPORT
            ============================================================ */
-        function downloadTemplate() { 
-            const csv = "title,media_type,series,genre,status,cover_url\nInception,Movie,Nolan,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg"; 
-            const blob = new Blob([csv], { type: 'text/csv' }); 
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob); 
-            a.download = 'movies_template.csv'; 
-            a.click(); 
+        function downloadTemplate() {
+
+            const csv =
+                "title,media_type,series,genre,status,cover_url\n" +
+                "Inception,Movie,Nolan,Sci-Fi,Archive,https://image.tmdb.org/t/p/w500/9gk2adHYeDvHkCSEqAvQNLV5Uge.jpg";
+
+            const blob =
+                new Blob([csv], {
+                    type: 'text/csv'
+                });
+
+            const a = document.createElement('a');
+
+            a.href =
+                URL.createObjectURL(blob);
+
+            a.download =
+                'movies_template.csv';
+
+            a.click();
         }
 
-        document.getElementById('csvFile').addEventListener('change', function(e) { 
-            const r = new FileReader(); 
-            r.onload = async (ev) => { 
-                const rows = ev.target.result.split('\n').slice(1); 
-                const mToInsert = rows.map(r => { 
-                    const cols = r.split(',').map(x => x?.trim()); 
-                    if (cols[0]) return { title: cols[0], media_type: cols[1]||'Movie', series: cols[2]||null, genre: cols[3]||'Movie', status: cols[4]||'Archive', cover_url: cols[5]||'' }; 
-                }).filter(x => x); 
-                await supabaseClient.from('movies').insert(mToInsert); 
-                loadMovies(); 
-            }; 
-            r.readAsText(e.target.files[0]); 
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+
+            const r = new FileReader();
+
+            r.onload = async (ev) => {
+
+                const rows =
+                    ev.target.result
+                        .split('\n')
+                        .slice(1);
+
+                const mToInsert =
+                    rows
+                        .map(r => {
+
+                            const cols =
+                                r.split(',')
+                                    .map(x => x?.trim());
+
+                            if (cols[0]) {
+                                return {
+                                    title: cols[0],
+                                    media_type: cols[1] || 'Movie',
+                                    series: cols[2] || null,
+                                    genre: cols[3] || 'Movie',
+                                    status: cols[4] || 'Archive',
+                                    cover_url: cols[5] || '',
+                                    completed_years: []
+                                };
+                            }
+                        })
+                        .filter(x => x);
+
+                const { error } =
+                    await supabaseClient
+                        .from('movies')
+                        .insert(mToInsert);
+
+                if (error) {
+                    alert(`CSV import error: ${error.message}`);
+                    return;
+                }
+
+                loadMovies();
+            };
+
+            r.readAsText(e.target.files[0]);
         });
 
         /* ============================================================
-           GLOBAL EVENT LISTENERS & INITIALIZATION
+           GLOBAL EVENT LISTENERS
            ============================================================ */
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#seriesInput') && !e.target.closest('#seriesResults')) { 
-                document.getElementById('seriesResults').classList.add('hidden'); 
+
+            if (
+                !e.target.closest('#seriesInput') &&
+                !e.target.closest('#seriesResults')
+            ) {
+                document
+                    .getElementById('seriesResults')
+                    .classList
+                    .add('hidden');
             }
-            if (!e.target.closest('#titleInput') && !e.target.closest('#searchResults') && !e.target.closest('button')) { 
-                document.getElementById('searchResults').classList.add('hidden'); 
+
+            if (
+                !e.target.closest('#titleInput') &&
+                !e.target.closest('#searchResults') &&
+                !e.target.closest('button')
+            ) {
+                document
+                    .getElementById('searchResults')
+                    .classList
+                    .add('hidden');
             }
+
             if (!e.target.closest('#toolboxContainer')) {
-                const menu = document.getElementById('toolboxMenu');
-                if (menu) { menu.classList.add('hidden'); menu.classList.remove('flex'); }
+
+                const menu =
+                    document.getElementById('toolboxMenu');
+
+                if (menu) {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('flex');
+                }
             }
         });
 
-        // Initialize App Authentication
+        /* ============================================================
+           INITIALIZE
+           ============================================================ */
         initAuth();
     </script>
 </body>
