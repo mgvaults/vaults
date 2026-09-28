@@ -254,15 +254,22 @@
                 const series = sIn.value.trim() || null;
 
                 if (editingId) {
-                    const cur = allMovies.find(m => m.id === editingId);
-                    const payload = { 
-                        title: tIn.value.trim(), 
-                        series, 
-                        media_type: selectedType, 
-                        cover_url: cover || cur.cover_url, 
-                        genre: genre || cur.genre,
-                        seasons: seasons || cur.seasons,
-                        release_year: rawRelease || cur.release_year
+                   const completedYearsInput = document.getElementById('completedYearsInput').value.trim();
+
+const completedYears = completedYearsInput
+    .split(',')
+    .map(y => y.trim())
+    .filter(y => /^\d{4}$/.test(y));
+
+const payload = { 
+    title: tIn.value.trim(), 
+    series, 
+    media_type: selectedType, 
+    cover_url: cover || cur.cover_url, 
+    genre: genre || cur.genre,
+    seasons: seasons || cur.seasons,
+    release_year: rawRelease || cur.release_year,
+    completed_years: completedYears
                     };
                     
                     const { error } = await supabaseClient.from('movies').update(payload).eq('id', editingId);
@@ -443,6 +450,11 @@ function getCompletionYears(movie) {
             
             toggleType(m.media_type || 'Movie');
             document.getElementById('seriesInput').value = m.series || ''; 
+            const completedYearContainer = document.getElementById('completedYearContainer');
+const completedYearsInput = document.getElementById('completedYearsInput');
+
+completedYearsInput.value = getCompletionYears(m).join(', ');
+completedYearContainer.classList.remove('hidden');
         }
 
         function exitEditMode() { resetForm(); toggleView(currentViewMode); }
@@ -457,6 +469,8 @@ function getCompletionYears(movie) {
             delete tIn.dataset.seasons;
 
             document.getElementById('seriesInput').value = ''; 
+            document.getElementById('completedYearsInput').value = '';
+document.getElementById('completedYearContainer').classList.add('hidden');
             document.getElementById('searchResults').classList.add('hidden');
             document.getElementById('searchResults').innerHTML = '';
             document.getElementById('seriesResults').classList.add('hidden');
