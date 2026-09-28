@@ -195,59 +195,34 @@
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allMovies = [], editingId = null, currentViewMode = 'queue', selectedType = 'Movie';
 
-        /* ============================================================
-           AUTHENTICATION & APP LIFECYCLE
-           ============================================================ */
-        async function initAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showApp(); else showAuth();
+/* ============================================================
+   DATA FETCHING
+   ============================================================ */
+async function loadMovies() {
+    const { data, error } = await supabaseClient
+        .from('movies')
+        .select('*')
+        .order('title', { ascending: true });
 
-            supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (session) showApp(); else showAuth();
-            });
-        }
+    if (!error) {
+        allMovies = data || [];
+        render();
+    } else {
+        console.error("Load failed:", error);
+        console.error("Message:", error.message);
+        console.error("Details:", error.details);
+        console.error("Hint:", error.hint);
+        console.error("Code:", error.code);
 
-        async function loginWithGoogle() {
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.href }
-            });
-
-            if (error) alert("OAuth error: " + error.message);
-        }
-
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            showAuth();
-        }
-
-        function showApp() {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            loadMovies();
-        }
-
-        function showAuth() {
-            document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-        }
-
-        /* ============================================================
-           DATA FETCHING
-           ============================================================ */
-        async function loadMovies() {
-            const { data, error } = await supabaseClient
-                .from('movies')
-                .select('*')
-                .order('title', { ascending: true });
-
-            if (!error) {
-                allMovies = data || [];
-                render();
-            } else {
-                console.error("Load failed:", error);
-            }
-        }
+        alert(
+            `Load failed:\n\n` +
+            `Message: ${error.message}\n` +
+            `Details: ${error.details || 'None'}\n` +
+            `Hint: ${error.hint || 'None'}\n` +
+            `Code: ${error.code || 'None'}`
+        );
+    }
+}
 
         /* ============================================================
            STATUS / WATCH HISTORY
