@@ -115,7 +115,14 @@
                         <div class="flex flex-wrap justify-center gap-2 py-2 border-y border-slate-700/40">
                             <div onclick="toggleType('Movie')" id="i-movie" class="type-box active" title="Movie"><span style="color:#06b6d4; font-size: 16px;">🎬</span></div>
                             <div onclick="toggleType('TV Show')" id="i-tv" class="type-box" title="TV Show"><span style="color:#ef4444; font-size: 16px;">📺</span></div>
-                        </div>
+    <div onclick="toggleType('Documentary')" id="i-documentary" class="type-box" title="Documentary">
+        <span style="color:#a855f7; font-size: 16px;">🎥</span>
+    </div>
+
+    <div onclick="toggleType('Stand-up')" id="i-standup" class="type-box" title="Stand-up">
+        <span style="color:#f59e0b; font-size: 16px;">🎤</span>
+    </div>
+</div>
                         
 <div class="flex gap-3 text-white relative items-end">
     <div class="flex-1 relative">
@@ -400,6 +407,8 @@ function getCompletionYears(movie) {
             selectedType = t;
             document.getElementById('i-movie').classList.toggle('active', t === 'Movie');
             document.getElementById('i-tv').classList.toggle('active', t === 'TV Show' || t === 'SHOW');
+                document.getElementById('i-documentary').classList.toggle('active', type === 'Documentary');
+    document.getElementById('i-standup').classList.toggle('active', type === 'Stand-up');
         }
 
         function toggleView(v) { 
