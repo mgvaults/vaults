@@ -290,19 +290,33 @@
         /* ============================================================
            COMPLETION YEARS HELPERS
            ============================================================ */
-        function getCompletionYears(movie) {
-            if (!movie || !movie.completed_years) return [];
-            if (Array.isArray(movie.completed_years)) {
-                return movie.completed_years.map(y => String(y).trim()).filter(Boolean);
-            }
-            if (typeof movie.completed_years === 'string') {
-                return movie.completed_years
-                    .split(',')
-                    .map(y => y.trim())
-                    .filter(Boolean);
-            }
-            return [];
-        }
+function getCompletionYears(movie) {
+    if (!movie || movie.completed_years === null || movie.completed_years === undefined) {
+        return [];
+    }
+
+    // PostgreSQL integer / bigint
+    if (typeof movie.completed_years === 'number') {
+        return [String(movie.completed_years)];
+    }
+
+    // PostgreSQL array / JSON array
+    if (Array.isArray(movie.completed_years)) {
+        return movie.completed_years
+            .map(y => String(y).trim())
+            .filter(Boolean);
+    }
+
+    // Text / comma-separated years
+    if (typeof movie.completed_years === 'string') {
+        return movie.completed_years
+            .split(',')
+            .map(y => y.trim())
+            .filter(Boolean);
+    }
+
+    return [];
+}
 
         function getLatestCompletionYear(movie) {
             const years = getCompletionYears(movie)
