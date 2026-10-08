@@ -908,12 +908,26 @@ async function loadMovies() {
                 typePillText
             } = getCardConfig(movie);
 
-            const lastWatchedYear = getLatestWatchYear(movie);
-            const watchCount = getWatchCount(movie);
+const lastWatchedYear = getLatestWatchYear(movie);
+const watchCount = getWatchCount(movie);
 
-            const lastWatchedDisplay = lastWatchedYear > 0
-                ? lastWatchedYear
-                : 'No year recorded';
+const lastWatchedDisplay = lastWatchedYear > 0
+    ? lastWatchedYear
+    : '—';
+
+let medalIcon = '';
+
+if (watchCount === 1) {
+    medalIcon = '🥉';
+} else if (watchCount === 2) {
+    medalIcon = '🥈';
+} else if (watchCount === 3) {
+    medalIcon = '🥇';
+} else if (watchCount === 4) {
+    medalIcon = '🏅';
+} else if (watchCount >= 5) {
+    medalIcon = '💎';
+}
 
             const div = document.createElement('div');
 
@@ -941,20 +955,43 @@ async function loadMovies() {
                             >
                         </div>
 
-                        <!-- Watch summary + Edit Pencil -->
-                        <div class="w-full mt-2 flex items-center justify-between gap-1">
+<!-- Trophy + Medal Progression + Edit Pencil -->
+<div class="w-full mt-2 flex items-center justify-between gap-1">
 
-                            <div class="flex flex-col gap-0.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-lg py-1.5 px-2.5 text-left">
-                                <span class="text-[10px] font-bold tracking-wide">Last watched: ${lastWatchedDisplay}</span>
-                                <span class="text-[10px] font-bold tracking-wide">Times watched: ${watchCount}</span>
-                            </div>
+    <div class="flex items-center gap-3">
 
-                            <button
-                                onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})'
-                                title="Edit"
-                                class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
-                            >✏️</button>
-                        </div>
+        <!-- Latest watched year -->
+        <div class="flex flex-col items-center justify-center
+                    bg-emerald-950/40 border border-emerald-500/30
+                    text-emerald-400 rounded-lg px-3 py-1.5 min-w-[58px]">
+
+            <span class="text-2xl leading-none">🏆</span>
+            <span class="text-[11px] font-black tracking-wide mt-0.5">
+                ${lastWatchedDisplay}
+            </span>
+
+        </div>
+
+        <!-- Watch count medal -->
+        <div class="flex flex-col items-center justify-center
+                    text-slate-300">
+
+            <span class="text-xl leading-none">${medalIcon}</span>
+            <span class="text-[9px] font-black text-slate-400 mt-0.5">
+                ${watchCount}
+            </span>
+
+        </div>
+
+    </div>
+
+    <button
+        onclick='editL(${JSON.stringify(movie).replace(/'/g, "&apos;")})'
+        title="Edit"
+        class="text-slate-400 hover:text-amber-400 font-bold text-sm leading-none p-1 transition"
+    >✏️</button>
+
+</div>
                     </div>
                 </div>
 
