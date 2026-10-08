@@ -474,10 +474,10 @@ async function loadMovies() {
                 .filter(y => y !== null);
         }
 
-        function getLatestWatchYear(movie) {
-            const years = getWatchYears(movie);
-            return years.length > 0 ? Math.max(...years) : 0;
-        }
+function getFirstWatchYear(movie) {
+    const years = getWatchYears(movie);
+    return years.length ? Math.min(...years) : 0;
+}
 
         function getWatchCount(movie) {
             return getWatchHistory(movie).length;
@@ -908,12 +908,10 @@ async function loadMovies() {
                 typePillText
             } = getCardConfig(movie);
 
-const lastWatchedYear = getLatestWatchYear(movie);
+const firstWatchedYear = getFirstWatchYear(movie);
 const watchCount = getWatchCount(movie);
 
-const lastWatchedDisplay = lastWatchedYear > 0
-    ? lastWatchedYear
-    : '—';
+const firstWatchedDisplay = firstWatchedYear > 0 ? firstWatchedYear : '—';
 
 let medalIcon = '';
 
@@ -967,7 +965,7 @@ if (watchCount === 1) {
 
             <span class="text-2xl leading-none">🏆</span>
             <span class="text-[11px] font-black tracking-wide mt-0.5">
-                ${lastWatchedDisplay}
+                ${firstWatchedDisplay}
             </span>
 
         </div>
