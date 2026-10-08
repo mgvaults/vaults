@@ -71,6 +71,7 @@
                         <button onclick="toggleToolbox(event)" title="Toolbox" class="p-2.5 px-4 bg-slate-800 rounded-xl border border-slate-700 text-2xl hover:bg-slate-700">🧰</button>
                         <div id="toolboxMenu" class="hidden flex-col gap-2 absolute right-0 top-full mt-2 p-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
                             <button onclick="repairMetadata()" title="Repair Metadata & Season Info" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">🔧</button>
+                            <button onclick="migrateWatchHistory()" title="Migrate watched years to watch history" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">🕘</button>
                             <button onclick="downloadTemplate()" title="CSV Template" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">💾</button>
                             <button onclick="document.getElementById('csvFile').click()" title="Import CSV" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">📥</button>
                             <button onclick="logout()" title="Sign Out" class="p-2 bg-slate-700 rounded-lg text-xl hover:bg-slate-600 flex items-center justify-center">🔒</button>
@@ -134,21 +135,21 @@
                             </div>
                         </div>
                         
-                        <!-- Series + Watched Years + Commit -->
+                        <!-- Series + Watch History + Commit -->
                         <div class="flex gap-3 text-white relative items-end">
                             <div class="flex-1 relative">
                                 <input id="seriesInput" type="text" oninput="filterSeriesDropdown(this.value)" onfocus="filterSeriesDropdown(this.value)" placeholder="Collection/Franchise Series (Optional)" class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic">
                                 <div id="seriesResults" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-y-auto max-h-[180px] z-50 text-white"></div>
                             </div>
 
-                            <!-- Watched Years - only visible while editing -->
-                            <div id="completedYearContainer" class="hidden w-48 flex-shrink-0">
+                            <!-- Watch History - only visible while editing -->
+                            <div id="watchHistoryContainer" class="hidden w-48 flex-shrink-0">
                                 <input
-                                    id="completedYearsInput"
+                                    id="watchHistoryInput"
                                     type="text"
-                                    placeholder="Watched year(s)"
+                                    placeholder="Watched year(s), e.g. 2022, 2026, 2026"
                                     class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic"
-                                    title="Enter one year or multiple years separated by commas"
+                                    title="Enter watched years separated by commas. Duplicate years are allowed."
                                 >
                             </div>
 
@@ -283,24 +284,17 @@ async function loadMovies() {
            ============================================================ */
         async function updateStatus(id, newStatus) {
             const movie = allMovies.find(m => m.id === id);
-
             if (!movie) return;
 
             let payload = { status: newStatus };
 
             if (newStatus === 'Watched') {
-                const existingYears = getCompletionYears(movie)
-                    .map(y => parseInt(y, 10))
-                    .filter(y => !isNaN(y));
+                const history = getWatchHistory(movie);
+                const today = new Date().toISOString().slice(0, 10);
 
-                const currentYear = new Date().getFullYear();
-
-                if (!existingYears.includes(currentYear)) {
-                    existingYears.push(currentYear);
-                    existingYears.sort((a, b) => a - b);
-                }
-
-                payload.completed_years = existingYears;
+                // Every click of Watched is a distinct viewing event.
+                history.push(today);
+                payload.watch_history = history;
             }
 
             const { error } = await supabaseClient
@@ -346,20 +340,20 @@ async function loadMovies() {
                         throw new Error('Could not find the item being edited.');
                     }
 
-                    const completedYearsInput = document
-                        .getElementById('completedYearsInput')
+                    const watchHistoryInput = document
+                        .getElementById('watchHistoryInput')
                         .value
                         .trim();
 
-                    const completedYears = completedYearsInput
-                        ? completedYearsInput
+                    const watchedYears = watchHistoryInput
+                        ? watchHistoryInput
                             .split(',')
                             .map(y => parseInt(y.trim(), 10))
-                            .filter(y => !isNaN(y))
+                            .filter(y => !isNaN(y) && y >= 1900 && y <= 2100)
                         : [];
 
-                    // Remove duplicate years and sort oldest -> newest
-                    const uniqueYears = [...new Set(completedYears)].sort((a, b) => a - b);
+                    // Keep every event, including multiple watches in the same year.
+                    const watchHistory = watchedYears.map(y => `${y}-01-01`);
 
                     const payload = {
                         title: tIn.value.trim(),
@@ -369,7 +363,7 @@ async function loadMovies() {
                         genre: genre || cur.genre,
                         seasons: seasons || cur.seasons,
                         release_year: rawRelease || cur.release_year,
-                        completed_years: uniqueYears
+                        watch_history: watchHistory
                     };
 
                     const { error } = await supabaseClient
@@ -398,7 +392,8 @@ async function loadMovies() {
                             seasons,
                             release_year: rawRelease,
                             status: 'Archive',
-                            completed_years: []
+                            completed_years: [],
+                            watch_history: []
                         }]);
 
                     if (error) throw error;
@@ -435,42 +430,57 @@ async function loadMovies() {
         }
 
         /* ============================================================
-           COMPLETION YEARS HELPERS
+           WATCH HISTORY HELPERS
            ============================================================ */
-        function getCompletionYears(movie) {
-            if (!movie || movie.completed_years === null || movie.completed_years === undefined) {
-                return [];
-            }
+        function getWatchHistory(movie) {
+            if (!movie) return [];
 
-            // PostgreSQL integer[] comes back as a JavaScript array
-            if (Array.isArray(movie.completed_years)) {
-                return movie.completed_years
-                    .map(y => String(y).trim())
+            // New format: JSONB array of ISO dates, one entry per viewing.
+            if (Array.isArray(movie.watch_history) && movie.watch_history.length > 0) {
+                return movie.watch_history
+                    .map(v => String(v).trim())
                     .filter(Boolean);
             }
 
-            // Backwards compatibility if any old value is still returned as a number
-            if (typeof movie.completed_years === 'number') {
-                return [String(movie.completed_years)];
+            // Backward compatibility: migrate the old unique-year array in memory.
+            if (Array.isArray(movie.completed_years)) {
+                return movie.completed_years
+                    .map(y => parseInt(y, 10))
+                    .filter(y => !isNaN(y))
+                    .map(y => `${y}-01-01`);
             }
 
-            // Backwards compatibility for comma-separated text
+            if (typeof movie.completed_years === 'number') {
+                return [`${movie.completed_years}-01-01`];
+            }
+
             if (typeof movie.completed_years === 'string') {
                 return movie.completed_years
                     .split(',')
-                    .map(y => y.trim())
-                    .filter(Boolean);
+                    .map(y => parseInt(y.trim(), 10))
+                    .filter(y => !isNaN(y))
+                    .map(y => `${y}-01-01`);
             }
 
             return [];
         }
 
-        function getLatestCompletionYear(movie) {
-            const years = getCompletionYears(movie)
-                .map(y => parseInt(y, 10))
-                .filter(y => !isNaN(y));
+        function getWatchYears(movie) {
+            return getWatchHistory(movie)
+                .map(d => {
+                    const match = String(d).match(/^(\d{4})/);
+                    return match ? parseInt(match[1], 10) : null;
+                })
+                .filter(y => y !== null);
+        }
 
+        function getLatestWatchYear(movie) {
+            const years = getWatchYears(movie);
             return years.length > 0 ? Math.max(...years) : 0;
+        }
+
+        function getWatchCount(movie) {
+            return getWatchHistory(movie).length;
         }
 
         /* ============================================================
@@ -643,12 +653,12 @@ async function loadMovies() {
 
             document.getElementById('seriesInput').value = m.series || '';
 
-            // Load existing watched years into the edit box
-            const completedYearContainer = document.getElementById('completedYearContainer');
-            const completedYearsInput = document.getElementById('completedYearsInput');
+            // Load every viewing year. Duplicate years are intentionally preserved.
+            const watchHistoryContainer = document.getElementById('watchHistoryContainer');
+            const watchHistoryInput = document.getElementById('watchHistoryInput');
 
-            completedYearsInput.value = getCompletionYears(m).join(', ');
-            completedYearContainer.classList.remove('hidden');
+            watchHistoryInput.value = getWatchYears(m).join(', ');
+            watchHistoryContainer.classList.remove('hidden');
 
             document.getElementById('submitBtn').innerText = "Update";
         }
@@ -672,8 +682,8 @@ async function loadMovies() {
 
             document.getElementById('seriesInput').value = '';
 
-            document.getElementById('completedYearsInput').value = '';
-            document.getElementById('completedYearContainer').classList.add('hidden');
+            document.getElementById('watchHistoryInput').value = '';
+            document.getElementById('watchHistoryContainer').classList.add('hidden');
 
             document.getElementById('searchResults').classList.add('hidden');
             document.getElementById('searchResults').innerHTML = '';
@@ -898,10 +908,11 @@ async function loadMovies() {
                 typePillText
             } = getCardConfig(movie);
 
-            const years = getCompletionYears(movie);
+            const lastWatchedYear = getLatestWatchYear(movie);
+            const watchCount = getWatchCount(movie);
 
-            const yearDisplay = years.length > 0
-                ? years.join(', ')
+            const lastWatchedDisplay = lastWatchedYear > 0
+                ? lastWatchedYear
                 : 'No year recorded';
 
             const div = document.createElement('div');
@@ -930,12 +941,12 @@ async function loadMovies() {
                             >
                         </div>
 
-                        <!-- Watched Years + Edit Pencil -->
+                        <!-- Watch summary + Edit Pencil -->
                         <div class="w-full mt-2 flex items-center justify-between gap-1">
 
-                            <div class="w-fit flex items-center gap-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 px-2.5 text-left">
-                                <span class="text-xs">🏆</span>
-                                <span class="text-xs font-black tracking-wide">${yearDisplay}</span>
+                            <div class="flex flex-col gap-0.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-lg py-1.5 px-2.5 text-left">
+                                <span class="text-[10px] font-bold tracking-wide">Last watched: ${lastWatchedDisplay}</span>
+                                <span class="text-[10px] font-bold tracking-wide">Times watched: ${watchCount}</span>
                             </div>
 
                             <button
@@ -1023,8 +1034,8 @@ async function loadMovies() {
                     )
                     .sort((a, b) => {
 
-                        const yearA = getLatestCompletionYear(a);
-                        const yearB = getLatestCompletionYear(b);
+                        const yearA = getLatestWatchYear(a);
+                        const yearB = getLatestWatchYear(b);
 
                         // Most recently watched first
                         if (yearB !== yearA) {
@@ -1397,6 +1408,44 @@ async function loadMovies() {
         }
 
         /* ============================================================
+           WATCH HISTORY MIGRATION
+           ============================================================ */
+        async function migrateWatchHistory() {
+            const menu = document.getElementById('toolboxMenu');
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+
+            const legacyMovies = allMovies.filter(m =>
+                (!Array.isArray(m.watch_history) || m.watch_history.length === 0) &&
+                getWatchYears(m).length > 0
+            );
+
+            if (legacyMovies.length === 0) {
+                alert('No legacy watched-year data needs migration.');
+                return;
+            }
+
+            if (!confirm(`Migrate watched years for ${legacyMovies.length} title(s)?\n\nExisting year data will be preserved as one viewing event per recorded year.`)) return;
+
+            for (const movie of legacyMovies) {
+                const history = getWatchHistory(movie);
+                const { error } = await supabaseClient
+                    .from('movies')
+                    .update({ watch_history: history })
+                    .eq('id', movie.id);
+
+                if (error) {
+                    console.error(`Migration failed for ${movie.title}:`, error);
+                    alert(`Migration failed for ${movie.title}: ${error.message}`);
+                    return;
+                }
+            }
+
+            alert(`Watch history migration complete for ${legacyMovies.length} title(s).`);
+            await loadMovies();
+        }
+
+        /* ============================================================
            CSV IMPORT & TEMPLATE EXPORT
            ============================================================ */
         function downloadTemplate() {
@@ -1448,7 +1497,8 @@ async function loadMovies() {
                                     genre: cols[3] || 'Movie',
                                     status: cols[4] || 'Archive',
                                     cover_url: cols[5] || '',
-                                    completed_years: []
+                                    completed_years: [],
+                                    watch_history: []
                                 };
                             }
                         })
