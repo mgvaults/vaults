@@ -147,9 +147,9 @@
                                 <input
                                     id="watchHistoryInput"
                                     type="text"
-                                    placeholder="Watched year(s), e.g. 2022, 2026, 2026"
+                                    placeholder="Dates or years, e.g. 06-11-2021, 2024, 2024"
                                     class="w-full bg-slate-900 p-3.5 rounded-2xl text-white border border-slate-700 text-xs font-bold italic"
-                                    title="Enter watched years separated by commas. Duplicate years are allowed."
+                                    title="Enter DD-MM-YYYY dates or years, separated by commas. Duplicate entries are allowed."
                                 >
                             </div>
 
@@ -346,15 +346,20 @@ async function loadMovies() {
                         .value
                         .trim();
 
-                    const watchedYears = watchHistoryInput
-                        ? watchHistoryInput
-                            .split(',')
-                            .map(y => parseInt(y.trim(), 10))
-                            .filter(y => !isNaN(y) && y >= 1900 && y <= 2100)
+                    // Accept exact DD-MM-YYYY / YYYY-MM-DD dates as well as year-only entries.
+                    // Exact dates are preserved; a year-only entry means 1 January of that year.
+                    const watchHistory = watchHistoryInput
+                        ? watchHistoryInput.split(',')
+                            .map(value => {
+                                const entry = value.trim();
+                                if (/^\d{4}$/.test(entry)) {
+                                    const year = Number(entry);
+                                    return year >= 1900 && year <= 2100 ? `01-01-${year}` : null;
+                                }
+                                return normalizeWatchDate(entry);
+                            })
+                            .filter(Boolean)
                         : [];
-
-                    // Keep every event, including multiple watches in the same year.
-                    const watchHistory = watchedYears.map(y => `01-01-${y}`);
 
                     const payload = {
                         title: tIn.value.trim(),
@@ -510,6 +515,11 @@ async function loadMovies() {
                 .filter(y => y !== null);
         }
 
+        function getFirstWatchYear(movie) {
+            const years = getWatchYears(movie);
+            return years.length > 0 ? Math.min(...years) : 0;
+        }
+
         function getLatestWatchYear(movie) {
             const years = getWatchYears(movie);
             return years.length > 0 ? Math.max(...years) : 0;
@@ -517,6 +527,16 @@ async function loadMovies() {
 
         function getWatchCount(movie) {
             return getWatchHistory(movie).length;
+        }
+
+        // Repeat-watch medals: bronze 1, silver 2, gold 3, platinum 4, diamond 5+.
+        function getWatchMedal(count) {
+            if (count >= 5) return { icon: '💎', name: 'Diamond' };
+            if (count === 4) return { icon: '🏅', name: 'Platinum' };
+            if (count === 3) return { icon: '🥇', name: 'Gold' };
+            if (count === 2) return { icon: '🥈', name: 'Silver' };
+            if (count === 1) return { icon: '🥉', name: 'Bronze' };
+            return { icon: '', name: 'Unwatched' };
         }
 
         // Convert existing ISO dates in the database to DD-MM-YYYY.
@@ -714,11 +734,12 @@ async function loadMovies() {
 
             document.getElementById('seriesInput').value = m.series || '';
 
-            // Load every viewing year. Duplicate years are intentionally preserved.
+            // Load exact dates so editing an item does not erase the original month/day.
+            // Duplicate viewing events are intentionally preserved.
             const watchHistoryContainer = document.getElementById('watchHistoryContainer');
             const watchHistoryInput = document.getElementById('watchHistoryInput');
 
-            watchHistoryInput.value = getWatchYears(m).join(', ');
+            watchHistoryInput.value = getWatchHistory(m).join(', ');
             watchHistoryContainer.classList.remove('hidden');
 
             document.getElementById('submitBtn').innerText = "Update";
@@ -969,11 +990,12 @@ async function loadMovies() {
                 typePillText
             } = getCardConfig(movie);
 
-            const lastWatchedYear = getLatestWatchYear(movie);
+            const firstWatchedYear = getFirstWatchYear(movie);
             const watchCount = getWatchCount(movie);
+            const medal = getWatchMedal(watchCount);
 
-            const lastWatchedDisplay = lastWatchedYear > 0
-                ? lastWatchedYear
+            const firstWatchedDisplay = firstWatchedYear > 0
+                ? firstWatchedYear
                 : 'No year recorded';
 
             const div = document.createElement('div');
@@ -1005,9 +1027,9 @@ async function loadMovies() {
                         <!-- Watch summary + Edit Pencil -->
                         <div class="w-full mt-2 flex items-center justify-between gap-1">
 
-                            <div class="flex flex-col gap-0.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-lg py-1.5 px-2.5 text-left">
-                                <span class="text-[10px] font-bold tracking-wide">Last watched: ${lastWatchedDisplay}</span>
-                                <span class="text-[10px] font-bold tracking-wide">Times watched: ${watchCount}</span>
+                            <div class="flex flex-col gap-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 rounded-lg py-1.5 px-2.5 text-left" title="First watched in ${firstWatchedDisplay}. ${watchCount} viewing event${watchCount === 1 ? '' : 's'} recorded.">
+                                <span class="text-[11px] font-black tracking-wide">🏆 ${firstWatchedDisplay}</span>
+                                ${watchCount > 0 ? `<span class="text-sm font-black tracking-wide" aria-label="${medal.name}, ${watchCount} viewing${watchCount === 1 ? '' : 's'}">${medal.icon} <span class="text-[10px]">×${watchCount}</span></span>` : `<span class="text-[10px] text-slate-400">No viewings recorded</span>`}
                             </div>
 
                             <button
