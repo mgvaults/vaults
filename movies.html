@@ -1027,9 +1027,13 @@ async function loadMovies() {
                         <!-- Watch summary + Edit Pencil -->
                         <div class="w-full mt-2 flex items-center justify-between gap-1">
 
-                            <div class="flex flex-col gap-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 rounded-lg py-1.5 px-2.5 text-left" title="First watched in ${firstWatchedDisplay}. ${watchCount} viewing event${watchCount === 1 ? '' : 's'} recorded.">
-                                <span class="text-[11px] font-black tracking-wide">🏆 ${firstWatchedDisplay}</span>
-                                ${watchCount > 0 ? `<span class="text-sm font-black tracking-wide" aria-label="${medal.name}, ${watchCount} viewing${watchCount === 1 ? '' : 's'}">${medal.icon} <span class="text-[10px]">×${watchCount}</span></span>` : `<span class="text-[10px] text-slate-400">No viewings recorded</span>`}
+                            <div class="flex items-center gap-1.5 min-w-0" title="First watched in ${firstWatchedDisplay}. ${watchCount} viewing event${watchCount === 1 ? '' : 's'} recorded.">
+                                <div class="flex items-center justify-center bg-emerald-950/60 border border-emerald-500/50 text-emerald-200 rounded-lg py-2 px-2.5 min-h-[42px]" aria-label="First watched ${firstWatchedDisplay}">
+                                    <span class="text-sm sm:text-base font-black tracking-wide whitespace-nowrap">🏆 ${firstWatchedDisplay}</span>
+                                </div>
+                                <div class="flex items-center justify-center bg-slate-100 border border-slate-300 text-slate-800 rounded-lg py-2 px-2 min-h-[42px]" title="${medal.name}: ${watchCount} viewing${watchCount === 1 ? '' : 's'}">
+                                    ${watchCount > 0 ? `<span class="text-sm font-black tracking-wide whitespace-nowrap" aria-label="${medal.name}, ${watchCount} viewing${watchCount === 1 ? '' : 's'}">${medal.icon} <span class="text-[10px]">×${watchCount}</span></span>` : `<span class="text-[10px] font-bold text-slate-500 whitespace-nowrap">No views</span>`}
+                                </div>
                             </div>
 
                             <button
