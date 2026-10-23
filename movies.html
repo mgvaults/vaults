@@ -398,7 +398,6 @@ async function loadMovies() {
                             seasons,
                             release_year: rawRelease,
                             status: 'Archive',
-                            completed_years: [],
                             watch_history: []
                         }]);
 
@@ -1584,7 +1583,6 @@ async function loadMovies() {
                                     genre: cols[3] || 'Movie',
                                     status: cols[4] || 'Archive',
                                     cover_url: cols[5] || '',
-                                    completed_years: [],
                                     watch_history: []
                                 };
                             }
