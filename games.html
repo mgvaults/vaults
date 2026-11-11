@@ -309,20 +309,28 @@
                         ></div>
                     </div>
 
-                    <!-- Backlog & Collection Column -->
+                    <!-- Backlog Column -->
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-slate-500 font-black text-xs uppercase tracking-[0.3em]">
-                                Backlog & Collection
+                                Backlog
                             </h2>
 
-                            <input
-                                id="filterBacklog"
-                                type="text"
-                                oninput="render()"
-                                placeholder="Filter..."
-                                class="col-filter"
-                            >
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onclick="resetBacklogSort()"
+                                    title="Reset Backlog to alphabetical order"
+                                    class="text-[10px] font-bold text-slate-500 hover:text-white transition whitespace-nowrap"
+                                >A–Z</button>
+                                <input
+                                    id="filterBacklog"
+                                    type="text"
+                                    oninput="render()"
+                                    placeholder="Filter..."
+                                    class="col-filter"
+                                >
+                            </div>
                         </div>
 
                         <div
@@ -1035,16 +1043,47 @@
                         cols.next.appendChild(createCard(g))
                     );
 
-                allGames
-                    .filter(g =>
-                        [
-                            'Backlog',
-                            'Game Pass',
-                            'PS Plus',
-                            'Switch Online',
-                            'Downloaded'
-                        ].includes(g.status)
-                    )
+                const backlogGames =
+                    allGames
+                        .filter(g =>
+                            [
+                                'Backlog',
+                                'Game Pass',
+                                'PS Plus',
+                                'Switch Online',
+                                'Downloaded'
+                            ].includes(g.status)
+                        );
+
+                /*
+                 * Default: sort by series name, or by game title for
+                 * standalone games. This keeps each series together while
+                 * interleaving series and standalone titles alphabetically.
+                 * After a manual drag-and-drop, use the saved sort_order.
+                 */
+                const manualBacklogOrder =
+                    localStorage.getItem('gamesVaultBacklogManualOrder') === 'true';
+
+                if (manualBacklogOrder) {
+                    backlogGames.sort((a, b) =>
+                        (a.sort_order ?? 0) - (b.sort_order ?? 0)
+                    );
+                } else {
+                    const collator = new Intl.Collator(undefined, {
+                        sensitivity: 'base',
+                        numeric: true
+                    });
+
+                    backlogGames.sort((a, b) => {
+                        const keyA = (a.series || a.title || '').trim();
+                        const keyB = (b.series || b.title || '').trim();
+
+                        return collator.compare(keyA, keyB) ||
+                            collator.compare(a.title || '', b.title || '');
+                    });
+                }
+
+                backlogGames
                     .filter(g =>
                         g.title.toLowerCase().includes(fB) ||
                         (g.series &&
@@ -1834,59 +1873,96 @@
            SORTABLE
            ============================================================ */
 
+        function resetBacklogSort() {
+            localStorage.removeItem('gamesVaultBacklogManualOrder');
+            render();
+        }
+
         function initSortable() {
 
             ['col-next', 'col-backlog'].forEach(id => {
 
-                const el =
-                    document.getElementById(id);
+                const el = document.getElementById(id);
+                if (!el || el.dataset.sortableInitialised === 'true') return;
 
-                if (!el) return;
+                el.dataset.sortableInitialised = 'true';
 
                 new Sortable(el, {
-
                     group: 'games',
                     animation: 250,
 
                     onEnd: async (evt) => {
+                        const fromId = evt.from.id;
+                        const toId = evt.to.id;
+                        const movedId = evt.item.dataset.id;
 
-                        let targetS = 'Backlog';
-
+                        // Do not save a partial/filtered Backlog arrangement.
                         if (
-                            evt.to.id === 'col-next'
+                            (fromId === 'col-backlog' || toId === 'col-backlog') &&
+                            document.getElementById('filterBacklog').value.trim()
                         ) {
-                            targetS = 'Up Next';
+                            await loadGames();
+                            return;
                         }
 
-                        const items =
-                            Array.from(
-                                evt.to.children
-                            );
+                        // Keep the existing Next Focus drag-and-drop behaviour unchanged.
+                        if (toId === 'col-next') {
+                            const items = Array.from(evt.to.children);
 
-                        for (
-                            let i = 0;
-                            i < items.length;
-                            i++
-                        ) {
+                            for (let i = 0; i < items.length; i++) {
+                                await supabaseClient
+                                    .from('games')
+                                    .update({
+                                        sort_order: (i + 1) * 100,
+                                        status: 'Up Next'
+                                    })
+                                    .eq('id', items[i].dataset.id);
+                            }
 
-                            await supabaseClient
+                            await loadGames();
+                            return;
+                        }
+
+                        // Backlog-to-Backlog drag means the user wants a manual order.
+                        if (fromId === 'col-backlog' && toId === 'col-backlog') {
+                            localStorage.setItem('gamesVaultBacklogManualOrder', 'true');
+                        }
+
+                        // When moving a game from Next Focus, change only that game's status.
+                        if (fromId !== toId) {
+                            const { error } = await supabaseClient
                                 .from('games')
-                                .update({
-                                    sort_order:
-                                        (i + 1) * 100,
-                                    status: targetS
-                                })
-                                .eq(
-                                    'id',
-                                    items[i].dataset.id
-                                );
+                                .update({ status: 'Backlog' })
+                                .eq('id', movedId);
+
+                            if (error) {
+                                console.error('Unable to update game status:', error);
+                                await loadGames();
+                                return;
+                            }
                         }
 
-                        loadGames();
+                        // Save the Backlog order without changing the other games' statuses.
+                        const items = Array.from(evt.to.children);
+
+                        for (let i = 0; i < items.length; i++) {
+                            const { error } = await supabaseClient
+                                .from('games')
+                                .update({ sort_order: (i + 1) * 100 })
+                                .eq('id', items[i].dataset.id);
+
+                            if (error) {
+                                console.error('Unable to save Backlog order:', error);
+                                break;
+                            }
+                        }
+
+                        await loadGames();
                     }
                 });
             });
         }
+
 
         /* ============================================================
            SERIES DROPDOWN
